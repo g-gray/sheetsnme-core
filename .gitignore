@@ -1,0 +1,11 @@
+/*
+!/.env.properties.example
+!/.eslintrc
+!/.flowconfig
+!/.gitignore
+!/package.json
+!/readme.md
+!/webpack.config.js
+!/yarn.lock
+!/flow-typed
+!/src
