@@ -48,26 +48,14 @@ function createOAuth2Client(redirectUri: string | void): t.OAuth2Client {
   )
 }
 
-function readCredentilas(): t.AuthCredentials | void {
-  try {
-    const data: Buffer = fs.readFileSync(CREDENTIALS_PATH)
-    return JSON.parse(data.toString())
-  }
-  catch (err) {
-    if (err.code === 'ENOENT') return undefined
-    return undefined
-  }
+function readCredentilas(): t.AuthCredentials {
+  const data: Buffer = fs.readFileSync(CREDENTIALS_PATH)
+  return JSON.parse(data.toString())
 }
 
-function readToken(): t.AuthToken | void {
-  try {
-    const data: Buffer = fs.readFileSync(TOKEN_PATH)
-    return JSON.parse(data.toString())
-  }
-  catch (err) {
-    if (err.code === 'ENOENT') return undefined
-    return undefined
-  }
+function readToken(): t.AuthToken {
+  const data: Buffer = fs.readFileSync(TOKEN_PATH)
+  return JSON.parse(data.toString())
 }
 
 function writeToken(token: t.AuthToken): void {
