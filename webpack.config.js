@@ -58,7 +58,7 @@ module.exports = {
     new FlowWebpackPlugin(),
   ],
 
-  devtool: 'sourcemap',
+  devtool: 'cheap-eval-source-map',
 
   // stats: {
   //   colors: true,
