@@ -6,15 +6,21 @@ import * as n from './net'
 import * as a from './auth'
 import * as db from './db'
 
+const {SESSION_COOKIE_NAME} = e.properties
+
 const router: t.Router = new Router()
 
 const authRequired: t.Middleware = async (ctx: t.Context, next: () => Promise<void>) => {
-  if (!a.isAuthorized()) {
+  const sessionId: string = a.getCookie(ctx, SESSION_COOKIE_NAME)
+  const session: t.Session = await db.sessionById(sessionId)
+
+  if (!session) {
     // const {header: {host}, url} = ctx.request
     // const redirectUri: string = `http://${host}${url}`
     // ctx.redirect(`/auth/login?redirectUri=${redirectUri}`)
     ctx.throw(401)
   }
+  ctx._session = session
   await next()
 }
 
@@ -26,40 +32,57 @@ router
   .get('/',
     authRequired,
     async (ctx: t.Context): Promise<void> | void => {
-      console.info('-- /')
-      const oAuth2Client = a.authWithToken()
-      const sheets = await n.fetchSheets(oAuth2Client)
-
-      const result = await db.query('select * from users')
-      console.info(`-- result:`, result)
       const {list, from, to} = ctx.query
       if (!list || !from || !to) {
         ctx.throw(400)
       }
 
-      console.info(`-- list:`, list)
-      console.info(`-- from:`, from)
-      console.info(`-- to:`, to)
-      ctx.body = await n.fetchValues(sheets, {
+      const session: t.Session = ((ctx._session: any): t.Session)
+      const token: t.AuthToken = session.externalToken
+      const oAuth2Client = a.createOAuth2Client(token)
+
+      ctx.body = await n.fetchValues(oAuth2Client, {
         spreadsheetId: e.properties.SPREADSHEET_ID,
         range: `${list}!${from}:${to}`,
       })
     }
   )
   .get('/auth/login', (ctx: t.Context): Promise<void> | void => {
-    if (a.isAuthorized()) {
+    if (false) {
       ctx.redirect('/')
       return
     }
-    a.login(ctx)
+    const {redirectTo} = ctx.query
+    const authUrl: string = a.generateAuthUrl(encodeURIComponent(redirectTo))
+    ctx.redirect(authUrl)
   })
   .get('/auth/code', async (ctx: t.Context): Promise<void> | void => {
-    await a.exchangeCodeForToken(ctx)
-    const {redirectTo} = ctx.query
+    const {code, state: redirectTo} = ctx.query
+
+    const token: t.AuthToken = await a.exchangeCodeForToken(code)
+    const oAuth2Client = a.createOAuth2Client(token)
+    const gUser: t.GUser = await n.fetchGUserInfo(oAuth2Client)
+
+    if (!gUser) {
+      ctx.throw(400, 'User not found')
+    }
+
+    const user: t.User = {
+      externalId: gUser.id,
+      email: gUser.email,
+      emailVerified: gUser.verified_email,
+      firstName: gUser.given_name,
+      lastName: gUser.family_name,
+    }
+
+    const sessionId: string = await db.login(user, token)
+    a.setCookie(ctx, SESSION_COOKIE_NAME, sessionId)
+
     if (redirectTo) {
       ctx.redirect(decodeURIComponent(redirectTo))
       return
     }
+
     ctx.redirect('/')
   })
   .get('/transactions', (ctx: t.Context) => {

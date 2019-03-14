@@ -21,15 +21,16 @@ export type Env = {
 }
 
 export type EnvProperties = {
-  SCHEMA           : string,
-  HOST             : string,
-  PORT             : number,
-  SPREADSHEET_ID   : string,
-  DB_NAME          : string,
-  DB_HOST          : string,
-  POSTGRES_USER    : string,
-  POSTGRES_PASSWORD: string,
-  PGSCRIPT_DB_URL  : string,
+  SCHEMA             : string,
+  HOST               : string,
+  PORT               : number,
+  SPREADSHEET_ID     : string,
+  DB_NAME            : string,
+  DB_HOST            : string,
+  POSTGRES_USER      : string,
+  POSTGRES_PASSWORD  : string,
+  PGSCRIPT_DB_URL    : string,
+  SESSION_COOKIE_NAME: string,
 }
 
 
@@ -72,4 +73,36 @@ export type OAuth2Client = {
   setCredentials             : (AuthToken) => void,
   generateAuthUrl            : ({access_type: string, scope: Array<string>}) => string,
   getToken                   : (string, (Error, AuthToken) => void) => void,
+  getToken                   : (string) => Promise<{tokens: AuthToken}>,
+}
+
+export type GUser = {
+  id             : string,
+  email          : string,
+  verified_email : true,
+  name?          : string,
+  given_name?    : string,
+  family_name?   : string,
+  picture        : string,
+  locale         : string,
+}
+
+export type User = {
+  id?           : string,
+  externalId    : string,
+  email         : string,
+  emailVerified : boolean,
+  firstName?    : string,
+  lastName?     : string,
+  userRoleId?   : string,
+  createdAt?    : Date,
+  updatedAt?    : Date,
+}
+
+export type Session = {
+  id?           : string,
+  userId        : string,
+  externalToken : AuthToken,
+  createdAt?    : Date,
+  updatedAt?    : Date,
 }

@@ -4,48 +4,38 @@ import pt from 'path'
 import {google} from 'googleapis'
 import * as t from './types'
 import * as e from './env'
+import * as u from './utils'
 
-// If modifying these scopes, delete token.json.
-const SCOPES: Array<string> = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+const SCOPES: Array<string> = [
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/userinfo.profile',
+]
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
-const TOKEN_PATH      : string = pt.resolve('token.json')
 const CREDENTIALS_PATH: string = pt.resolve('credentials.json')
+const {SCHEMA, HOST, PORT} = e.properties
+const REDIRECT_URL    : string = `${SCHEMA}://${HOST}:${PORT}/auth/code/`
 
-export function isAuthorized(): boolean {
-  return Boolean(readToken())
+export function generateAuthUrl(redirectTo: string): string {
+  const oAuth2Client: t.OAuth2Client = createOAuth2Client()
+  return oAuth2Client.generateAuthUrl({access_type: 'offline', scope: SCOPES, state: redirectTo})
 }
 
-export function authWithToken(): t.OAuth2Client {
-  const oAuth2Client = createOAuth2Client()
-  const token: t.AuthToken = readToken()
-  oAuth2Client.setCredentials(token)
-  return oAuth2Client
+export async function exchangeCodeForToken(code: string): Promise<t.AuthToken> {
+  const oAuth2Client: t.OAuth2Client = createOAuth2Client()
+  return await oAuth2Client.getToken(code).then(({tokens}) => tokens)
 }
 
-export function login(ctx: t.Context): void {
-  const {redirectTo} = ctx.query
-  const oAuth2Client: t.OAuth2Client = createOAuth2Client(redirectUri(redirectTo))
-  const authUrl: string = oAuth2Client.generateAuthUrl({access_type: 'offline', scope: SCOPES})
-  ctx.redirect(authUrl)
-}
-
-export async function exchangeCodeForToken(ctx: t.Context): Promise<void> {
-  const {code, redirectTo} = ctx.query
-  const oAuth2Client: t.OAuth2Client = createOAuth2Client(redirectUri(redirectTo))
-  const token: t.AuthToken = await getToken(oAuth2Client, code)
-  writeToken(token)
-}
-
-function createOAuth2Client(redirectUri: string | void): t.OAuth2Client {
+export function createOAuth2Client(token: t.AuthToken | void): t.OAuth2Client {
   const credentials: t.AuthCredentials = readCredentilas()
-  const {client_id, client_secret, redirect_uris} = credentials.installed
-  return new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    redirectUri ? redirectUri : redirect_uris[0]
-  )
+  const {client_id, client_secret} = credentials.installed
+  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, REDIRECT_URL)
+  if (token) {
+    oAuth2Client.setCredentials(token)
+  }
+  return oAuth2Client
 }
 
 function readCredentilas(): t.AuthCredentials {
@@ -53,27 +43,13 @@ function readCredentilas(): t.AuthCredentials {
   return JSON.parse(data.toString())
 }
 
-function readToken(): t.AuthToken {
-  const data: Buffer = fs.readFileSync(TOKEN_PATH)
-  return JSON.parse(data.toString())
-}
-
-function writeToken(token: t.AuthToken): void {
-  return fs.writeFileSync(TOKEN_PATH, JSON.stringify(token))
-}
-
-function getToken(oAuth2Client: t.OAuth2Client, code: string): Promise<t.AuthToken> {
-  return new Promise(resolve => {
-    oAuth2Client.getToken(code, (err, token) => {
-      if (err) throw Error(err.toString())
-      resolve(token)
-    })
+export function setCookie(ctx: t.Context, name: string, value: string) {
+  ctx.cookies.set(name, value, {
+    httpOnly: true,
+    maxAge: u.DAY, // Expires in a day
   })
 }
 
-function redirectUri(redirectTo: string | void): string {
-  const {SCHEMA, HOST, PORT} = e.properties
-  return redirectTo
-    ? `${SCHEMA}://${HOST}:${PORT}/auth/code/?redirectTo=${encodeURIComponent(redirectTo)}`
-    : `${SCHEMA}://${HOST}:${PORT}/auth/code/`
+export function getCookie(ctx: t.Context, name: string): string {
+  return String(ctx.cookies.get(name))
 }
