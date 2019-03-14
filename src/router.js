@@ -6,14 +6,14 @@ import * as n from './net'
 import * as a from './auth'
 import * as db from './db'
 
-const router: Router = new Router()
+const router: t.Router = new Router()
 
 const authRequired: t.Middleware = async (ctx: t.Context, next: () => Promise<void>) => {
   if (!a.isAuthorized()) {
     // const {header: {host}, url} = ctx.request
     // const redirectUri: string = `http://${host}${url}`
     // ctx.redirect(`/auth/login?redirectUri=${redirectUri}`)
-    ctx.throw(401, 'Unauthorized')
+    ctx.throw(401)
   }
   await next()
 }

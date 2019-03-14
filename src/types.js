@@ -1,5 +1,20 @@
-export type * from '../flow-typed/npm/koa_v2.0.x'
-export type * from '../flow-typed/npm/koa-router_v7.2.x'
+// @flow
+export type * from 'koa'
+import type KoaT from 'koa'
+export type Koa = KoaT
+
+export type * from 'koa-router'
+import type RouterT from 'koa-router'
+export type Router = RouterT
+
+export type * from 'pg'
+import typeof PGT from 'pg'
+export type PG = PGT
+
+export type * from 'dotenv'
+export type * from 'googleapis'
+
+
 
 export type Env = {
   vars: EnvProperties
@@ -21,37 +36,40 @@ export type EnvProperties = {
 
 export type AuthCredentials = {
   installed: {
-    client_id: string,
-    project_id: string,
-    auth_uri: string,
-    token_uri: string,
+    client_id                  : string,
+    project_id                 : string,
+    auth_uri                   : string,
+    token_uri                  : string,
     auth_provider_x509_cert_url: string,
-    client_secret: string,
-    redirect_uris: Array<string>,
+    client_secret              : string,
+    redirect_uris              : Array<string>,
   }
 }
 
 export type AuthToken = {
-  access_token: string,
+  access_token : string,
   refresh_token: string,
-  scope: string,
-  token_type: string,
-  expiry_date: number,
+  scope        : string,
+  token_type   : string,
+  expiry_date  : number,
 }
 
 export type OAuth2Client = {
-  _events: Array<any>,
-  _eventsCount: number,
-  _maxListeners: number,
-  transporter: any,
-  credentials: any,
-  certificateCache: any,
-  certificateExpiry: any,
-  refreshTokenPromises: Map,
-  _clientId: string,
-  _clientSecret: string,
-  redirectUri: string | void,
-  authBaseUrl: string | void,
-  tokenUrl: string | void,
+  _events                    : Array<any>,
+  _eventsCount               : number,
+  _maxListeners              : number,
+  transporter                : any,
+  credentials                : any,
+  certificateCache           : any,
+  certificateExpiry          : any,
+  refreshTokenPromises       : Map<any>,
+  _clientId                  : string,
+  _clientSecret              : string,
+  redirectUri                : string | void,
+  authBaseUrl                : string | void,
+  tokenUrl                   : string | void,
   eagerRefreshThresholdMillis: number,
+  setCredentials             : (AuthToken) => void,
+  generateAuthUrl            : ({access_type: string, scope: Array<string>}) => string,
+  getToken                   : (string, (Error, AuthToken) => void) => void,
 }
