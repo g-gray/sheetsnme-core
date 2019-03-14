@@ -1,4 +1,5 @@
 // @flow
+
 export type * from 'koa'
 import type KoaT from 'koa'
 export type Koa = KoaT

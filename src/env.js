@@ -1,4 +1,5 @@
 // @flow
+
 import * as t from './types'
 import dotenv from 'dotenv'
 dotenv.load({path: '.env.properties'})

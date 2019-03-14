@@ -1,4 +1,5 @@
 // @flow
+
 import {Pool} from 'pg'
 import * as t from './types'
 import * as e from './env'

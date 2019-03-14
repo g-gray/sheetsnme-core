@@ -1,4 +1,5 @@
 // @flow
+
 import Router from 'koa-router'
 import * as t from './types'
 import * as e from './env'
@@ -24,7 +25,7 @@ const authRequired: t.Middleware = async (ctx: t.Context, next: () => Promise<vo
   await next()
 }
 
-/*
+/**
  * GET
  */
 
@@ -93,7 +94,7 @@ router
     ctx.body = `Transaction: ${id}`
   })
 
-/*
+/**
  * POST
  */
 

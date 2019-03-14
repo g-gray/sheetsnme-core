@@ -1,4 +1,5 @@
 // @flow
+
 import Koa from 'koa'
 import * as t from './types'
 import * as e from './env'
@@ -6,9 +7,11 @@ import * as u from './utils'
 import * as r from './router'
 
 
-/*
- * App
+/**
+ * App entry
+ * @type {Koa}
  */
+
 const app: t.Koa = new Koa()
 
 app
