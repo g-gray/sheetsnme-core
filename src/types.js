@@ -2,11 +2,22 @@ export type * from '../flow-typed/npm/koa_v2.0.x'
 export type * from '../flow-typed/npm/koa-router_v7.2.x'
 
 export type Env = {
-  SCHEMA: string,
-  HOST: string,
-  PORT: string,
-  SPREADSHEET_ID: string,
+  vars: EnvProperties
 }
+
+export type EnvProperties = {
+  SCHEMA           : string,
+  HOST             : string,
+  PORT             : number,
+  SPREADSHEET_ID   : string,
+  DB_NAME          : string,
+  DB_HOST          : string,
+  POSTGRES_USER    : string,
+  POSTGRES_PASSWORD: string,
+  PGSCRIPT_DB_URL  : string,
+}
+
+
 
 export type AuthCredentials = {
   installed: {

@@ -3,6 +3,7 @@ import fs from 'fs'
 import pt from 'path'
 import {google} from 'googleapis'
 import * as t from './types'
+import * as e from './env'
 
 // If modifying these scopes, delete token.json.
 const SCOPES: Array<string> = ['https://www.googleapis.com/auth/spreadsheets.readonly']
@@ -83,7 +84,7 @@ function getToken(oAuth2Client: t.OAuth2Client, code: string): Promise<t.AuthTok
 }
 
 function redirectUri(redirectTo: string | void): string {
-  const {SCHEMA, HOST, PORT} = global.env
+  const {SCHEMA, HOST, PORT} = e.properties
   return redirectTo
     ? `${SCHEMA}://${HOST}:${PORT}/auth/code/?redirectTo=${encodeURIComponent(redirectTo)}`
     : `${SCHEMA}://${HOST}:${PORT}/auth/code/`

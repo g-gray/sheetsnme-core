@@ -1,23 +1,15 @@
 // @flow
-import dotenv from 'dotenv'
 import Koa from 'koa'
 import * as t from './types'
+import * as e from './env'
 import * as u from './utils'
 import * as r from './router'
 
-dotenv.load({path: '.env.properties'})
-global.env = {
-  SCHEMA        : process.env.SCHEMA         || '',
-  HOST          : process.env.HOST           || '',
-  PORT          : process.env.PORT           || '',
-  SPREADSHEET_ID: process.env.SPREADSHEET_ID || '',
-}
-
-const app: t.Application = new Koa()
 
 /*
  * App
  */
+const app: t.Koa = new Koa()
 
 app
   .use(async (_, next: () => Promise<void>): Promise<void> => {
@@ -39,6 +31,7 @@ app
   .use(r.routes)
   .use(r.allowedMethods)
 
-app.listen(global.env.PORT, global.env.HOST, () => {
-  console.log(`Server listening on ${global.env.SCHEMA}://${global.env.HOST}:${global.env.PORT}`)
+const {SCHEMA, HOST, PORT} = e.properties
+app.listen(PORT, HOST, () => {
+  console.log(`Server listening on ${SCHEMA}://${HOST}:${PORT}`)
 })

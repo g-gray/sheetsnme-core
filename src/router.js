@@ -1,8 +1,10 @@
 // @flow
 import Router from 'koa-router'
 import * as t from './types'
-import * as a from './auth'
+import * as e from './env'
 import * as n from './net'
+import * as a from './auth'
+import * as db from './db'
 
 const router: Router = new Router()
 
@@ -28,12 +30,18 @@ router
       const oAuth2Client = a.authWithToken()
       const sheets = await n.fetchSheets(oAuth2Client)
 
+      const result = await db.query('select * from users')
+      console.info(`-- result:`, result)
       const {list, from, to} = ctx.query
+      if (!list || !from || !to) {
+        ctx.throw(400)
+      }
+
       console.info(`-- list:`, list)
       console.info(`-- from:`, from)
       console.info(`-- to:`, to)
       ctx.body = await n.fetchValues(sheets, {
-        spreadsheetId: global.env.SPREADSHEET_ID,
+        spreadsheetId: e.properties.SPREADSHEET_ID,
         range: `${list}!${from}:${to}`,
       })
     }

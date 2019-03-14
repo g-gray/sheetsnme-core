@@ -1,12 +1,17 @@
 {
   "scripts": {
-    "dev": "webpack --watch"
+    "dev": "webpack --watch",
+    "db:setup": "(source .env.properties && PGPASSWORD=$POSTGRES_PASSWORD psql -d $DB_NAME -h $PGSCRIPT_DB_URL -U $POSTGRES_USER -f sql/setup.pgsql)",
+    "db:reset": "(source .env.properties && PGPASSWORD=$POSTGRES_PASSWORD psql -d $DB_NAME -h $PGSCRIPT_DB_URL -U $POSTGRES_USER -f sql/reset-schema.pgsql)",
+    "db:seed": "(source .env.properties && PGPASSWORD=$POSTGRES_PASSWORD psql -d $DB_NAME -h $PGSCRIPT_DB_URL -U $POSTGRES_USER -f sql/seed.pgsql)",
+    "db:reset-and-seed": "npm run db:setup && npm run db:reset && npm run db:seed"
   },
   "dependencies": {
     "dotenv": "^6.2.0",
     "googleapis": "27",
     "koa": "^2.7.0",
-    "koa-router": "^7.4.0"
+    "koa-router": "^7.4.0",
+    "pg": "^7.8.2"
   },
   "devDependencies": {
     "@babel/core": "^7.3.4",
