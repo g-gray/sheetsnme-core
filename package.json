@@ -7,25 +7,25 @@
     "db:reset-and-seed": "npm run db:setup && npm run db:reset && npm run db:seed"
   },
   "dependencies": {
-    "dotenv": "^6.2.0",
+    "dotenv": "6.2.0",
     "googleapis": "27",
-    "koa": "^2.7.0",
-    "koa-router": "^7.4.0",
-    "pg": "^7.8.2"
+    "koa": "2.7.0",
+    "koa-router": "7.4.0",
+    "pg": "7.8.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "@babel/preset-flow": "^7.0.0",
-    "babel-eslint": "^10.0.1",
-    "babel-loader": "^8.0.5",
-    "eslint_d": "^7.3.0",
-    "flow-bin": "^0.94.0",
-    "flow-typed": "^2.5.1",
-    "flow-webpack-plugin": "^1.2.0",
-    "nodemon": "^1.18.10",
-    "nodemon-webpack-plugin": "^4.0.7",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.2.3"
+    "@babel/core": "7.3.4",
+    "@babel/preset-env": "7.3.4",
+    "@babel/preset-flow": "7.0.0",
+    "babel-eslint": "10.0.1",
+    "babel-loader": "8.0.5",
+    "eslint_d": "7.3.0",
+    "flow-bin": "0.94.0",
+    "flow-typed": "2.5.1",
+    "flow-webpack-plugin": "1.2.0",
+    "nodemon": "1.18.10",
+    "nodemon-webpack-plugin": "4.0.7",
+    "webpack": "4.29.6",
+    "webpack-cli": "3.2.3"
   }
 }
