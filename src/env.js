@@ -8,6 +8,8 @@ export const properties: t.EnvProperties = {
   SCHEMA              : process.env.SCHEMA              || '',
   HOST                : process.env.HOST                || '',
   PORT                : Number(process.env.PORT)        || 0,
+  CLIENT_ID           : process.env.CLIENT_ID           || '',
+  CLIENT_SECRET       : process.env.CLIENT_SECRET       || '',
   SPREADSHEET_ID      : process.env.SPREADSHEET_ID      || '',
   DB_NAME             : process.env.DB_NAME             || '',
   DB_HOST             : process.env.DB_HOST             || '',

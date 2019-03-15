@@ -25,6 +25,8 @@ export type EnvProperties = {
   SCHEMA             : string,
   HOST               : string,
   PORT               : number,
+  CLIENT_ID          : string,
+  CLIENT_SECRET      : string,
   SPREADSHEET_ID     : string,
   DB_NAME            : string,
   DB_HOST            : string,
