@@ -17,14 +17,12 @@ export const authRequired: t.Middleware = async (ctx: t.Context, next: () => Pro
     ? await db.sessionById(sessionId)
     : undefined
   if (!session) {
-    // const {header: {host}, url} = ctx.request
-    // const redirectUri: string = `http://${host}${url}`
-    const redirectUri: string = ctx.headers.referer
-      ? encodeURIComponent(ctx.headers.referer)
-      : '/'
+    // const redirectUri: string = ctx.headers.referer
+    //   ? encodeURIComponent(ctx.headers.referer)
+    //   : '/'
+    const redirectUri: string = encodeURIComponent(ctx.url)
     ctx.redirect(`/auth/login?redirectUri=${redirectUri}`)
     return
-    // ctx.throw(401)
   }
 
   ctx.session = session
