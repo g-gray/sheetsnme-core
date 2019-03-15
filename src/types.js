@@ -109,3 +109,8 @@ export type Session = {
   createdAt?    : Date,
   updatedAt?    : Date,
 }
+
+export type Context = {
+  ...Context,
+  session?: string,
+}

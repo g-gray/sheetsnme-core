@@ -10,12 +10,12 @@ const SCOPES: Array<string> = [
   'https://www.googleapis.com/auth/userinfo.profile',
 ]
 
-export function generateAuthUrl(redirectTo: string): string {
 const {SCHEMA, HOST, PORT, CLIENT_ID, CLIENT_SECRET} = e.properties
 const REDIRECT_URL: string = `${SCHEMA}://${HOST}:${PORT}/auth/code/`
 
+export function generateAuthUrl(state: string): string {
   const oAuth2Client: t.OAuth2Client = createOAuth2Client()
-  return oAuth2Client.generateAuthUrl({access_type: 'offline', scope: SCOPES, state: redirectTo})
+  return oAuth2Client.generateAuthUrl({access_type: 'offline', scope: SCOPES, state})
 }
 
 export async function exchangeCodeForToken(code: string): Promise<t.AuthToken> {
@@ -38,6 +38,13 @@ export function setCookie(ctx: t.Context, name: string, value: string) {
   })
 }
 
-export function getCookie(ctx: t.Context, name: string): string {
-  return String(ctx.cookies.get(name))
+export function setCookieExpired(ctx: t.Context, name: string) {
+  ctx.cookies.set(name, '', {
+    httpOnly: true,
+    maxAge: -1,
+  })
+}
+
+export function getCookie(ctx: t.Context, name: string): string | void {
+  return ctx.cookies.get(name)
 }

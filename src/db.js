@@ -66,7 +66,6 @@ export async function login(user: t.User, token: t.AuthToken): Promise<string> {
 }
 
 export async function sessionById(id: string): Promise<t.Session> {
-  console.info('-- sessionById')
   const q: string = `
   select *
   from sessions
