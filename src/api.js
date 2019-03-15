@@ -11,12 +11,13 @@ const {SESSION_COOKIE_NAME} = e.properties
  * Auth
  */
 
-export const authRequired: t.Middleware = async (ctx: t.Context, next: () => Promise<void>) => {
+export async function authRequired(ctx: t.Context, next: () => Promise<void>): Promise<void> {
   const sessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const session: t.Session | void = sessionId
     ? await db.sessionById(sessionId)
     : undefined
-  if (!session) {
+
+  if (typeof session === 'undefined') {
     // const redirectUri: string = ctx.headers.referer
     //   ? encodeURIComponent(ctx.headers.referer)
     //   : '/'
@@ -29,7 +30,7 @@ export const authRequired: t.Middleware = async (ctx: t.Context, next: () => Pro
   await next()
 }
 
-export const authLogin: t.Middleware = (ctx: t.Context) => {
+export function authLogin(ctx: t.Context): void {
   const redirectTo: string = ctx.query.redirectTo
     ? encodeURIComponent(ctx.query.redirectTo)
     : '/'
@@ -37,12 +38,20 @@ export const authLogin: t.Middleware = (ctx: t.Context) => {
   ctx.redirect(authUrl)
 }
 
-export const authLogout: t.Middleware = (ctx: t.Context) => {
-  a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
-  ctx.redirect('/')
+export async function authLogout(ctx: t.Context): Promise<void> {
+  const sessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
+
+  if (typeof sessionId === 'string') {
+    await db.logout(sessionId)
+    a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
+    ctx.redirect('/')
+    return
+  }
+
+  ctx.throw(400)
 }
 
-export const authCode: t.Middleware = async (ctx: t.Context): Promise<void> | void => {
+export async function authCode (ctx: t.Context): Promise<void>  {
   const {code, state: redirectTo} = ctx.query
 
   const token: t.AuthToken = await a.exchangeCodeForToken(code)
@@ -78,7 +87,7 @@ export const authCode: t.Middleware = async (ctx: t.Context): Promise<void> | vo
  * Index
  */
 
-export const index: t.Middleware = async (ctx: t.Context) => {
+export async function index (ctx: t.Context): Promise<void> {
   const session: t.Session | void = ctx.session
   const token: t.AuthToken | void = session
     ? session.externalToken
@@ -103,16 +112,16 @@ export const index: t.Middleware = async (ctx: t.Context) => {
  * Transactions
  */
 
-export const getTransactions: t.Middleware = (ctx: t.Context) => {
+export function getTransactions(ctx: t.Context): void {
   ctx.body = 'Transactions'
 }
 
-export const getTransaction: t.Middleware = (ctx: t.Context) => {
+export function getTransaction(ctx: t.Context): void {
   const id: string = ctx.params.id
   ctx.body = `Transaction: ${id}`
 }
 
-export const upsertTransaction: t.Middleware = (ctx: t.Context) => {
+export function upsertTransaction(ctx: t.Context): void {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.body = `Insert transaction`
@@ -121,7 +130,7 @@ export const upsertTransaction: t.Middleware = (ctx: t.Context) => {
   ctx.body = `Update transaction: ${id || ''}`
 }
 
-export const deleteTransaction: t.Middleware = (ctx: t.Context) => {
+export function deleteTransaction(ctx: t.Context): void {
   const id: string = ctx.params.id
   ctx.body = `Delete transaction: ${id}`
 }

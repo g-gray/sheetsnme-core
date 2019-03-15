@@ -3,6 +3,7 @@
 import {Pool} from 'pg'
 import * as t from './types'
 import * as e from './env'
+import * as u from './utils'
 
 const {DB_HOST, DB_NAME, POSTGRES_USER, POSTGRES_PASSWORD} = e.properties
 
@@ -65,13 +66,35 @@ export async function login(user: t.User, token: t.AuthToken): Promise<string> {
   return ((row.id: any): string)
 }
 
+export async function logout(id: string): Promise<void> {
+  const q: string = `
+  with
+    s as (
+      delete
+      from sessions
+      where id = $1
+      returning *
+    )
+  delete
+  from sessions
+  where
+    user_id = (select user_id from s) and
+    (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
+  `
+  const v: Array<mixed> = [id, u.DAY]
+
+  await query(q, v)
+}
+
 export async function sessionById(id: string): Promise<t.Session> {
   const q: string = `
   select *
   from sessions
-  where id='${id}'
+  where id = $1
   `
-  const result: t.ResultSet = await query(q)
+  const v: Array<mixed> = [id]
+
+  const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
 
   const session: t.Session = {
@@ -84,3 +107,4 @@ export async function sessionById(id: string): Promise<t.Session> {
 
   return session
 }
+
