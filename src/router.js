@@ -7,7 +7,7 @@ import * as n from './net'
 import * as a from './auth'
 import * as db from './db'
 
-const {SESSION_COOKIE_NAME} = e.properties
+const {SESSION_COOKIE_NAME, SCHEMA, HOST, PORT} = e.properties
 
 const router: t.Router = new Router()
 
@@ -53,7 +53,7 @@ router
       ctx.redirect('/')
       return
     }
-    const {redirectTo} = ctx.query
+    const redirectTo = ctx.query.redirectTo || `${SCHEMA}://${HOST}:${PORT}`
     const authUrl: string = a.generateAuthUrl(encodeURIComponent(redirectTo))
     ctx.redirect(authUrl)
   })
