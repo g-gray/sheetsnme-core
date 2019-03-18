@@ -31,9 +31,9 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
 }
 
 export function authLogin(ctx: t.Context): void {
-  const redirectTo: string = ctx.query.redirectTo
+  const redirectTo: string | void = ctx.query.redirectTo
     ? encodeURIComponent(ctx.query.redirectTo)
-    : '/'
+    : undefined
   const authUrl: string = a.generateAuthUrl(redirectTo)
   ctx.redirect(authUrl)
 }

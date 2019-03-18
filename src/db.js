@@ -62,26 +62,37 @@ export async function login(user: t.User, token: t.AuthToken): Promise<string> {
 
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
+  const userId = ((row.user_id: any): string)
+  await deleteExpiredSessions(userId)
+  const sessionId = ((row.id: any): string)
 
-  return ((row.id: any): string)
+  return sessionId
 }
 
 export async function logout(id: string): Promise<void> {
   const q: string = `
-  with
-    s as (
-      delete
-      from sessions
-      where id = $1
-      returning *
-    )
+  delete
+  from sessions
+  where id = $1
+  returning *
+  `
+  const v: Array<mixed> = [id]
+
+  const result: t.ResultSet = await query(q, v)
+  const row: t.Row = result.rows[0]
+  const userId = ((row.user_id: any): string)
+  await deleteExpiredSessions(userId)
+}
+
+async function deleteExpiredSessions(userId) {
+  const q: string = `
   delete
   from sessions
   where
-    user_id = (select user_id from s) and
-    (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
+    user_id = $1
+    and (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
   `
-  const v: Array<mixed> = [id, u.DAY]
+  const v: Array<mixed> = [userId, u.DAY]
 
   await query(q, v)
 }
