@@ -54,7 +54,7 @@ export async function authLogout(ctx: t.Context): Promise<void> {
 export async function authCode (ctx: t.Context): Promise<void>  {
   const {code, state: redirectTo} = ctx.query
 
-  const token: t.AuthToken = await a.exchangeCodeForToken(code)
+  const token: t.GAuthToken = await a.exchangeCodeForToken(code)
   const oAuth2Client = a.createOAuth2Client(token)
   const gUser: t.GUser = await n.fetchGUserInfo(oAuth2Client)
 
@@ -89,7 +89,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
 
 export async function index (ctx: t.Context): Promise<void> {
   const session: t.Session | void = ctx.session
-  const token: t.AuthToken | void = session
+  const token: t.GAuthToken | void = session
     ? session.externalToken
     : undefined
   const oAuth2Client = a.createOAuth2Client(token)
@@ -116,9 +116,19 @@ export function getTransactions(ctx: t.Context): void {
   ctx.body = 'Transactions'
 }
 
-export function getTransaction(ctx: t.Context): void {
-  const id: string = ctx.params.id
-  ctx.body = `Transaction: ${id}`
+export async function getTransaction(ctx: t.Context): Promise<void> {
+  const session: t.Session | void = ctx.session
+  const token: t.GAuthToken | void = session
+    ? session.externalToken
+    : undefined
+  const oAuth2Client = a.createOAuth2Client(token)
+
+  const {id} = ctx.params
+  if (!id) ctx.throw(400, 'Tx id is required')
+
+  const tx: t.Transaction | void = await n.fetchTxById(oAuth2Client, id)
+
+  ctx.body = `Transaction: ${JSON.stringify(tx)}`
 }
 
 export function upsertTransaction(ctx: t.Context): void {

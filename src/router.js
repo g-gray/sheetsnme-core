@@ -15,7 +15,7 @@ router
   .get('/auth/logout',                api.authLogout)
   .get('/auth/code',                  api.authCode)
   .get('/transactions',               api.getTransactions)
-  .get('/transactions/:id',           api.getTransaction)
+  .get('/transactions/:id',           api.authRequired, api.getTransaction)
 
 /**
  * POST

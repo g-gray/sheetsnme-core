@@ -14,16 +14,16 @@ const {SCHEMA, HOST, PORT, CLIENT_ID, CLIENT_SECRET} = e.properties
 const REDIRECT_URL: string = `${SCHEMA}://${HOST}:${PORT}/auth/code/`
 
 export function generateAuthUrl(state: string | void): string {
-  const oAuth2Client: t.OAuth2Client = createOAuth2Client()
+  const oAuth2Client: t.GOAuth2Client = createOAuth2Client()
   return oAuth2Client.generateAuthUrl({access_type: 'offline', scope: SCOPES, state})
 }
 
-export async function exchangeCodeForToken(code: string): Promise<t.AuthToken> {
-  const oAuth2Client: t.OAuth2Client = createOAuth2Client()
+export async function exchangeCodeForToken(code: string): Promise<t.GAuthToken> {
+  const oAuth2Client: t.GOAuth2Client = createOAuth2Client()
   return await oAuth2Client.getToken(code).then(({tokens}) => tokens)
 }
 
-export function createOAuth2Client(token: t.AuthToken | void): t.OAuth2Client {
+export function createOAuth2Client(token: t.GAuthToken | void): t.GOAuth2Client {
   const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL)
   if (token) {
     oAuth2Client.setCredentials(token)
