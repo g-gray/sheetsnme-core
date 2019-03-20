@@ -10,11 +10,11 @@ const router: t.Router = new Router()
  */
 
 router
-  .get('/',                           api.authRequired, api.index)
+  .redirect('/', '/transactions')
   .get('/auth/login',                 api.authLogin)
   .get('/auth/logout',                api.authLogout)
   .get('/auth/code',                  api.authCode)
-  .get('/transactions',               api.getTransactions)
+  .get('/transactions',               api.authRequired, api.getTransactions)
   .get('/transactions/:id',           api.authRequired, api.getTransaction)
 
 /**
