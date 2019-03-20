@@ -1,6 +1,7 @@
 // @flow
 
 import Koa from 'koa'
+import bodyParser from 'koa-bodyparser'
 import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
@@ -13,6 +14,7 @@ import * as r from './router'
  */
 
 const app: t.Koa = new Koa()
+app.use(bodyParser())
 
 app
   .use(async (_, next: () => Promise<void>): Promise<void> => {
