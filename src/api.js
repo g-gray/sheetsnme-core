@@ -133,7 +133,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  const tx: t.Transaction | void = await n.fetchTransactionById(client, id)
+  const tx: t.Transaction | void = await n.fetchTransaction(client, id)
   if (!tx) {
     ctx.throw(404, 'Transaction not found')
     return
@@ -142,13 +142,30 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
   ctx.body = `Transaction: ${JSON.stringify(tx)}`
 }
 
-export function upsertTransaction(ctx: t.Context): void {
-  const {id} = ctx.params
+export async function upsertTransaction(ctx: t.Context): Promise<void> {
+  console.info(`upsertTransaction`)
+  const client: t.GOAuth2Client = ctx.client
+
+  const id: string | void = ctx.params.id
+  // TODO Replace by insert
   if (!id) {
-    ctx.body = `Insert transaction`
+    // TODO Add validation of transaction
+    // Arbitrary data can be passed as transaction, we must validate it
+    const newTx: t.Transaction = ctx.request.body
+    const tx: t.Transaction | void = await n.createTransaction(client, newTx)
+    if (!tx) {
+      ctx.throw(404, 'Transaction not found')
+    }
     return
   }
-  ctx.body = `Update transaction: ${id || ''}`
+
+  // TODO Add validation of transaction
+  // Arbitrary data can be passed as transaction, we must validate it
+  const newTx: t.Transaction = ctx.request.body
+  const tx: t.Transaction | void = await n.updateTransaction(client, id, newTx)
+  if (!tx) {
+    ctx.throw(404, 'Transaction not found')
+  }
 }
 
 export function deleteTransaction(ctx: t.Context): void {

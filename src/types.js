@@ -8,6 +8,10 @@ export type * from 'koa-router'
 import type RouterT from 'koa-router'
 export type Router = RouterT
 
+export type * from 'koa-bodyparser'
+import type KoaBodyparserT from 'koa-bodyparser'
+export type KoaBodyparser = KoaBodyparserT
+
 export type * from 'pg'
 import typeof PGT from 'pg'
 export type PG = PGT
@@ -131,7 +135,7 @@ export type Context = {
  */
 
 export type Transaction = {
-  id?            : string,
+  id             : string,
   date           : Date,
   category?      : string,
   payee?         :string,
@@ -142,7 +146,6 @@ export type Transaction = {
   amountIncome?  : string,
   createdAt      : Date,
   updatedAt      : Date,
-  index?         : number,
 }
 
 export type Transactions = Array<Transaction>

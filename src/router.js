@@ -22,8 +22,15 @@ router
  */
 
 router
-  .post('/transactions/:id',          api.upsertTransaction)
-  .del('/transactions/:id',           api.deleteTransaction)
+  .post('/transactions',              api.authRequired, api.upsertTransaction)
+  .post('/transactions/:id',          api.authRequired, api.upsertTransaction)
+
+/**
+ * DEL
+ */
+
+router
+  .del('/transactions/:id',           api.authRequired, api.deleteTransaction)
 
 export const routes = router.routes()
 export const allowedMethods = router.allowedMethods()
