@@ -6,7 +6,11 @@ import * as e from './env'
 
 const {SPREADSHEET_ID} = e.properties
 
-export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser> {
+/**
+ * User
+ */
+
+export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void> {
   return new Promise(resolve => {
     google.oauth2({version: 'v2', auth: client}).userinfo.get((err, res) => {
       if (err) throw Error(err)
@@ -15,14 +19,16 @@ export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser> {
   })
 }
 
+
+
 /**
  * Transactions
  */
 
-export async function fetchTxById(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
+export async function fetchTransactionById(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
   const updateOptions: t.GReqOptions = {
     spreadsheetId: SPREADSHEET_ID,
-    range: `_txById!A1`,
+    range: `Transactions!A1`,
     valueInputOption: 'RAW',
     resource: {
       values: [[id]],
@@ -32,15 +38,27 @@ export async function fetchTxById(client: t.GOAuth2Client, id: string): Promise<
 
   const fetchTxOptions: t.GReqOptions = {
     spreadsheetId: SPREADSHEET_ID,
-    range: `_txById!A3:K3`,
+    range: `Transactions!A3:K3`,
   }
-  const rows: t.GRows = await fetchValues(client, fetchTxOptions)
-  const row: t.GRow = f.first(rows)
+  const rows: t.GRows | void = await fetchValues(client, fetchTxOptions)
+  const row: t.GRow | void = f.first(rows)
 
-  if (!row) return undefined
+  if (typeof row === 'undefined') {
+    return undefined
+  }
 
-  const tx: t.Transaction = rowToTx(row)
+  const tx: t.Transaction = rowToTransaction(row)
   return tx
+}
+
+export async function fetchTransactions(client: t.GOAuth2Client): Promise<t.Transactions> {
+  const fetchTxOptions: t.GReqOptions = {
+    spreadsheetId: SPREADSHEET_ID,
+    range: `Transactions!A5:K`,
+  }
+  const rows: t.GRows | void = await fetchValues(client, fetchTxOptions)
+  const txs: t.Transactions = f.map(rows, rowToTransaction)
+  return txs
 }
 
 
@@ -49,7 +67,7 @@ export async function fetchTxById(client: t.GOAuth2Client, id: string): Promise<
  * Utils
  */
 
-export function fetchValues(client: t.GOAuth2Client, options: t.GReqOptions): Promise<t.GRows> {
+export function fetchValues(client: t.GOAuth2Client, options: t.GReqOptions): Promise<t.GRows | void> {
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.values.get(options, (err, res) => {
       if (err) throw Error(err)
@@ -85,7 +103,7 @@ export function updateValues(client: t.GOAuth2Client, options: t.GReqOptions): P
   })
 }
 
-function rowToTx(row: t.GRow): t.Transaction {
+function rowToTransaction(row: t.GRow): t.Transaction {
   return {
     id: row[0],
     date: row[1],

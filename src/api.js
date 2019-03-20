@@ -17,16 +17,25 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     ? await db.sessionById(sessionId)
     : undefined
 
-  if (typeof session === 'undefined') {
+  if (!session) {
     // const redirectUri: string = ctx.headers.referer
     //   ? encodeURIComponent(ctx.headers.referer)
     //   : '/'
-    const redirectUri: string = encodeURIComponent(ctx.url)
-    ctx.redirect(`/auth/login?redirectUri=${redirectUri}`)
+    // const redirectUri: string = encodeURIComponent(ctx.url)
+    // ctx.redirect(`/auth/login?redirectUri=${redirectUri}`)
+    ctx.throw(401, 'Unauthorized')
     return
   }
 
-  ctx.session = session
+  const token: t.GAuthToken | void = session
+    ? session.externalToken
+    : undefined
+
+  if (!token) {
+    ctx.throw(400, 'Token is required')
+  }
+  ctx.client = a.createOAuth2Client(token)
+
   await next()
 }
 
@@ -41,38 +50,58 @@ export function authLogin(ctx: t.Context): void {
 export async function authLogout(ctx: t.Context): Promise<void> {
   const sessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
 
-  if (typeof sessionId === 'string') {
-    await db.logout(sessionId)
-    a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
-    ctx.redirect('/')
+  if (!sessionId) {
+    ctx.throw(400, 'Session id is required')
     return
   }
 
-  ctx.throw(400)
+  const session: t.Session | void = await db.logout(sessionId)
+  if (!session) {
+    ctx.throw(404, 'Session not found')
+    return
+  }
+
+  a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
+  ctx.redirect('/')
 }
 
 export async function authCode (ctx: t.Context): Promise<void>  {
-  const {code, state: redirectTo} = ctx.query
+  const code: string | void = ctx.query.code
+  if (!code) {
+    ctx.throw(400, 'Code is required')
+    return
+  }
 
-  const token: t.GAuthToken = await a.exchangeCodeForToken(code)
+  const token: t.GAuthToken | void = await a.exchangeCodeForToken(code)
+  if (!token) {
+    ctx.throw(400, 'Token is required')
+    return
+  }
+
   const oAuth2Client = a.createOAuth2Client(token)
-  const gUser: t.GUser = await n.fetchGUserInfo(oAuth2Client)
-
+  const gUser: t.GUser | void = await n.fetchGUserInfo(oAuth2Client)
   if (!gUser) {
     ctx.throw(400, 'User not found')
+    return
   }
 
   const user: t.User = {
-    externalId: gUser.id,
-    email: gUser.email,
+    externalId   : gUser.id,
+    email        : gUser.email,
     emailVerified: gUser.verified_email,
-    firstName: gUser.given_name,
-    lastName: gUser.family_name,
+    firstName    : gUser.given_name,
+    lastName     : gUser.family_name,
   }
 
-  const sessionId: string = await db.login(user, token)
-  a.setCookie(ctx, SESSION_COOKIE_NAME, sessionId)
+  const session: t.Session | void = await db.login(user, token)
+  if (!session) {
+    ctx.throw(404, 'Session not found')
+    return
+  }
 
+  a.setCookie(ctx, SESSION_COOKIE_NAME, session.id)
+
+  const redirectTo: string | void = ctx.query.state
   if (redirectTo) {
     ctx.redirect(decodeURIComponent(redirectTo))
     return
@@ -84,55 +113,35 @@ export async function authCode (ctx: t.Context): Promise<void>  {
 
 
 /**
- * Index
- */
-
-export async function index (ctx: t.Context): Promise<void> {
-  const session: t.Session | void = ctx.session
-  const token: t.GAuthToken | void = session
-    ? session.externalToken
-    : undefined
-  const oAuth2Client = a.createOAuth2Client(token)
-
-  const {list, from, to} = ctx.query
-  if (!list || !from || !to) {
-    ctx.body = 'list, from, to query params are required'
-    return
-  }
-
-  ctx.body = await n.fetchValues(oAuth2Client, {
-    spreadsheetId: e.properties.SPREADSHEET_ID,
-    range: `${list}!${from}:${to}`,
-  })
-}
-
-
-
-/**
  * Transactions
  */
 
-export function getTransactions(ctx: t.Context): void {
-  ctx.body = 'Transactions'
+export async function getTransactions(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+  const txs: t.Transactions = await n.fetchTransactions(client)
+  ctx.body = `Transactions: ${JSON.stringify(txs)}`
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {
-  const session: t.Session | void = ctx.session
-  const token: t.GAuthToken | void = session
-    ? session.externalToken
-    : undefined
-  const oAuth2Client = a.createOAuth2Client(token)
+  const client: t.GOAuth2Client = ctx.client
 
-  const {id} = ctx.params
-  if (!id) ctx.throw(400, 'Tx id is required')
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Transaction id is required')
+    return
+  }
 
-  const tx: t.Transaction | void = await n.fetchTxById(oAuth2Client, id)
+  const tx: t.Transaction | void = await n.fetchTransactionById(client, id)
+  if (!tx) {
+    ctx.throw(404, 'Transaction not found')
+    return
+  }
 
   ctx.body = `Transaction: ${JSON.stringify(tx)}`
 }
 
 export function upsertTransaction(ctx: t.Context): void {
-  const id: string | void = ctx.params.id
+  const {id} = ctx.params
   if (!id) {
     ctx.body = `Insert transaction`
     return

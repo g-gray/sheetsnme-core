@@ -14,6 +14,7 @@ export type PG = PGT
 
 export type * from 'dotenv'
 export type * from 'googleapis'
+export type * from 'fpx'
 
 /**
  * Env
@@ -74,7 +75,7 @@ export type GOAuth2Client = {
 }
 
 export type Session = {
-  id?          : string,
+  id           : string,
   userId       : string,
   externalToken: GAuthToken,
   createdAt?   : Date,
@@ -119,6 +120,7 @@ export type User = {
 export type Context = {
   ...Context,
   session?: string,
+  client?: GOAuth2Client,
 }
 
 
@@ -142,14 +144,16 @@ export type Transaction = {
   index?         : number,
 }
 
+export type Transactions = Array<Transaction>
+
 export type GRow = Array<any>
 
 export type GRows = Array<GRow>
 
 export type GValueRange = {
-  "range": string,
-  "majorDimension": 'ROWS' | 'COLUMNS',
-  "values": GRows,
+  range: string,
+  majorDimension: 'ROWS' | 'COLUMNS',
+  values: GRows,
 }
 
 export type GReqOptions = {

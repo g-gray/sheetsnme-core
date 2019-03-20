@@ -18,9 +18,10 @@ export function generateAuthUrl(state: string | void): string {
   return oAuth2Client.generateAuthUrl({access_type: 'offline', scope: SCOPES, state})
 }
 
-export async function exchangeCodeForToken(code: string): Promise<t.GAuthToken> {
+export async function exchangeCodeForToken(code: string): Promise<t.GAuthToken | void> {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client()
-  return await oAuth2Client.getToken(code).then(({tokens}) => tokens)
+  const token: t.GAuthToken = await oAuth2Client.getToken(code).then(({tokens}) => tokens)
+  return token
 }
 
 export function createOAuth2Client(token: t.GAuthToken | void): t.GOAuth2Client {

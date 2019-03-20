@@ -21,7 +21,7 @@ export function query(text: string, values: Array<mixed> | void): Promise<t.Resu
 
 
 
-export async function login(user: t.User, token: t.GAuthToken): Promise<string> {
+export async function login(user: t.User, token: t.GAuthToken): Promise<t.Session | void> {
   const q: string = `
   with
     ur as (select id from user_roles where sym='user'),
@@ -61,15 +61,17 @@ export async function login(user: t.User, token: t.GAuthToken): Promise<string> 
   ]
 
   const result: t.ResultSet = await query(q, v)
-  const row: t.GRow = result.rows[0]
-  const userId = ((row.user_id: any): string)
-  await deleteExpiredSessions(userId)
-  const sessionId = ((row.id: any): string)
+  const row: t.Row = result.rows[0]
+  if (!row) {
+    return undefined
+  }
 
-  return sessionId
+  const session: t.Session = rowToSession(row)
+  await deleteExpiredSessions(session.userId)
+  return session
 }
 
-export async function logout(id: string): Promise<void> {
+export async function logout(id: string): Promise<t.Session | void> {
   const q: string = `
   delete
   from sessions
@@ -79,12 +81,19 @@ export async function logout(id: string): Promise<void> {
   const v: Array<mixed> = [id]
 
   const result: t.ResultSet = await query(q, v)
-  const row: t.GRow = result.rows[0]
+  const row: t.Row = result.rows[0]
+  if (!row) {
+    return undefined
+  }
+
   const userId = ((row.user_id: any): string)
   await deleteExpiredSessions(userId)
+
+  const session: t.Session = rowToSession(row)
+  return session
 }
 
-async function deleteExpiredSessions(userId) {
+async function deleteExpiredSessions(userId: string): Promise<void> {
   const q: string = `
   delete
   from sessions
@@ -97,7 +106,7 @@ async function deleteExpiredSessions(userId) {
   await query(q, v)
 }
 
-export async function sessionById(id: string): Promise<t.Session> {
+export async function sessionById(id: string): Promise<t.Session | void> {
   const q: string = `
   select *
   from sessions
@@ -106,16 +115,23 @@ export async function sessionById(id: string): Promise<t.Session> {
   const v: Array<mixed> = [id]
 
   const result: t.ResultSet = await query(q, v)
-  const row: t.GRow = result.rows[0]
+  const row: t.Row | void = result.rows[0]
 
-  const session: t.Session = {
-    id            : ((row.id: any): string),
-    userId        : ((row.user_id: any): string),
-    externalToken : ((row.external_token: any): t.GAuthToken),
-    createdAt     : ((row.created_at: any): Date),
-    updatedAt     : ((row.updated_at: any): Date),
+  if (!row) {
+    return undefined
   }
 
+  const session: t.Session = rowToSession(row)
   return session
+}
+
+function rowToSession(row: t.Row): t.Session {
+  return {
+    id            : ((row.id            : any): string),
+    userId        : ((row.user_id       : any): string),
+    externalToken : ((row.external_token: any): t.GAuthToken),
+    createdAt     : ((row.created_at    : any): Date),
+    updatedAt     : ((row.updated_at    : any): Date),
+  }
 }
 
