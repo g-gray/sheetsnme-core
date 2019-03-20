@@ -5,14 +5,16 @@ import * as n from './net'
 import * as a from './auth'
 import * as db from './db'
 
-const {SESSION_COOKIE_NAME} = e.properties
+const {SESSION_HEADER_NAME, SESSION_COOKIE_NAME} = e.properties
 
 /**
  * Auth
  */
 
 export async function authRequired(ctx: t.Context, next: () => Promise<void>): Promise<void> {
-  const sessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
+  const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
+  const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
+  const sessionId: string | void = headerSessionId || cookieSessionId
   const session: t.Session | void = sessionId
     ? await db.sessionById(sessionId)
     : undefined

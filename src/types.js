@@ -37,6 +37,7 @@ export type EnvProperties = {
   POSTGRES_PASSWORD  : string,
   PGSCRIPT_DB_URL    : string,
   SESSION_COOKIE_NAME: string,
+  SESSION_HEADER_NAME: string,
 }
 
 

@@ -17,4 +17,5 @@ export const properties: t.EnvProperties = {
   POSTGRES_PASSWORD   : process.env.POSTGRES_PASSWORD   || '',
   PGSCRIPT_DB_URL     : process.env.PGSCRIPT_DB_URL     || '',
   SESSION_COOKIE_NAME : process.env.SESSION_COOKIE_NAME || '',
+  SESSION_HEADER_NAME : process.env.SESSION_HEADER_NAME || '',
 }
