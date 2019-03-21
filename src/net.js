@@ -87,6 +87,37 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
   return resultTx
 }
 
+export async function deleteTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
+  await updateValues(client, `Transactions!A1`, [[id]])
+
+  const txIndexRows: t.GRows = await fetchValues(client, `Transactions!A2:K2`)
+  const txIndexRow: t.GRow | void = txIndexRows[0]
+
+  if (!txIndexRow) {
+    // TODO Throw an error
+    return undefined
+  }
+
+  const txIndex: number = Number(txIndexRow)
+
+  const txRows: t.GRows = await fetchValues(client, `Transactions!A3:K3`)
+  const txRow: t.GRow | void = txRows[0]
+
+  if (!txRow) {
+    // TODO Throw an error
+    return undefined
+  }
+
+  const tx: t.Transaction = rowToTransaction(txRow)
+
+  await clearValues(
+    client,
+    `Transactions!A${TX_ROWS_OFFSET + txIndex}:K${TX_ROWS_OFFSET + txIndex}`,
+  )
+
+  return tx
+}
+
 export async function fetchTransactions(client: t.GOAuth2Client): Promise<t.Transactions> {
   const rows: t.GRows = await fetchValues(client, `Transactions!A5:K`)
   const txs: t.Transactions = f.map(rows, rowToTransaction)
@@ -113,11 +144,16 @@ export function fetchValues(client: t.GOAuth2Client, range: string): Promise<t.G
   })
 }
 
-export function clearValues(client: t.GOAuth2Client, options: t.GReqOptions): Promise<any> {
+export function clearValues(client: t.GOAuth2Client, range: string): Promise<void> {
+  const options: t.GReqOptions = {
+    spreadsheetId: SPREADSHEET_ID,
+    range,
+  }
+
   return new Promise(resolve => {
-    google.sheets({version: 'v4', auth: client}).spreadsheets.values.clear(options, (err, res) => {
+    google.sheets({version: 'v4', auth: client}).spreadsheets.values.clear(options, err => {
       if (err) if (err) throw Error(err)
-      resolve(res.data.clearedRange)
+      resolve()
     })
   })
 }

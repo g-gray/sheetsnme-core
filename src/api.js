@@ -170,7 +170,19 @@ export async function upsertTransaction(ctx: t.Context): Promise<void> {
   ctx.body = tx
 }
 
-export function deleteTransaction(ctx: t.Context): void {
-  const id: string = ctx.params.id
-  ctx.body = `Delete transaction: ${id}`
+export async function deleteTransaction(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+  const id: string | void = ctx.params.id
+
+  if (!id) {
+    ctx.throw(400, 'Transaction id is required')
+    return
+  }
+
+  const tx: t.Transaction | void = await n.deleteTransaction(client, id)
+  if (!tx) {
+    ctx.throw(404, 'Transaction not found')
+    return
+  }
+  ctx.body = tx
 }
