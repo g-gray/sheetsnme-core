@@ -43,7 +43,6 @@ export async function fetchTransaction(client: t.GOAuth2Client, id: string): Pro
 }
 
 export async function createTransaction(client: t.GOAuth2Client, tx: t.Transaction): Promise<t.Transaction | void> {
-  console.info(`createTransaction`)
   const txRows: t.GRows = await appendValues(
     client,
     `Transactions!A:K`,
@@ -85,7 +84,6 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
   }
 
   const resultTx: t.Transaction = rowToTransaction(txRow)
-  console.info(`resultTx:`, resultTx)
   return resultTx
 }
 

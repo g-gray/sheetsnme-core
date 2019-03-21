@@ -143,7 +143,6 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 }
 
 export async function upsertTransaction(ctx: t.Context): Promise<void> {
-  console.info(`upsertTransaction`)
   const client: t.GOAuth2Client = ctx.client
 
   const id: string | void = ctx.params.id
