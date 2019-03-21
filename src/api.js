@@ -64,7 +64,7 @@ export async function authLogout(ctx: t.Context): Promise<void> {
   }
 
   a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
-  ctx.redirect('/')
+  ctx.body = {}
 }
 
 export async function authCode (ctx: t.Context): Promise<void>  {
