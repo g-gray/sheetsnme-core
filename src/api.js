@@ -144,9 +144,8 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 
 export async function upsertTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-
   const id: string | void = ctx.params.id
-  // TODO Replace by insert
+
   if (!id) {
     // TODO Add validation of transaction
     // Arbitrary data can be passed as transaction, we must validate it
@@ -154,7 +153,9 @@ export async function upsertTransaction(ctx: t.Context): Promise<void> {
     const tx: t.Transaction | void = await n.createTransaction(client, newTx)
     if (!tx) {
       ctx.throw(404, 'Transaction not found')
+      return
     }
+    ctx.body = tx
     return
   }
 
@@ -164,7 +165,9 @@ export async function upsertTransaction(ctx: t.Context): Promise<void> {
   const tx: t.Transaction | void = await n.updateTransaction(client, id, newTx)
   if (!tx) {
     ctx.throw(404, 'Transaction not found')
+    return
   }
+  ctx.body = tx
 }
 
 export function deleteTransaction(ctx: t.Context): void {
