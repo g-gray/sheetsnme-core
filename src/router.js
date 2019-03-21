@@ -10,27 +10,27 @@ const router: t.Router = new Router()
  */
 
 router
-  .redirect('/', '/transactions')
-  .get('/auth/login',                 api.authLogin)
-  .get('/auth/logout',                api.authLogout)
-  .get('/auth/code',                  api.authCode)
-  .get('/transactions',               api.authRequired, api.getTransactions)
-  .get('/transactions/:id',           api.authRequired, api.getTransaction)
+  .get('/auth/login',                     api.authLogin)
+  .get('/auth/logout',                    api.authLogout)
+  .get('/auth/code',                      api.authCode)
+
+  .get('/api/transactions',               api.authRequired, api.getTransactions)
+  .get('/api/transactions/:id',           api.authRequired, api.getTransaction)
 
 /**
  * POST
  */
 
 router
-  .post('/transactions',              api.authRequired, api.upsertTransaction)
-  .post('/transactions/:id',          api.authRequired, api.upsertTransaction)
+  .post('/api/transactions',              api.authRequired, api.upsertTransaction)
+  .post('/api/transactions/:id',          api.authRequired, api.upsertTransaction)
 
 /**
  * DEL
  */
 
 router
-  .del('/transactions/:id',           api.authRequired, api.deleteTransaction)
+  .del('/api/transactions/:id',           api.authRequired, api.deleteTransaction)
 
 export const routes = router.routes()
 export const allowedMethods = router.allowedMethods()
