@@ -138,7 +138,7 @@ export type Transaction = {
   id             : string,
   date           : Date,
   category?      : string,
-  payee?         :string,
+  payee?         : string,
   comment?       : string,
   accountOutcome?: string,
   accountIncome? : string,

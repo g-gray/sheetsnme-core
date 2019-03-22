@@ -6,7 +6,8 @@ import * as e from './env'
 
 const {SPREADSHEET_ID} = e.properties
 
-const TX_ROWS_OFFSET: number = 4
+const TXS_FRX_ROWS         : number = 1
+const FILTERED_TXS_FRZ_ROWS: number = 2
 
 /**
  * User
@@ -28,18 +29,25 @@ export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void>
  */
 
 export async function fetchTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
-  await updateValues(client, `Transactions!A1`, [[id]])
+  await updateValues(
+    client,
+    `FilteredTransactions!A1:L1`,
+    [['', id, '', '', '', '', '', '', '', '', '', '']]
+  )
 
-  const rows: t.GRows = await fetchValues(client, `Transactions!A3:K3`)
-  const row: t.GRow | void = rows[0]
+  const filteredRows: t.GRows = await fetchValues(
+    client,
+    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
+  )
+  const filteredRow: t.GRow | void = filteredRows[0]
 
-  if (!row) {
+  if (!filteredRow) {
     // TODO Throw an error
     return undefined
   }
 
-  const tx: t.Transaction = rowToTransaction(row)
-  return tx
+  const resultTx: t.Transaction = rowToTransaction(filteredRow)
+  return resultTx
 }
 
 export async function createTransaction(client: t.GOAuth2Client, tx: t.Transaction): Promise<t.Transaction | void> {
@@ -55,25 +63,38 @@ export async function createTransaction(client: t.GOAuth2Client, tx: t.Transacti
     return undefined
   }
 
-  const resultTx: t.Transaction = rowToTransaction(txRow)
-  return resultTx
+  const createdTx: t.Transaction = rowToTransaction(txRow)
+  return createdTx
 }
 
 export async function updateTransaction(client: t.GOAuth2Client, id: string, tx: t.Transaction): Promise<t.Transaction | void> {
-  await updateValues(client, `Transactions!A1`, [[id]])
+  await updateValues(
+    client,
+    `FilteredTransactions!A1:L1`,
+    [['', id, '', '', '', '', '', '', '', '', '', '']]
+  )
 
-  const txIndexRows: t.GRows = await fetchValues(client, `Transactions!A2:K2`)
-  const txIndexRow: t.GRow | void = txIndexRows[0]
+  const filteredRows: t.GRows = await fetchValues(
+    client,
+    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
+  )
+  const filteredRow: t.GRow | void = filteredRows[0]
 
-  if (!txIndexRow) {
+  if (!filteredRow) {
     // TODO Throw an error
     return undefined
   }
 
-  const txIndex: number = Number(txIndexRow)
+  const txRowNumber: number = Number(filteredRow[0])
+
+  if (!txRowNumber) {
+    // TODO Throw an error
+    return undefined
+  }
+
   const txRows: t.GRows = await updateValues(
     client,
-    `Transactions!A${TX_ROWS_OFFSET + txIndex}:K${TX_ROWS_OFFSET + txIndex}`,
+    `Transactions!A${TXS_FRX_ROWS + txRowNumber}:K${TXS_FRX_ROWS + txRowNumber}`,
     [transactionToRow(tx)]
   )
   const txRow: t.GRow | void = txRows[0]
@@ -83,43 +104,46 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
     return undefined
   }
 
-  const resultTx: t.Transaction = rowToTransaction(txRow)
-  return resultTx
+  const updatedTx: t.Transaction = rowToTransaction(txRow)
+  return updatedTx
 }
 
 export async function deleteTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
-  await updateValues(client, `Transactions!A1`, [[id]])
+  await updateValues(
+    client,
+    `FilteredTransactions!A1:L1`,
+    [['', id, '', '', '', '', '', '', '', '', '', '']]
+  )
 
-  const txIndexRows: t.GRows = await fetchValues(client, `Transactions!A2:K2`)
-  const txIndexRow: t.GRow | void = txIndexRows[0]
+  const filteredRows: t.GRows = await fetchValues(
+    client,
+    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
+  )
+  const filteredRow: t.GRow | void = filteredRows[0]
 
-  if (!txIndexRow) {
+  if (!filteredRow) {
     // TODO Throw an error
     return undefined
   }
 
-  const txIndex: number = Number(txIndexRow)
+  const deletedTx: t.Transaction = rowToTransaction(filteredRow)
+  const txRowNumber: number = Number(filteredRow[0])
 
-  const txRows: t.GRows = await fetchValues(client, `Transactions!A3:K3`)
-  const txRow: t.GRow | void = txRows[0]
-
-  if (!txRow) {
+  if (!txRowNumber) {
     // TODO Throw an error
     return undefined
   }
-
-  const tx: t.Transaction = rowToTransaction(txRow)
 
   await clearValues(
     client,
-    `Transactions!A${TX_ROWS_OFFSET + txIndex}:K${TX_ROWS_OFFSET + txIndex}`,
+    `Transactions!A${TXS_FRX_ROWS + txRowNumber}:K${TXS_FRX_ROWS + txRowNumber}`,
   )
 
-  return tx
+  return deletedTx
 }
 
 export async function fetchTransactions(client: t.GOAuth2Client): Promise<t.Transactions> {
-  const rows: t.GRows = await fetchValues(client, `Transactions!A5:K`)
+  const rows: t.GRows = await fetchValues(client, `Transactions!A${TXS_FRX_ROWS + 1}:K`)
   const txs: t.Transactions = f.map(rows, rowToTransaction)
   return txs
 }
@@ -170,7 +194,7 @@ export function appendValues(client: t.GOAuth2Client, range: string, values: t.G
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.values.append(options, (err, res) => {
       if (err) if (err) throw Error(err)
-      resolve(res.data.updates.updatedData)
+      resolve(res.data.updates.updatedData.values)
     })
   })
 }
@@ -194,17 +218,17 @@ export function updateValues(client: t.GOAuth2Client, range: string, values: t.G
 
 function rowToTransaction(row: t.GRow): t.Transaction {
   return {
-    id            : row[0],
-    date          : row[1],
-    category      : row[2],
-    payee         : row[3],
-    comment       : row[4],
-    accountOutcome: row[5],
-    accountIncome : row[6],
-    amountOutcome : row[7],
-    amountIncome  : row[8],
-    createdAt     : row[9],
-    updatedAt     : row[10],
+    id            : row[1],
+    date          : row[2],
+    category      : row[3],
+    payee         : row[4],
+    comment       : row[5],
+    accountOutcome: row[6],
+    accountIncome : row[7],
+    amountOutcome : row[8],
+    amountIncome  : row[9],
+    createdAt     : row[10],
+    updatedAt     : row[11],
   }
 }
 
