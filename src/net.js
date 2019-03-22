@@ -218,17 +218,17 @@ export function updateValues(client: t.GOAuth2Client, range: string, values: t.G
 
 function rowToTransaction(row: t.GRow): t.Transaction {
   return {
-    id            : row[1],
-    date          : row[2],
-    category      : row[3],
-    payee         : row[4],
-    comment       : row[5],
-    accountOutcome: row[6],
-    accountIncome : row[7],
-    amountOutcome : row[8],
-    amountIncome  : row[9],
-    createdAt     : row[10],
-    updatedAt     : row[11],
+    id                : row[0],
+    date              : row[1],
+    category          : row[2],
+    payee             : row[3],
+    comment           : row[4],
+    accountOutcome    : row[5],
+    amountOutcome     : row[6],
+    accountIncome     : row[7],
+    amountIncome      : row[8],
+    createdAt         : row[9],
+    updatedAt         : row[10],
   }
 }
 
