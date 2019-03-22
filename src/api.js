@@ -121,7 +121,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
 export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const txs: t.Transactions = await n.fetchTransactions(client)
-  ctx.body = `Transactions: ${JSON.stringify(txs)}`
+  ctx.body = JSON.stringify(txs)
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {
