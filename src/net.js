@@ -46,7 +46,7 @@ export async function fetchTransaction(client: t.GOAuth2Client, id: string): Pro
     return undefined
   }
 
-  const resultTx: t.Transaction = rowToTransaction(filteredRow)
+  const resultTx: t.Transaction = filteredRowToTransaction(filteredRow)
   return resultTx
 }
 
@@ -126,7 +126,7 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
     return undefined
   }
 
-  const deletedTx: t.Transaction = rowToTransaction(filteredRow)
+  const deletedTx: t.Transaction = filteredRowToTransaction(filteredRow)
   const txRowNumber: number = Number(filteredRow[0])
 
   if (!txRowNumber) {
@@ -214,6 +214,11 @@ export function updateValues(client: t.GOAuth2Client, range: string, values: t.G
       resolve(res.data.updatedData.values)
     })
   })
+}
+
+function filteredRowToTransaction(row: t.GRow): t.Transaction {
+  // We slice the filtered row here, because it contains a row number as the first element
+  return rowToTransaction(row.slice(1))
 }
 
 function rowToTransaction(row: t.GRow): t.Transaction {
