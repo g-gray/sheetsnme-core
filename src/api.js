@@ -120,7 +120,8 @@ export async function authCode (ctx: t.Context): Promise<void>  {
 
 export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const txs: t.Transactions = await n.fetchTransactions(client)
+  const filter: t.Filter = ctx.query
+  const txs: t.Transactions = await n.fetchTransactions(client, filter)
   ctx.body = JSON.stringify(txs)
 }
 

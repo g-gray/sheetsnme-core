@@ -142,10 +142,32 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
   return deletedTx
 }
 
-export async function fetchTransactions(client: t.GOAuth2Client): Promise<t.Transactions> {
-  const rows: t.GRows = await fetchValues(client, `Transactions!A${TXS_FRX_ROWS + 1}:K`)
-  const txs: t.Transactions = f.map(rows, rowToTransaction)
-  return txs
+export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Filter): Promise<t.Transactions> {
+  await updateValues(
+    client,
+    `FilteredTransactions!A1:L1`,
+    [['',
+      filter.id             || '',
+      filter.date           || '',
+      filter.category       || '',
+      filter.payee          || '',
+      filter.comment        || '',
+      filter.outcomeAccount || '',
+      filter.outcomeAmount  || '',
+      filter.incomeAccount  || '',
+      filter.incomeAmount   || '',
+      filter.createdAt      || '',
+      filter.changedAt      || '',
+    ]]
+  )
+
+  const filteredRows: t.GRows = await fetchValues(
+    client,
+    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L`
+  )
+
+  const filteredTxs: t.Transactions = f.map(filteredRows, filteredRowToTransaction)
+  return filteredTxs
 }
 
 

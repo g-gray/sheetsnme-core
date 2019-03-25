@@ -167,3 +167,17 @@ export type GReqOptions = {
   valueInputOption?: 'RAW' | 'USER_ENTERED',
   valueRanges?     : Array<GValueRange>,
 }
+
+export type Filter = {
+  id?            : string,
+  date?          : string,
+  category?      : string,
+  payee?         : string,
+  comment?       : string,
+  outcomeAccount?: string,
+  outcomeAmount? : string,
+  incomeAccount? : string,
+  incomeAmount?  : string,
+  createdAt?     : string,
+  changedAt?     : string,
+}
