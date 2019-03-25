@@ -87,6 +87,7 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
   }
 
   const txRowNumber: number = Number(filteredRow[0])
+  const txToUpdate: t.Transaction = filteredRowToTransaction(filteredRow)
 
   if (!txRowNumber) {
     // TODO Throw an error
@@ -96,7 +97,7 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
   const txRows: t.GRows = await updateValues(
     client,
     `Transactions!A${TXS_FRX_ROWS + txRowNumber}:K${TXS_FRX_ROWS + txRowNumber}`,
-    [transactionToRow(tx)]
+    [transactionToRow({...txToUpdate, tx})]
   )
   const txRow: t.GRow | void = txRows[0]
 
@@ -261,17 +262,18 @@ function rowToTransaction(row: t.GRow): t.Transaction {
 }
 
 function transactionToRow(tx: t.Transaction): t.GRow {
+  const date: Date = new Date()
   return [
-    tx.id,
-    tx.date,
-    tx.category,
-    tx.payee,
-    tx.comment,
-    tx.accountOutcome,
-    tx.accountIncome,
-    tx.amountOutcome,
-    tx.amountIncome,
-    tx.createdAt,
-    tx.updatedAt,
+    tx.id             || '',
+    tx.date           || '',
+    tx.category       || '',
+    tx.payee          || '',
+    tx.comment        || '',
+    tx.accountOutcome || '',
+    tx.accountIncome  || '',
+    tx.amountOutcome  || '',
+    tx.amountIncome   || '',
+    tx.createdAt      || u.formatDateTime(date),
+    u.formatDateTime(date),
   ]
 }

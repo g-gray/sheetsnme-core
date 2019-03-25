@@ -154,7 +154,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 
   ctx.throw(406, 'Not acceptable')
 }
-console.info(`uuid():`, uuid())
+
 export async function createTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   // TODO Add validation of transaction
