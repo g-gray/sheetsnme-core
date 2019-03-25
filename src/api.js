@@ -1,4 +1,5 @@
 // @flow
+import uuid from 'uuid/v4'
 import * as t from './types'
 import * as e from './env'
 import * as n from './net'
@@ -153,13 +154,12 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 
   ctx.throw(406, 'Not acceptable')
 }
-
+console.info(`uuid():`, uuid())
 export async function createTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-
   // TODO Add validation of transaction
   // Arbitrary data can be passed as transaction, we must validate it
-  const newTx: t.Transaction = ctx.request.body
+  const newTx: t.Transaction = {...ctx.request.body, id: uuid()}
   const tx: t.Transaction | void = await n.createTransaction(client, newTx)
   if (!tx) {
     ctx.throw(404, 'Transaction not found')

@@ -3,6 +3,7 @@ import {google} from 'googleapis'
 import * as f from 'fpx'
 import * as t from './types'
 import * as e from './env'
+import * as u from './utils'
 
 const {SPREADSHEET_ID} = e.properties
 
