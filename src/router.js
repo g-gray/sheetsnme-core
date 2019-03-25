@@ -22,8 +22,8 @@ router
  */
 
 router
-  .post('/api/transactions',              api.authRequired, api.upsertTransaction)
-  .post('/api/transactions/:id',          api.authRequired, api.upsertTransaction)
+  .post('/api/transactions',              api.authRequired, api.createTransaction)
+  .post('/api/transactions/:id',          api.authRequired, api.updateTransaction)
 
 /**
  * DEL

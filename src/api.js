@@ -64,7 +64,7 @@ export async function authLogout(ctx: t.Context): Promise<void> {
   }
 
   a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
-  ctx.body = {}
+  ctx.body = 'Success'
 }
 
 export async function authCode (ctx: t.Context): Promise<void>  {
@@ -122,7 +122,13 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const filter: t.Filter = ctx.query
   const txs: t.Transactions = await n.fetchTransactions(client, filter)
-  ctx.body = JSON.stringify(txs)
+
+  if (ctx.accepts('application/json')) {
+    ctx.body = txs
+    return
+  }
+
+  ctx.throw(406, 'Not acceptable')
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {
@@ -140,23 +146,40 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  ctx.body = `Transaction: ${JSON.stringify(tx)}`
+  if (ctx.accepts('application/json')) {
+    ctx.body = tx
+    return
+  }
+
+  ctx.throw(406, 'Not acceptable')
 }
 
-export async function upsertTransaction(ctx: t.Context): Promise<void> {
+export async function createTransaction(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+
+  // TODO Add validation of transaction
+  // Arbitrary data can be passed as transaction, we must validate it
+  const newTx: t.Transaction = ctx.request.body
+  const tx: t.Transaction | void = await n.createTransaction(client, newTx)
+  if (!tx) {
+    ctx.throw(404, 'Transaction not found')
+    return
+  }
+
+  if (ctx.accepts('application/json')) {
+    ctx.body = tx
+    return
+  }
+
+  ctx.throw(406, 'Not acceptable')
+}
+
+export async function updateTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const id: string | void = ctx.params.id
 
   if (!id) {
-    // TODO Add validation of transaction
-    // Arbitrary data can be passed as transaction, we must validate it
-    const newTx: t.Transaction = ctx.request.body
-    const tx: t.Transaction | void = await n.createTransaction(client, newTx)
-    if (!tx) {
-      ctx.throw(404, 'Transaction not found')
-      return
-    }
-    ctx.body = tx
+    ctx.throw(400, 'Transaction id is required')
     return
   }
 
@@ -168,7 +191,13 @@ export async function upsertTransaction(ctx: t.Context): Promise<void> {
     ctx.throw(404, 'Transaction not found')
     return
   }
-  ctx.body = tx
+
+  if (ctx.accepts('application/json')) {
+    ctx.body = tx
+    return
+  }
+
+  ctx.throw(406, 'Not acceptable')
 }
 
 export async function deleteTransaction(ctx: t.Context): Promise<void> {
@@ -185,5 +214,11 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
     ctx.throw(404, 'Transaction not found')
     return
   }
-  ctx.body = tx
+
+  if (ctx.accepts('application/json')) {
+    ctx.body = tx
+    return
+  }
+
+  ctx.throw(406, 'Not acceptable')
 }

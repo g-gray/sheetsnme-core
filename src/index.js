@@ -4,7 +4,6 @@ import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
 import * as t from './types'
 import * as e from './env'
-import * as u from './utils'
 import * as r from './router'
 
 
