@@ -129,8 +129,8 @@ export type User = {
 
 export type Context = {
   ...Context,
-  session?: string,
-  client?: GOAuth2Client,
+  sessionId?: string,
+  client?   : GOAuth2Client,
 }
 
 

@@ -142,3 +142,43 @@ function rowToSession(row: t.Row): t.Session {
   }
 }
 
+
+
+/**
+ * User
+ */
+
+export async function userBySessionId(sessionId: string): Promise<t.User | void> {
+  const q: string = `
+  select *
+  from users u
+  left join sessions s on s.user_id = u.id
+  where s.id = $1
+  `
+  const v: Array<mixed> = [sessionId]
+
+  const result: t.ResultSet = await query(q, v)
+  const row: t.Row | void = result.rows[0]
+
+  if (!row) {
+    return undefined
+  }
+
+  const user: t.User = rowToUser(row)
+  return user
+}
+
+function rowToUser(row: t.Row): t.User {
+  return {
+    id           :((row.id            : any): string),
+    externalId   :((row.external_id   : any): string),
+    pictureUrl   :((row.picture_url   : any): string),
+    email        :((row.email         : any): string),
+    emailVerified:((row.email_verified: any): boolean),
+    firstName    :((row.first_name    : any): string),
+    lastName     :((row.last_name     : any): string),
+    userRoleId   :((row.user_role_id  : any): string),
+    createdAt    :((row.created_at    : any): Date),
+    updatedAt    :((row.updated_at    : any): Date),
+  }
+}

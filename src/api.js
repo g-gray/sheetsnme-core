@@ -33,11 +33,12 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
   const token: t.GAuthToken | void = session
     ? session.externalToken
     : undefined
-
   if (!token) {
     ctx.throw(400, 'Token is required')
   }
+
   ctx.client = a.createOAuth2Client(token)
+  ctx.sessionId = session.id
 
   await next()
 }
@@ -52,7 +53,6 @@ export function authLogin(ctx: t.Context): void {
 
 export async function authLogout(ctx: t.Context): Promise<void> {
   const sessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
-
   if (!sessionId) {
     ctx.throw(400, 'Session id is required')
     return
@@ -112,6 +112,28 @@ export async function authCode (ctx: t.Context): Promise<void>  {
   }
 
   ctx.redirect('/')
+}
+
+
+
+/**
+ * Auth
+ */
+
+export async function getUser(ctx: t.Context) {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
+  const sessionId: string = ctx.sessionId
+  const user: t.User | void = await db.userBySessionId(sessionId)
+  if (!user) {
+    ctx.throw(404, 'User not found')
+    return
+  }
+
+  ctx.body = user
 }
 
 
