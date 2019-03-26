@@ -16,6 +16,10 @@ export type * from 'pg'
 import typeof PGT from 'pg'
 export type PG = PGT
 
+export type * from 'uuid'
+import type UuidT from 'uuid'
+export type Uuid = UuidT
+
 export type * from 'dotenv'
 export type * from 'googleapis'
 export type * from 'fpx'

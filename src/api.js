@@ -1,5 +1,5 @@
 // @flow
-import uuid from 'uuid/v4'
+import uuid from 'uuid/v5'
 import * as t from './types'
 import * as e from './env'
 import * as n from './net'
