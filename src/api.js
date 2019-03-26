@@ -121,19 +121,24 @@ export async function authCode (ctx: t.Context): Promise<void>  {
  */
 
 export async function getTransactions(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const filter: t.Filter = ctx.query
   const txs: t.Transactions = await n.fetchTransactions(client, filter)
 
-  if (ctx.accepts('application/json')) {
-    ctx.body = txs
-    return
-  }
-
-  ctx.throw(406, 'Not acceptable')
+  ctx.body = txs
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
 
   const id: string | void = ctx.params.id
@@ -148,15 +153,15 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  if (ctx.accepts('application/json')) {
-    ctx.body = tx
-    return
-  }
-
-  ctx.throw(406, 'Not acceptable')
+  ctx.body = tx
 }
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   // TODO Add validation of transaction
   // Arbitrary data can be passed as transaction, we must validate it
@@ -167,15 +172,15 @@ export async function createTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  if (ctx.accepts('application/json')) {
-    ctx.body = tx
-    return
-  }
-
-  ctx.throw(406, 'Not acceptable')
+  ctx.body = tx
 }
 
 export async function updateTransaction(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const id: string | void = ctx.params.id
 
@@ -193,15 +198,15 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  if (ctx.accepts('application/json')) {
-    ctx.body = tx
-    return
-  }
-
-  ctx.throw(406, 'Not acceptable')
+  ctx.body = tx
 }
 
 export async function deleteTransaction(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const id: string | void = ctx.params.id
 
@@ -216,10 +221,5 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  if (ctx.accepts('application/json')) {
-    ctx.body = tx
-    return
-  }
-
-  ctx.throw(406, 'Not acceptable')
+  ctx.body = tx
 }
