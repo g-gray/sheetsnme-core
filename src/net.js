@@ -8,7 +8,7 @@ import * as u from './utils'
 const {SPREADSHEET_ID} = e.properties
 
 const TXS_FRX_ROWS         : number = 1
-const FILTERED_TXS_FRZ_ROWS: number = 2
+const FILTERED_TXS_FRZ_ROWS: number = 1
 
 /**
  * User
@@ -32,8 +32,8 @@ export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void>
 export async function fetchTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
   await updateValues(
     client,
-    `FilteredTransactions!A1:L1`,
-    [['', id, '', '', '', '', '', '', '', '', '', '']]
+    `FilteredTransactions!B2`,
+    [[txFilterQueryFormula({id})]]
   )
 
   const filteredRows: t.GRows = await fetchValues(
@@ -71,8 +71,8 @@ export async function createTransaction(client: t.GOAuth2Client, tx: t.Transacti
 export async function updateTransaction(client: t.GOAuth2Client, id: string, tx: t.Transaction): Promise<t.Transaction | void> {
   await updateValues(
     client,
-    `FilteredTransactions!A1:L1`,
-    [['', id, '', '', '', '', '', '', '', '', '', '']]
+    `FilteredTransactions!B2`,
+    [[txFilterQueryFormula({id})]]
   )
 
   const filteredRows: t.GRows = await fetchValues(
@@ -113,8 +113,8 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
 export async function deleteTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
   await updateValues(
     client,
-    `FilteredTransactions!A1:L1`,
-    [['', id, '', '', '', '', '', '', '', '', '', '']]
+    `FilteredTransactions!B2`,
+    [[txFilterQueryFormula({id})]]
   )
 
   const filteredRows: t.GRows = await fetchValues(
@@ -144,23 +144,38 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
   return deletedTx
 }
 
+function queryFormula(range: string, query: string):string {
+  // TODO handle #VALUE! gsheets error
+  return `=IFNA(QUERY(${range}, "${query}", -1), "")`
+}
+
+function txFilterQueryFormula(filter: t.Filter): string {
+  const where = f.compact([
+    filter.id         ? `A = '${filter.id}'`                                   : undefined,
+    filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                       : undefined,
+    filter.dateTo     ? `B <= date '${filter.dateTo}'`                         : undefined,
+    filter.category   ? `C = '${filter.category}'`                             : undefined,
+    filter.payee      ? `lower(D) like lower('%${filter.payee}%')`             : undefined,
+    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`           : undefined,
+    filter.account    ? `(F = '${filter.account}' OR H = '${filter.account}')` : undefined,
+    filter.amountFrom ? `G >= ${filter.amountFrom}`                            : undefined,
+    filter.amountTo   ? `I <= ${filter.amountTo}`                              : undefined,
+  ]).join(' AND\n    ')
+
+  return queryFormula(
+    `Transactions!A${TXS_FRX_ROWS + 1}:K`,
+    `
+    select *
+    ${where ? 'where\n    ' + where : ''}
+    `,
+  )
+}
+
 export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Filter): Promise<t.Transactions> {
   await updateValues(
     client,
-    `FilteredTransactions!A1:L1`,
-    [['',
-      filter.id             || '',
-      filter.date           || '',
-      filter.category       || '',
-      filter.payee          || '',
-      filter.comment        || '',
-      filter.outcomeAccount || '',
-      filter.outcomeAmount  || '',
-      filter.incomeAccount  || '',
-      filter.incomeAmount   || '',
-      filter.createdAt      || '',
-      filter.changedAt      || '',
-    ]]
+    `FilteredTransactions!B2`,
+    [[txFilterQueryFormula(filter)]]
   )
 
   const filteredRows: t.GRows = await fetchValues(

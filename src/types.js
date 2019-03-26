@@ -174,15 +174,13 @@ export type GReqOptions = {
 }
 
 export type Filter = {
-  id?            : string,
-  date?          : string,
-  category?      : string,
-  payee?         : string,
-  comment?       : string,
-  outcomeAccount?: string,
-  outcomeAmount? : string,
-  incomeAccount? : string,
-  incomeAmount?  : string,
-  createdAt?     : string,
-  changedAt?     : string,
+  id?        : string,
+  dateFrom?  : string,
+  dateTo?    : string,
+  category?  : string,
+  payee?     : string,
+  comment?   : string,
+  account?   : string,
+  amountFrom?: string,
+  amountTo?  : string,
 }
