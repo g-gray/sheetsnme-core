@@ -111,6 +111,7 @@ export type GUser = {
 export type User = {
   id?          : string,
   externalId   : string,
+  pictureUrl   : string,
   email        : string,
   emailVerified: boolean,
   firstName?   : string,

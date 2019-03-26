@@ -25,6 +25,7 @@ create table users (
   id                 uuid         primary key default gen_random_uuid(),
 
   external_id        text         not null unique check (external_id <> ''),
+  picture_url        text         not null default '',
   email              text         not null default '', -- intentionally "text"
   email_verified     bool         not null default false,
   first_name         text         not null default '',

@@ -90,6 +90,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
 
   const user: t.User = {
     externalId   : gUser.id,
+    pictureUrl   : gUser.picture,
     email        : gUser.email,
     emailVerified: gUser.verified_email,
     firstName    : gUser.given_name,

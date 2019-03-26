@@ -21,6 +21,10 @@ export function query(text: string, values: Array<mixed> | void): Promise<t.Resu
 
 
 
+/**
+ * Auth
+ */
+
 export async function login(user: t.User, token: t.GAuthToken): Promise<t.Session | void> {
   const q: string = `
   with
@@ -29,6 +33,7 @@ export async function login(user: t.User, token: t.GAuthToken): Promise<t.Sessio
       insert into users
         (
           external_id,
+          picture_url,
           email,
           email_verified,
           first_name,
@@ -36,23 +41,25 @@ export async function login(user: t.User, token: t.GAuthToken): Promise<t.Sessio
           user_role_id
         )
       values
-        ($1, $2, $3, $4, $5, (select id from ur))
+        ($1, $2, $3, $4, $5, $6, (select id from ur))
       on conflict (external_id) do update set
-        email          = $2,
-        email_verified = $3,
-        first_name     = $4,
-        last_name      = $5,
+        picture_url    = $2,
+        email          = $3,
+        email_verified = $4,
+        first_name     = $5,
+        last_name      = $6,
         updated_at     = current_timestamp
       returning id
     )
   insert into sessions
     (user_id, external_token)
   values
-    ((select id from u), $6)
+    ((select id from u), $7)
   returning *
   `
   const v: Array<mixed> = [
     user.externalId,
+    user.pictureUrl,
     user.email,
     user.emailVerified,
     user.firstName,
