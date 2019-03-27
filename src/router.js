@@ -15,6 +15,13 @@ router
   .get('/auth/code',                      api.authCode)
 
   .get('/api/user',                       api.authRequired, api.getUser)
+
+  .get('/api/accounts',                   api.authRequired, api.getAccounts)
+
+  .get('/api/categories',                 api.authRequired, api.getCategories)
+
+  .get('/api/payees',                     api.authRequired, api.getPayees)
+
   .get('/api/transactions',               api.authRequired, api.getTransactions)
   .get('/api/transactions/:id',           api.authRequired, api.getTransaction)
 

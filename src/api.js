@@ -117,7 +117,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
 
 
 /**
- * Auth
+ * User
  */
 
 export async function getUser(ctx: t.Context) {
@@ -134,6 +134,60 @@ export async function getUser(ctx: t.Context) {
   }
 
   ctx.body = user
+}
+
+
+
+/**
+ * Accounts
+ */
+
+export async function getAccounts(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const accounts: t.Accounts = await n.fetchAccounts(client)
+
+  ctx.body = accounts
+}
+
+
+
+/**
+ * Categories
+ */
+
+export async function getCategories(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const categories: t.Categories = await n.fetchCategories(client)
+
+  ctx.body = categories
+}
+
+
+
+/**
+ * Payees
+ */
+
+export async function getPayees(ctx: t.Context): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const payees: t.Payees = await n.fetchPayees(client)
+
+  ctx.body = payees
 }
 
 

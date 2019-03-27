@@ -134,6 +134,53 @@ export type Context = {
 }
 
 
+/**
+ * Accounts
+ */
+
+export type Account = {
+  id          : string,
+  title       : string,
+  currencyCode: string,
+  rubRate     : number,
+  initial     : number,
+  createdAt   : Date,
+  updatedAt   : Date,
+}
+
+export type Accounts = Array<Account>
+
+
+
+/**
+ * Accounts
+ */
+
+export type Category = {
+  id          : string,
+  title       : string,
+  createdAt   : Date,
+  updatedAt   : Date,
+}
+
+export type Categories = Array<Category>
+
+
+
+/**
+ * Payees
+ */
+
+export type Payee = {
+  id       : string,
+  title    : string,
+  createdAt: Date,
+  updatedAt: Date,
+}
+
+export type Payees = Array<Payee>
+
+
 
 /**
  * Transacations
@@ -142,18 +189,20 @@ export type Context = {
 export type Transaction = {
   id             : string,
   date           : Date,
-  category?      : string,
-  payee?         : string,
-  comment?       : string,
-  accountOutcome?: string,
-  accountIncome? : string,
-  amountOutcome? : string,
-  amountIncome?  : string,
+  category       : string,
+  payee          : string,
+  comment        : string,
+  accountOutcome : string,
+  amountOutcome  : number,
+  accountIncome  : string,
+  amountIncome   : number,
   createdAt      : Date,
   updatedAt      : Date,
 }
 
 export type Transactions = Array<Transaction>
+
+
 
 export type GRow = Array<any>
 
