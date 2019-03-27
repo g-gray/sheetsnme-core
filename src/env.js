@@ -2,7 +2,7 @@
 
 import * as t from './types'
 import dotenv from 'dotenv'
-dotenv.load({path: '.env.properties'})
+dotenv.config({path: '.env.properties'})
 
 export const properties: t.EnvProperties = {
   SCHEMA              : process.env.SCHEMA              || '',

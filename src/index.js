@@ -20,6 +20,6 @@ app
   .use(r.allowedMethods)
 
 const {SCHEMA, HOST, PORT} = e.properties
-app.listen(PORT, HOST, () => {
+app.listen(PORT, HOST, undefined, () => {
   console.log(`Server listening on ${SCHEMA}://${HOST}:${PORT}`)
 })
