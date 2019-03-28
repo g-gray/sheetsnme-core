@@ -254,13 +254,13 @@ function rowToTransaction(row: t.GRow): t.Transaction {
   return {
     id                : row[0],
     date              : row[1],
-    category          : row[2],
-    payee             : row[3],
+    categoryId        : row[2],
+    payeeId           : row[3],
     comment           : row[4],
-    accountOutcome    : row[5],
-    amountOutcome     : row[6],
-    accountIncome     : row[7],
-    amountIncome      : row[8],
+    outcomeAccountId  : row[5],
+    outcomeAmount     : row[6],
+    incomeAccountId   : row[7],
+    incomeAmount      : row[8],
     createdAt         : row[9],
     updatedAt         : row[10],
   }
@@ -269,31 +269,31 @@ function rowToTransaction(row: t.GRow): t.Transaction {
 function transactionToRow(tx: t.Transaction): t.GRow {
   const date: Date = new Date()
   return [
-    tx.id             || '',
-    tx.date           || '',
-    tx.category       || '',
-    tx.payee          || '',
-    tx.comment        || '',
-    tx.accountOutcome || '',
-    tx.amountOutcome  || '',
-    tx.accountIncome  || '',
-    tx.amountIncome   || '',
-    tx.createdAt      || u.formatDateTime(date),
+    tx.id               || '',
+    tx.date             || '',
+    tx.categoryId       || '',
+    tx.payeeId          || '',
+    tx.comment          || '',
+    tx.outcomeAccountId || '',
+    tx.outcomeAmount    || '',
+    tx.incomeAccountId  || '',
+    tx.incomeAmount     || '',
+    tx.createdAt        || u.formatDateTime(date),
     u.formatDateTime(date),
   ]
 }
 
 function filteredTransactionsQuery(filter: t.Filter): string {
   const where = f.compact([
-    filter.id         ? `A = '${filter.id}'`                                   : undefined,
-    filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                       : undefined,
-    filter.dateTo     ? `B <= date '${filter.dateTo}'`                         : undefined,
-    filter.category   ? `C = '${filter.category}'`                             : undefined,
-    filter.payee      ? `lower(D) like lower('%${filter.payee}%')`             : undefined,
-    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`           : undefined,
-    filter.account    ? `(F = '${filter.account}' OR H = '${filter.account}')` : undefined,
-    filter.amountFrom ? `G >= ${filter.amountFrom}`                            : undefined,
-    filter.amountTo   ? `I <= ${filter.amountTo}`                              : undefined,
+    filter.id         ? `A = '${filter.id}'`                                       : undefined,
+    filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                           : undefined,
+    filter.dateTo     ? `B <= date '${filter.dateTo}'`                             : undefined,
+    filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
+    filter.payeeId    ? `lower(D) like lower('%${filter.payeeId}%')`               : undefined,
+    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
+    filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : undefined,
+    filter.amountFrom ? `G >= ${filter.amountFrom}`                                : undefined,
+    filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
   ]).join(' AND\n    ')
 
   return query(

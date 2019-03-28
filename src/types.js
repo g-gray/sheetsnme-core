@@ -187,17 +187,17 @@ export type Payees = Array<Payee>
  */
 
 export type Transaction = {
-  id             : string,
-  date           : Date,
-  category       : string,
-  payee          : string,
-  comment        : string,
-  accountOutcome : string,
-  amountOutcome  : number,
-  accountIncome  : string,
-  amountIncome   : number,
-  createdAt      : Date,
-  updatedAt      : Date,
+  id              : string,
+  date            : Date,
+  categoryId      : string,
+  payeeId         : string,
+  comment         : string,
+  outcomeAccountId: string,
+  outcomeAmount   : number,
+  incomeAccountId : string,
+  incomeAmount    : number,
+  createdAt       : Date,
+  updatedAt       : Date,
 }
 
 export type Transactions = Array<Transaction>
@@ -226,10 +226,10 @@ export type Filter = {
   id?        : string,
   dateFrom?  : string,
   dateTo?    : string,
-  category?  : string,
-  payee?     : string,
+  categoryId?: string,
+  payeeId?   : string,
   comment?   : string,
-  account?   : string,
+  accountId? : string,
   amountFrom?: string,
   amountTo?  : string,
 }
