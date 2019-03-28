@@ -208,21 +208,38 @@ export type GRow = Array<any>
 
 export type GRows = Array<GRow>
 
-export type GValueRange = {
+export type GValueRange = {|
   range: string,
   majorDimension: 'ROWS' | 'COLUMNS',
   values: GRows,
-}
+|}
 
-export type GReqOptions = {
-  spreadsheetId    : string,
-  range?           : string,
-  resourse?        : {values: GRows},
-  valueInputOption?: 'RAW' | 'USER_ENTERED',
-  valueRanges?     : Array<GValueRange>,
-}
+export type GValuesRequest = {|
+  spreadsheetId            : string,
+  range                    : string,
+  resource?                : {values: GRows},
+  valueInputOption?        : 'RAW' | 'USER_ENTERED',
+  includeValuesInResponse? : boolean,
+  valueRanges?             : Array<GValueRange>,
+|}
 
-export type Filter = {
+export type GRequests = Array<
+  {|
+    deleteDimension?: {|
+      range: {|
+        sheetId: number,
+        dimension: 'ROWS' | 'COLUMNS',
+        startIndex: number,
+        endIndex: number
+      |}
+    |},
+  |}
+>
+
+export type GBatchRequest = {|
+  spreadsheetId: string,
+  resource: {requests: GRequests},
+|}
   id?        : string,
   dateFrom?  : string,
   dateTo?    : string,

@@ -7,7 +7,7 @@ import * as u from './utils'
 
 const {SPREADSHEET_ID} = e.properties
 
-const TXS_FRX_ROWS         : number = 1
+const TXS_FRZ_ROWS         : number = 1
 const FILTERED_TXS_FRZ_ROWS: number = 1
 const ACCOUNTS_FRZ_ROWS    : number = 1
 const CATEGORIES_FRZ_ROWS  : number = 1
@@ -124,7 +124,7 @@ export async function fetchTransaction(client: t.GOAuth2Client, id: string): Pro
     client,
     `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
   )
-  const filteredRow: t.GRow | void = filteredRows[0]
+  const filteredRow: t.GRow | void = f.first(filteredRows)
 
   if (!filteredRow) {
     // TODO Throw an error
@@ -163,14 +163,14 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
     client,
     `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
   )
-  const filteredRow: t.GRow | void = filteredRows[0]
+  const filteredRow: t.GRow | void = f.first(filteredRows)
 
   if (!filteredRow) {
     // TODO Throw an error
     return undefined
   }
 
-  const txRowNumber: number = Number(filteredRow[0])
+  const txRowNumber: number = Number(filteredRow[0]) + TXS_FRZ_ROWS
   const txToUpdate: t.Transaction = filteredRowToTransaction(filteredRow)
 
   if (!txRowNumber) {
@@ -180,8 +180,8 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
 
   const txRows: t.GRows = await updateValues(
     client,
-    `Transactions!A${TXS_FRX_ROWS + txRowNumber}:K${TXS_FRX_ROWS + txRowNumber}`,
-    [transactionToRow({...txToUpdate, tx})]
+    `Transactions!A${TXS_FRZ_ROWS + txRowNumber}:K${TXS_FRZ_ROWS + txRowNumber}`,
+    [transactionToRow({...txToUpdate, ...tx})]
   )
   const txRow: t.GRow | void = txRows[0]
 
@@ -205,7 +205,8 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
     client,
     `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
   )
-  const filteredRow: t.GRow | void = filteredRows[0]
+
+  const filteredRow: t.GRow | void = f.first(filteredRows)
 
   if (!filteredRow) {
     // TODO Throw an error
@@ -213,17 +214,25 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
   }
 
   const deletedTx: t.Transaction = filteredRowToTransaction(filteredRow)
-  const txRowNumber: number = Number(filteredRow[0])
+  const txRowNumber: number = Number(filteredRow[0]) + TXS_FRZ_ROWS
 
   if (!txRowNumber) {
     // TODO Throw an error
     return undefined
   }
 
-  await clearValues(
-    client,
-    `Transactions!A${TXS_FRX_ROWS + txRowNumber}:K${TXS_FRX_ROWS + txRowNumber}`,
-  )
+  const requests: t.GRequests = [{
+    deleteDimension: {
+      range: {
+        sheetId: 0,
+        dimension: 'ROWS',
+        startIndex: txRowNumber - 1,
+        endIndex: txRowNumber,
+      },
+    },
+  }]
+
+  await batchUpdate(client, requests)
 
   return deletedTx
 }
@@ -297,7 +306,7 @@ function filteredTransactionsQuery(filter: t.Filter): string {
   ]).join(' AND\n    ')
 
   return query(
-    `Transactions!A${TXS_FRX_ROWS + 1}:K`,
+    `Transactions!A${TXS_FRZ_ROWS + 1}:K`,
     `
     select *
     ${where ? 'where\n    ' + where : ''}
@@ -311,7 +320,7 @@ function filteredTransactionsQuery(filter: t.Filter): string {
  */
 
 export function fetchValues(client: t.GOAuth2Client, range: string): Promise<t.GRows> {
-  const options: t.GReqOptions = {
+  const options: t.GValuesRequest = {
     spreadsheetId: SPREADSHEET_ID,
     range,
   }
@@ -325,7 +334,7 @@ export function fetchValues(client: t.GOAuth2Client, range: string): Promise<t.G
 }
 
 export function clearValues(client: t.GOAuth2Client, range: string): Promise<void> {
-  const options: t.GReqOptions = {
+  const options: t.GValuesRequest = {
     spreadsheetId: SPREADSHEET_ID,
     range,
   }
@@ -339,7 +348,7 @@ export function clearValues(client: t.GOAuth2Client, range: string): Promise<voi
 }
 
 export function appendValues(client: t.GOAuth2Client, range: string, values: t.GRow): Promise<any> {
-  const options: t.GReqOptions = {
+  const options: t.GValuesRequest = {
     spreadsheetId: SPREADSHEET_ID,
     range,
     valueInputOption: 'USER_ENTERED',
@@ -356,7 +365,7 @@ export function appendValues(client: t.GOAuth2Client, range: string, values: t.G
 }
 
 export function updateValues(client: t.GOAuth2Client, range: string, values: t.GRow): Promise<any> {
-  const options: t.GReqOptions = {
+  const options: t.GValuesRequest = {
     spreadsheetId: SPREADSHEET_ID,
     range,
     valueInputOption: 'USER_ENTERED',
@@ -371,6 +380,22 @@ export function updateValues(client: t.GOAuth2Client, range: string, values: t.G
     })
   })
 }
+
+
+export function batchUpdate(client: t.GOAuth2Client, requests: t.GRequests): Promise<any> {
+  const options: t.GBatchRequest = {
+    spreadsheetId: SPREADSHEET_ID,
+    resource: {requests},
+  }
+
+  return new Promise(resolve => {
+    google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options, (err, res) => {
+      if (err) if (err) throw Error(err)
+      resolve(res.data.replies)
+    })
+  })
+}
+
 
 
 function query(range: string, query: string):string {
