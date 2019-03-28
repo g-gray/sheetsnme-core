@@ -28,11 +28,11 @@ export type * from 'fpx'
  * Env
  */
 
-export type Env = {
+export type Env = {|
   vars: EnvProperties
-}
+|}
 
-export type EnvProperties = {
+export type EnvProperties = {|
   SCHEMA             : string,
   HOST               : string,
   PORT               : number,
@@ -46,7 +46,7 @@ export type EnvProperties = {
   PGSCRIPT_DB_URL    : string,
   SESSION_COOKIE_NAME: string,
   SESSION_HEADER_NAME: string,
-}
+|}
 
 
 
@@ -54,15 +54,15 @@ export type EnvProperties = {
  * Auth
  */
 
-export type GAuthToken = {
+export type GAuthToken = {|
   access_token : string,
   refresh_token: string,
   scope        : string,
   token_type   : string,
   expiry_date  : number,
-}
+|}
 
-export type GOAuth2Client = {
+export type GOAuth2Client = {|
   _events                    : Array<any>,
   _eventsCount               : number,
   _maxListeners              : number,
@@ -81,15 +81,15 @@ export type GOAuth2Client = {
   generateAuthUrl            : ({access_type: string, scope: Array<string>}) => string,
   getToken                   : (string, (Error, GAuthToken) => void) => void,
   getToken                   : (string) => Promise<{tokens: GAuthToken}>,
-}
+|}
 
-export type Session = {
+export type Session = {|
   id           : string,
   userId       : string,
   externalToken: GAuthToken,
   createdAt?   : Date,
   updatedAt?   : Date,
-}
+|}
 
 
 
@@ -97,7 +97,7 @@ export type Session = {
  * User
  */
 
-export type GUser = {
+export type GUser = {|
   id            : string,
   email         : string,
   verified_email: true,
@@ -106,9 +106,9 @@ export type GUser = {
   family_name   : string,
   picture       : string,
   locale        : string,
-}
+|}
 
-export type User = {
+export type User = {|
   id?          : string,
   externalId   : string,
   pictureUrl   : string,
@@ -119,7 +119,7 @@ export type User = {
   userRoleId?  : string,
   createdAt?   : Date,
   updatedAt?   : Date,
-}
+|}
 
 
 
@@ -127,18 +127,18 @@ export type User = {
  * Context
  */
 
-export type Context = {
+export type Context = {|
   ...Context,
   sessionId?: string,
   client?   : GOAuth2Client,
-}
+|}
 
 
 /**
  * Accounts
  */
 
-export type Account = {
+export type Account = {|
   id          : string,
   title       : string,
   currencyCode: string,
@@ -146,7 +146,7 @@ export type Account = {
   initial     : number,
   createdAt   : Date,
   updatedAt   : Date,
-}
+|}
 
 export type Accounts = Array<Account>
 
@@ -156,12 +156,12 @@ export type Accounts = Array<Account>
  * Accounts
  */
 
-export type Category = {
+export type Category = {|
   id          : string,
   title       : string,
   createdAt   : Date,
   updatedAt   : Date,
-}
+|}
 
 export type Categories = Array<Category>
 
@@ -171,12 +171,12 @@ export type Categories = Array<Category>
  * Payees
  */
 
-export type Payee = {
+export type Payee = {|
   id       : string,
   title    : string,
   createdAt: Date,
   updatedAt: Date,
-}
+|}
 
 export type Payees = Array<Payee>
 
@@ -186,7 +186,7 @@ export type Payees = Array<Payee>
  * Transacations
  */
 
-export type Transaction = {
+export type Transaction = {|
   id              : string,
   date            : Date,
   categoryId      : string,
@@ -198,7 +198,7 @@ export type Transaction = {
   incomeAmount    : number,
   createdAt       : Date,
   updatedAt       : Date,
-}
+|}
 
 export type Transactions = Array<Transaction>
 
@@ -240,6 +240,8 @@ export type GBatchRequest = {|
   spreadsheetId: string,
   resource: {requests: GRequests},
 |}
+
+export type Filter = {|
   id?        : string,
   dateFrom?  : string,
   dateTo?    : string,
@@ -249,4 +251,4 @@ export type GBatchRequest = {|
   accountId? : string,
   amountFrom?: string,
   amountTo?  : string,
-}
+|}
