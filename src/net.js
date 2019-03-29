@@ -8,8 +8,6 @@ import * as u from './utils'
 const {SPREADSHEET_ID} = e.properties
 
 const TXS_FRZ_ROWS         : number = 1
-const FILTERED_TXS_FRZ_ROWS: number = 1
-const ACCOUNTS_FRZ_ROWS    : number = 1
 const CATEGORIES_FRZ_ROWS  : number = 1
 const PAYEES_FRZ_ROWS      : number = 1
 
@@ -33,9 +31,21 @@ export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void>
  */
 
 export async function fetchAccounts(client: t.GOAuth2Client): Promise<t.Accounts> {
-  const rows: t.GRows = await fetchValues(
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new Error('Spreadsheet not found')
+  }
+
+  const sheet = findSheetByTitle(spreadsheet.sheets, 'Accounts')
+  if (!sheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount
+
+  const rows: t.GRows = await getValues(
     client,
-    `Accounts!A${ACCOUNTS_FRZ_ROWS + 1}:G`
+    `Accounts!A${frozenRows + 1}:G`
   )
 
   const accounts: t.Accounts = f.map(rows, rowToAccount)
@@ -62,7 +72,7 @@ function rowToAccount(row: t.GRow): t.Account {
  */
 
 export async function fetchCategories(client: t.GOAuth2Client): Promise<t.Categories> {
-  const rows: t.GRows = await fetchValues(
+  const rows: t.GRows = await getValues(
     client,
     `Categories!A${CATEGORIES_FRZ_ROWS + 1}:D`
   )
@@ -88,7 +98,7 @@ function rowToCategory(row: t.GRow): t.Category {
  */
 
 export async function fetchPayees(client: t.GOAuth2Client): Promise<t.Payees> {
-  const rows: t.GRows = await fetchValues(
+  const rows: t.GRows = await getValues(
     client,
     `Payees!A${PAYEES_FRZ_ROWS + 1}:D`
   )
@@ -114,15 +124,34 @@ function rowToPayee(row: t.GRow): t.Payee {
  */
 
 export async function fetchTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new Error('Spreadsheet not found')
+  }
+
+  const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
+  if (!filteredTxsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+
+  const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+  if (!txsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+
   await updateValues(
     client,
     `FilteredTransactions!B2`,
-    [[filteredTransactionsQuery({id})]]
+    [[filteredTransactionsQuery({id}, txsFrozenRows)]]
   )
 
-  const filteredRows: t.GRows = await fetchValues(
+  const filteredRows: t.GRows = await getValues(
     client,
-    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
+    `FilteredTransactions!A${filteredTxsFrozenRows + 1}:L${filteredTxsFrozenRows + 1}`
   )
   const filteredRow: t.GRow | void = f.first(filteredRows)
 
@@ -153,15 +182,34 @@ export async function createTransaction(client: t.GOAuth2Client, tx: t.Transacti
 }
 
 export async function updateTransaction(client: t.GOAuth2Client, id: string, tx: t.Transaction): Promise<t.Transaction | void> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new Error('Spreadsheet not found')
+  }
+
+  const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
+  if (!filteredTxsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+
+  const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+  if (!txsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+
   await updateValues(
     client,
     `FilteredTransactions!B2`,
-    [[filteredTransactionsQuery({id})]]
+    [[filteredTransactionsQuery({id}, txsFrozenRows)]]
   )
 
-  const filteredRows: t.GRows = await fetchValues(
+  const filteredRows: t.GRows = await getValues(
     client,
-    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
+    `FilteredTransactions!A${filteredTxsFrozenRows + 1}:L${filteredTxsFrozenRows + 1}`
   )
   const filteredRow: t.GRow | void = f.first(filteredRows)
 
@@ -170,7 +218,7 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
     return undefined
   }
 
-  const txRowNumber: number = Number(filteredRow[0]) + TXS_FRZ_ROWS
+  const txRowNumber: number = Number(filteredRow[0]) + txsFrozenRows
   const txToUpdate: t.Transaction = filteredRowToTransaction(filteredRow)
 
   if (!txRowNumber) {
@@ -180,7 +228,7 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
 
   const txRows: t.GRows = await updateValues(
     client,
-    `Transactions!A${TXS_FRZ_ROWS + txRowNumber}:K${TXS_FRZ_ROWS + txRowNumber}`,
+    `Transactions!A${txsFrozenRows + txRowNumber}:K${txsFrozenRows + txRowNumber}`,
     [transactionToRow({...txToUpdate, ...tx})]
   )
   const txRow: t.GRow | void = txRows[0]
@@ -195,15 +243,34 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
 }
 
 export async function deleteTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new Error('Spreadsheet not found')
+  }
+
+  const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
+  if (!filteredTxsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+
+  const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+  if (!txsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+
   await updateValues(
     client,
     `FilteredTransactions!B2`,
-    [[filteredTransactionsQuery({id})]]
+    [[filteredTransactionsQuery({id}, txsFrozenRows)]]
   )
 
-  const filteredRows: t.GRows = await fetchValues(
+  const filteredRows: t.GRows = await getValues(
     client,
-    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L${FILTERED_TXS_FRZ_ROWS + 1}`
+    `FilteredTransactions!A${filteredTxsFrozenRows + 1}:L${filteredTxsFrozenRows + 1}`
   )
 
   const filteredRow: t.GRow | void = f.first(filteredRows)
@@ -214,7 +281,7 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
   }
 
   const deletedTx: t.Transaction = filteredRowToTransaction(filteredRow)
-  const txRowNumber: number = Number(filteredRow[0]) + TXS_FRZ_ROWS
+  const txRowNumber: number = Number(filteredRow[0]) + txsFrozenRows
 
   if (!txRowNumber) {
     // TODO Throw an error
@@ -232,21 +299,40 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
     },
   }]
 
-  await batchUpdate(client, requests)
+  await batchUpdateSpreadsheet(client, requests)
 
   return deletedTx
 }
 
 export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Filter): Promise<t.Transactions> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new Error('Spreadsheet not found')
+  }
+
+  const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
+  if (!filteredTxsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+
+  const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+  if (!txsSheet) {
+    throw new Error('Sheet not found')
+  }
+
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+
   await updateValues(
     client,
     `FilteredTransactions!B2`,
-    [[filteredTransactionsQuery(filter)]]
+    [[filteredTransactionsQuery(filter, txsFrozenRows)]]
   )
 
-  const filteredRows: t.GRows = await fetchValues(
+  const filteredRows: t.GRows = await getValues(
     client,
-    `FilteredTransactions!A${FILTERED_TXS_FRZ_ROWS + 1}:L`
+    `FilteredTransactions!A${filteredTxsFrozenRows + 1}:L`
   )
 
   const filteredTxs: t.Transactions = f.map(filteredRows, filteredRowToTransaction)
@@ -292,7 +378,7 @@ function transactionToRow(tx: t.Transaction): t.GRow {
   ]
 }
 
-function filteredTransactionsQuery(filter: t.Filter): string {
+function filteredTransactionsQuery(filter: t.Filter, txsFrozenRows: number): string {
   const where = f.compact([
     filter.id         ? `A = '${filter.id}'`                                       : undefined,
     filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                           : undefined,
@@ -306,7 +392,7 @@ function filteredTransactionsQuery(filter: t.Filter): string {
   ]).join(' AND\n    ')
 
   return query(
-    `Transactions!A${TXS_FRZ_ROWS + 1}:K`,
+    `Transactions!A${txsFrozenRows + 1}:K`,
     `
     select *
     ${where ? 'where\n    ' + where : ''}
@@ -319,7 +405,36 @@ function filteredTransactionsQuery(filter: t.Filter): string {
  * Utils
  */
 
-export function fetchValues(client: t.GOAuth2Client, range: string): Promise<t.GRows> {
+export function getSpreadsheet(client: t.GOAuth2Client, ranges: ?string): Promise<t.GSpreadsheet | void> {
+  const options = {
+    spreadsheetId: SPREADSHEET_ID,
+    ranges,
+  }
+
+  return new Promise(resolve => {
+    google.sheets({version: 'v4', auth: client}).spreadsheets.get(options, (err, res) => {
+      if (err) if (err) throw Error(err)
+      resolve(res.data)
+    })
+  })
+}
+
+export function batchUpdateSpreadsheet(client: t.GOAuth2Client, requests: t.GRequests): Promise<any> {
+  const options: t.GBatchRequest = {
+    spreadsheetId: SPREADSHEET_ID,
+    resource: {requests},
+  }
+
+  return new Promise(resolve => {
+    google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options, (err, res) => {
+      if (err) if (err) throw Error(err)
+      resolve(res.data.replies)
+    })
+  })
+}
+
+
+export function getValues(client: t.GOAuth2Client, range: string): Promise<t.GRows> {
   const options: t.GValuesRequest = {
     spreadsheetId: SPREADSHEET_ID,
     range,
@@ -347,7 +462,7 @@ export function clearValues(client: t.GOAuth2Client, range: string): Promise<voi
   })
 }
 
-export function appendValues(client: t.GOAuth2Client, range: string, values: t.GRow): Promise<any> {
+export function appendValues(client: t.GOAuth2Client, range: string, values: t.GRow): Promise<t.GRows> {
   const options: t.GValuesRequest = {
     spreadsheetId: SPREADSHEET_ID,
     range,
@@ -364,7 +479,7 @@ export function appendValues(client: t.GOAuth2Client, range: string, values: t.G
   })
 }
 
-export function updateValues(client: t.GOAuth2Client, range: string, values: t.GRow): Promise<any> {
+export function updateValues(client: t.GOAuth2Client, range: string, values: t.GRow): Promise<t.GRows> {
   const options: t.GValuesRequest = {
     spreadsheetId: SPREADSHEET_ID,
     range,
@@ -382,23 +497,11 @@ export function updateValues(client: t.GOAuth2Client, range: string, values: t.G
 }
 
 
-export function batchUpdate(client: t.GOAuth2Client, requests: t.GRequests): Promise<any> {
-  const options: t.GBatchRequest = {
-    spreadsheetId: SPREADSHEET_ID,
-    resource: {requests},
-  }
-
-  return new Promise(resolve => {
-    google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options, (err, res) => {
-      if (err) if (err) throw Error(err)
-      resolve(res.data.replies)
-    })
-  })
-}
-
-
-
 function query(range: string, query: string):string {
   // TODO handle #VALUE! gsheets error
   return `=IFNA(QUERY(${range}, "${query}", -1), "")`
+}
+
+function findSheetByTitle(sheets: Array<t.GSheet>, title: string): t.GSheet | void {
+  return f.find(sheets, sheet => sheet.properties.title === title)
 }

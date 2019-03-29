@@ -204,6 +204,20 @@ export type Transactions = Array<Transaction>
 
 
 
+export type Filter = {|
+  id?        : string,
+  dateFrom?  : string,
+  dateTo?    : string,
+  categoryId?: string,
+  payeeId?   : string,
+  comment?   : string,
+  accountId? : string,
+  amountFrom?: string,
+  amountTo?  : string,
+|}
+
+
+
 export type GRow = Array<any>
 
 export type GRows = Array<GRow>
@@ -223,32 +237,55 @@ export type GValuesRequest = {|
   valueRanges?             : Array<GValueRange>,
 |}
 
-export type GRequests = Array<
+export type GRequests = [
   {|
     deleteDimension?: {|
       range: {|
         sheetId: number,
         dimension: 'ROWS' | 'COLUMNS',
-        startIndex: number,
-        endIndex: number
+        startIndex?: number,
+        endIndex?: number,
       |}
     |},
   |}
->
+]
 
 export type GBatchRequest = {|
   spreadsheetId: string,
   resource: {requests: GRequests},
 |}
 
-export type Filter = {|
-  id?        : string,
-  dateFrom?  : string,
-  dateTo?    : string,
-  categoryId?: string,
-  payeeId?   : string,
-  comment?   : string,
-  accountId? : string,
-  amountFrom?: string,
-  amountTo?  : string,
+export type GGridProperties = {|
+  rowCount      : number,
+  columnCount   : number,
+  frozenRowCount: number,
+|}
+
+export type GSheetProperties = {|
+  sheetId       : number,
+  title         : string,
+  index         : number,
+  sheetType     : 'GRID',
+  gridProperties: GGridProperties,
+|}
+
+export type GSheet = {|
+  properties  : GSheetProperties,
+  filterViews?: any,
+  basicFilter?: any,
+|}
+
+export type GSpreadsheetProperties = {|
+  title        : string,
+  locale       : string,
+  autoRecalc   : 'ON_CHANGE',
+  timeZone     : string,
+  defaultFormat: any
+|}
+
+export type GSpreadsheet = {|
+  spreadsheetId : string,
+  properties    : GSpreadsheetProperties,
+  sheets        : Array<GSheet>,
+  spreadsheetUrl: string,
 |}
