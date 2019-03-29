@@ -26,3 +26,11 @@ export function formatDateTime(value: any): string {
   const match = dateIsoString(value).match(/(\d\d\d\d-\d\d-\d\d)T(\d\d:\d\d:\d\d)/)
   return match ? `${match[1]} ${match[2]}` : ''
 }
+
+export class PublicError extends Error {
+  constructor(message) {
+    super(...arguments)
+    this.message = message
+    this.name = 'PublicError'
+  }
+}

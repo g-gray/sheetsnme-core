@@ -33,12 +33,12 @@ export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void>
 export async function fetchAccounts(client: t.GOAuth2Client): Promise<t.Accounts> {
   const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
   if (!spreadsheet) {
-    throw new Error('Spreadsheet not found')
+    throw new u.PublicError('Spreadsheet not found')
   }
 
   const sheet = findSheetByTitle(spreadsheet.sheets, 'Accounts')
   if (!sheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const frozenRows: number = sheet.properties.gridProperties.frozenRowCount
@@ -126,19 +126,19 @@ function rowToPayee(row: t.GRow): t.Payee {
 export async function fetchTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
   const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
   if (!spreadsheet) {
-    throw new Error('Spreadsheet not found')
+    throw new u.PublicError('Spreadsheet not found')
   }
 
   const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
   if (!filteredTxsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
@@ -156,8 +156,7 @@ export async function fetchTransaction(client: t.GOAuth2Client, id: string): Pro
   const filteredRow: t.GRow | void = f.first(filteredRows)
 
   if (!filteredRow) {
-    // TODO Throw an error
-    return undefined
+    throw new u.PublicError('Row not found')
   }
 
   const resultTx: t.Transaction = filteredRowToTransaction(filteredRow)
@@ -173,8 +172,7 @@ export async function createTransaction(client: t.GOAuth2Client, tx: t.Transacti
   const txRow: t.GRow | void = txRows[0]
 
   if (!txRow) {
-    // TODO Throw an error
-    return undefined
+    throw new u.PublicError('Row not found')
   }
 
   const createdTx: t.Transaction = rowToTransaction(txRow)
@@ -184,19 +182,19 @@ export async function createTransaction(client: t.GOAuth2Client, tx: t.Transacti
 export async function updateTransaction(client: t.GOAuth2Client, id: string, tx: t.Transaction): Promise<t.Transaction | void> {
   const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
   if (!spreadsheet) {
-    throw new Error('Spreadsheet not found')
+    throw new u.PublicError('Spreadsheet not found')
   }
 
   const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
   if (!filteredTxsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
@@ -214,17 +212,17 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
   const filteredRow: t.GRow | void = f.first(filteredRows)
 
   if (!filteredRow) {
-    // TODO Throw an error
-    return undefined
+    throw new u.PublicError('Row not found')
   }
 
-  const txRowNumber: number = Number(filteredRow[0]) + txsFrozenRows
-  const txToUpdate: t.Transaction = filteredRowToTransaction(filteredRow)
-
+  let txRowNumber: number = Number(filteredRow[0]) + txsFrozenRows
   if (!txRowNumber) {
-    // TODO Throw an error
-    return undefined
+    throw new u.PublicError('Row number not found')
   }
+
+  txRowNumber += txsFrozenRows
+
+  const txToUpdate: t.Transaction = filteredRowToTransaction(filteredRow)
 
   const txRows: t.GRows = await updateValues(
     client,
@@ -234,8 +232,7 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
   const txRow: t.GRow | void = txRows[0]
 
   if (!txRow) {
-    // TODO Throw an error
-    return undefined
+    throw new u.PublicError('Row not found')
   }
 
   const updatedTx: t.Transaction = rowToTransaction(txRow)
@@ -245,19 +242,19 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
 export async function deleteTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
   const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
   if (!spreadsheet) {
-    throw new Error('Spreadsheet not found')
+    throw new u.PublicError('Spreadsheet not found')
   }
 
   const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
   if (!filteredTxsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
@@ -274,19 +271,18 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
   )
 
   const filteredRow: t.GRow | void = f.first(filteredRows)
-
   if (!filteredRow) {
-    // TODO Throw an error
-    return undefined
+    throw new u.PublicError('Row not found')
   }
 
   const deletedTx: t.Transaction = filteredRowToTransaction(filteredRow)
-  const txRowNumber: number = Number(filteredRow[0]) + txsFrozenRows
 
+  let txRowNumber: number = Number(filteredRow[0]) + txsFrozenRows
   if (!txRowNumber) {
-    // TODO Throw an error
-    return undefined
+    throw new u.PublicError('Row number not found')
   }
+
+  txRowNumber += txsFrozenRows
 
   const requests: t.GRequests = [{
     deleteDimension: {
@@ -307,19 +303,19 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
 export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Filter): Promise<t.Transactions> {
   const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
   if (!spreadsheet) {
-    throw new Error('Spreadsheet not found')
+    throw new u.PublicError('Spreadsheet not found')
   }
 
   const filteredTxsSheet = findSheetByTitle(spreadsheet.sheets, 'FilteredTransactions')
   if (!filteredTxsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
-    throw new Error('Sheet not found')
+    throw new u.PublicError('Sheet not found')
   }
 
   const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
