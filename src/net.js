@@ -41,7 +41,7 @@ export async function fetchAccounts(client: t.GOAuth2Client): Promise<t.Accounts
     throw new u.PublicError('Sheet not found')
   }
 
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
 
   const rows: t.GRows = await getValues(
     client,
@@ -134,14 +134,14 @@ export async function fetchTransaction(client: t.GOAuth2Client, id: string): Pro
     throw new u.PublicError('Sheet not found')
   }
 
-  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount || 0
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount || 0
 
   await updateValues(
     client,
@@ -190,14 +190,14 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tx:
     throw new u.PublicError('Sheet not found')
   }
 
-  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount || 0
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount || 0
 
   await updateValues(
     client,
@@ -250,14 +250,14 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
     throw new u.PublicError('Sheet not found')
   }
 
-  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount || 0
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount || 0
 
   await updateValues(
     client,
@@ -311,14 +311,14 @@ export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Filte
     throw new u.PublicError('Sheet not found')
   }
 
-  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount
+  const filteredTxsFrozenRows: number = filteredTxsSheet.properties.gridProperties.frozenRowCount || 0
 
   const txsSheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
   if (!txsSheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount
+  const txsFrozenRows: number = txsSheet.properties.gridProperties.frozenRowCount || 0
 
   await updateValues(
     client,
