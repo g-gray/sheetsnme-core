@@ -5,6 +5,7 @@ import bodyParser from 'koa-bodyparser'
 import * as t from './types'
 import * as e from './env'
 import * as r from './router'
+import * as u from './utils'
 
 
 /**
@@ -30,7 +31,7 @@ export async function handlePublicError(ctx: t.Context, next: () => Promise<void
     await next()
   }
   catch (error) {
-    if (error.name === 'PublicError') {
+    if (error instanceof u.PublicError) {
       ctx.throw(400, error.message)
       return
     }
