@@ -1,5 +1,7 @@
 // @flow
 import * as f from 'fpx'
+import xhttp from 'xhttp/node'
+import * as t from './types'
 
 export const SECOND: number = 1000
 export const MINUTE: number = SECOND * 60
@@ -28,9 +30,18 @@ export function formatDateTime(value: any): string {
 }
 
 export class PublicError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(...arguments)
     this.message = message
     this.name = 'PublicError'
   }
+}
+
+export function fetch(params: t.XHttpParams): Promise<t.XHttpResponse> {
+  return new Promise((resolve, reject) => {
+    xhttp.jsonRequest(params, (err, response) => {
+      if (response.ok) resolve(response)
+      else reject(response)
+    })
+  })
 }

@@ -2465,6 +2465,11 @@ for-in@^1.0.2:
   resolved "https://registry.yarnpkg.com/for-in/-/for-in-1.0.2.tgz#81068d295a8142ec0ac726c6e2200c30fb6d5e80"
   integrity sha1-gQaNKVqBQuwKxybG4iAMMPttXoA=
 
+fpx@^0.5:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/fpx/-/fpx-0.5.1.tgz#276f962994886a3f2ed8d9a0f2de7361ca718a73"
+  integrity sha512-pzbH9u3SF0VgoLpGFBSvQ4qFKSNDCZNR4CgdHnEaXNFWpyXNh/zjT2xQrk0+J0/l1x80/mBlkm0Gq22UawFliQ==
+
 fpx@^0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/fpx/-/fpx-0.7.0.tgz#83a843052a5c127dfa6056b5e2e48de06fa104a9"
@@ -5865,6 +5870,13 @@ xdg-basedir@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/xdg-basedir/-/xdg-basedir-3.0.0.tgz#496b2cc109eca8dbacfe2dc72b603c17c5870ad4"
   integrity sha1-SWsswQnsqNus/i3HK2A8F8WHCtQ=
+
+xhttp@^0.11.0:
+  version "0.11.0"
+  resolved "https://registry.yarnpkg.com/xhttp/-/xhttp-0.11.0.tgz#9848d640b4c0d5e6e7dac99aaab72e6f30ddbabe"
+  integrity sha512-V4mig7Br09WoRPkepywbV/s7Z76gH4LRPUwMvmJazfEG7atL3EuRo4uxnFrowDNbOEPet1QPjazuGLguK2uGqQ==
+  dependencies:
+    fpx "^0.5"
 
 xtend@^4.0.0, xtend@~4.0.1:
   version "4.0.1"

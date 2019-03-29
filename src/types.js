@@ -198,6 +198,7 @@ export type Transaction = {|
   incomeAmount    : number,
   createdAt       : Date,
   updatedAt       : Date,
+  row             : number,
 |}
 
 export type Transactions = Array<Transaction>
@@ -241,10 +242,10 @@ export type GRequests = [
   {|
     deleteDimension?: {|
       range: {|
-        sheetId: number,
-        dimension: 'ROWS' | 'COLUMNS',
+        sheetId    : number,
+        dimension  : 'ROWS' | 'COLUMNS',
         startIndex?: number,
-        endIndex?: number,
+        endIndex?  : number,
       |}
     |},
   |}
@@ -288,4 +289,23 @@ export type GSpreadsheet = {|
   properties    : GSpreadsheetProperties,
   sheets        : Array<GSheet>,
   spreadsheetUrl: string,
+|}
+
+
+export type XHttpParams = {|
+  url     : string,
+  method? : string,
+  headers?: {[string]: string},
+  timeout?: number,
+  body?   : (Object | string),
+|}
+
+export type XHttpResponse = {|
+  ok        : boolean,
+  status    : string,
+  statusText: string,
+  reason    : string,
+  headers   : {[string]: string},
+  body      : (Object | string),
+  params    : XHttpParams,
 |}
