@@ -7,10 +7,6 @@ import * as u from './utils'
 
 const {SPREADSHEET_ID} = e.properties
 
-const TXS_FRZ_ROWS         : number = 1
-const CATEGORIES_FRZ_ROWS  : number = 1
-const PAYEES_FRZ_ROWS      : number = 1
-
 /**
  * User
  */
@@ -72,9 +68,21 @@ function rowToAccount(row: t.GRow): t.Account {
  */
 
 export async function fetchCategories(client: t.GOAuth2Client): Promise<t.Categories> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
+  }
+
+  const sheet = findSheetByTitle(spreadsheet.sheets, 'Categories')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+
   const rows: t.GRows = await getValues(
     client,
-    `Categories!A${CATEGORIES_FRZ_ROWS + 1}:D`
+    `Categories!A${frozenRows + 1}:D`
   )
 
   const categories: t.Categories = f.map(rows, rowToCategory)
@@ -98,9 +106,21 @@ function rowToCategory(row: t.GRow): t.Category {
  */
 
 export async function fetchPayees(client: t.GOAuth2Client): Promise<t.Payees> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
+  }
+
+  const sheet = findSheetByTitle(spreadsheet.sheets, 'Payees')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+
   const rows: t.GRows = await getValues(
     client,
-    `Payees!A${PAYEES_FRZ_ROWS + 1}:D`
+    `Payees!A${frozenRows + 1}:D`
   )
 
   const payees: t.Payees = f.map(rows, rowToPayee)
