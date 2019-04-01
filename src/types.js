@@ -146,6 +146,7 @@ export type Account = {|
   initial     : number,
   createdAt   : Date,
   updatedAt   : Date,
+  row         : number,
 |}
 
 export type Accounts = Array<Account>

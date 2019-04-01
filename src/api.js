@@ -138,15 +138,81 @@ export async function getUser(ctx: t.Context) {
  */
 
 export async function getAccounts(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
   const accounts: t.Accounts = await n.fetchAccounts(client)
 
   ctx.body = accounts
+}
+
+export async function getAccount(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Account id is required')
+    return
+  }
+
+  const tx: t.Account | void = await n.fetchAccount(client, id)
+  if (!tx) {
+    ctx.throw(404, 'Account not found')
+    return
+  }
+
+  ctx.body = tx
+}
+
+export async function createAccount(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+  // TODO Add validation of account
+  // Arbitrary data can be passed as account, we must validate it
+  const newAccount: t.Account = {...ctx.request.body, id: uuid()}
+  const account: t.Account | void = await n.createAccount(client, newAccount)
+  if (!account) {
+    ctx.throw(404, 'Account not found')
+    return
+  }
+
+  ctx.body = account
+}
+
+export async function updateAccount(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+  const id: string | void = ctx.params.id
+
+  if (!id) {
+    ctx.throw(400, 'Account id is required')
+    return
+  }
+
+  // TODO Add validation of account
+  // Arbitrary data can be passed as account, we must validate it
+  const newAccount: t.Account = ctx.request.body
+  const account: t.Account | void = await n.updateAccount(client, id, newAccount)
+  if (!account) {
+    ctx.throw(404, 'Account not found')
+    return
+  }
+
+  ctx.body = account
+}
+
+export async function deleteAccount(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+  const id: string | void = ctx.params.id
+
+  if (!id) {
+    ctx.throw(400, 'Account id is required')
+    return
+  }
+
+  const account: t.Account | void = await n.deleteAccount(client, id)
+  if (!account) {
+    ctx.throw(404, 'Account not found')
+    return
+  }
+
+  ctx.body = account
 }
 
 

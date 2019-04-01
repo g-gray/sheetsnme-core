@@ -26,6 +26,125 @@ export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void>
  * Accounts
  */
 
+export async function fetchAccount(client: t.GOAuth2Client, id: string): Promise<t.Account | void> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
+  }
+
+  const sheet = findSheetByTitle(spreadsheet.sheets, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const data = await querySheet(sheet.properties.sheetId, filterAccountsQuery({id}))
+  const filtered: t.Accounts = f.map(data.rows, row => rowToAccount(queryRowToRow(row)))
+  const result: t.Account | void = f.first(filtered)
+
+  return result
+}
+
+export async function createAccount(client: t.GOAuth2Client, account: t.Account): Promise<t.Account | void> {
+  const Rows: t.GRows = await appendValues(
+    client,
+    `Accounts!A:G`,
+    [accountToRow(account)]
+  )
+  const row: t.GRow | void = Rows[0]
+
+  if (!row) {
+    throw new u.PublicError('Row not found')
+  }
+
+  const created: t.Account = rowToAccount(row)
+  return created
+}
+
+export async function updateAccount(client: t.GOAuth2Client, id: string, account: t.Account): Promise<t.Account | void> {
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
+  }
+
+  const sheet = findSheetByTitle(spreadsheet.sheets, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  // TODO Add return type
+  const data = await querySheet(sheet.properties.sheetId, filterAccountsQuery({id}))
+  const filtered: t.Accounts = f.map(data.rows, row => rowToAccount(queryRowToRow(row)))
+  const toUpdate: t.Account | void = f.first(filtered)
+  if (!toUpdate) {
+    throw new u.PublicError('Account not found')
+  }
+
+  const rowNumber: number = toUpdate.row
+  if (!rowNumber) {
+    throw new u.PublicError('Row number not found')
+  }
+
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+
+  const rows: t.GRows = await updateValues(
+    client,
+    `Accounts!A${frozenRows + rowNumber}:K${frozenRows + rowNumber}`,
+    [accountToRow({...toUpdate, ...account})]
+  )
+
+  const row: t.GRow | void = rows[0]
+  if (!row) {
+    throw new u.PublicError('Row not found')
+  }
+
+  const updated: t.Account = rowToAccount(row)
+  return updated
+}
+
+export async function deleteAccount(client: t.GOAuth2Client, id: string): Promise<t.Account | void> {
+  // TODO Don't allow if there are transactions with this account id
+  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
+  }
+
+  const sheet = findSheetByTitle(spreadsheet.sheets, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  // TODO Add return type
+  const sheetId = sheet.properties.sheetId
+  const data = await querySheet(sheetId, filterAccountsQuery({id}))
+  const accounts: t.Accounts = f.map(data.rows, row => rowToAccount(queryRowToRow(row)))
+  const toDelete: t.Account | void = f.first(accounts)
+  if (!toDelete) {
+    throw new u.PublicError('Account not found')
+  }
+
+  const rowNumber: number = toDelete.row
+  if (!rowNumber) {
+    throw new u.PublicError('Row number not found')
+  }
+
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+
+  const requests: t.GRequests = [{
+    deleteDimension: {
+      range: {
+        sheetId,
+        dimension: 'ROWS',
+        startIndex: frozenRows + rowNumber - 1,
+        endIndex: frozenRows + rowNumber,
+      },
+    },
+  }]
+
+  await batchUpdateSpreadsheet(client, requests)
+
+  return toDelete
+}
+
 export async function fetchAccounts(client: t.GOAuth2Client): Promise<t.Accounts> {
   const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
   if (!spreadsheet) {
@@ -50,18 +169,40 @@ export async function fetchAccounts(client: t.GOAuth2Client): Promise<t.Accounts
 
 
 function rowToAccount(row: t.GRow): t.Account {
+  // TODO Think about casting to Number. Potentially footgun
   return {
     id          : row[0],
     title       : row[1],
     currencyCode: row[2],
-    rubRate     : row[3],
-    initial     : row[4],
+    rubRate     : Number(row[3]),
+    initial     : Number(row[4]),
     createdAt   : row[5],
     updatedAt   : row[6],
+    row         : Number(row[7]),
   }
 }
 
+function accountToRow(account: t.Account): t.GRow {
+  const date: Date = new Date()
+  return [
+    account.id           || '',
+    account.title        || '',
+    account.currencyCode || '',
+    account.rubRate      || 1,
+    account.initial      || 0,
+    account.createdAt    || u.formatDateTime(date),
+    u.formatDateTime(date),
+  ]
+}
 
+function filterAccountsQuery(filter: t.Filter): string {
+  const where = f.compact([
+    filter.id ? `A = '${filter.id}'` : undefined,
+  ]).join(' AND ')
+
+  const query: string = `select * ${where ? 'where ' + where : ''} order by B desc`
+  return query
+}
 
 /**
  * Categories

@@ -17,6 +17,7 @@ router
   .get('/api/user',                       api.jsonOnly, api.authRequired, api.getUser)
 
   .get('/api/accounts',                   api.jsonOnly, api.authRequired, api.getAccounts)
+  .get('/api/accounts/:id',               api.jsonOnly, api.authRequired, api.getAccount)
 
   .get('/api/categories',                 api.jsonOnly, api.authRequired, api.getCategories)
 
@@ -33,12 +34,17 @@ router
   .post('/api/transactions',              api.jsonOnly, api.authRequired, api.createTransaction)
   .post('/api/transactions/:id',          api.jsonOnly, api.authRequired, api.updateTransaction)
 
+  .post('/api/accounts',                  api.jsonOnly, api.authRequired, api.createAccount)
+  .post('/api/accounts/:id',              api.jsonOnly, api.authRequired, api.updateAccount)
+
 /**
  * DEL
  */
 
 router
   .del('/api/transactions/:id',           api.jsonOnly, api.authRequired, api.deleteTransaction)
+
+  .del('/api/accounts/:id',               api.jsonOnly, api.authRequired, api.deleteAccount)
 
 export const routes = router.routes()
 export const allowedMethods = router.allowedMethods()
