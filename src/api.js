@@ -99,7 +99,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
 
   const session: t.Session | void = await db.login(user, token)
   if (!session) {
-    ctx.throw(404, 'Session not found')
+    ctx.throw(400, 'Session not found')
     return
   }
 
