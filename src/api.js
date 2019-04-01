@@ -121,11 +121,6 @@ export async function authCode (ctx: t.Context): Promise<void>  {
  */
 
 export async function getUser(ctx: t.Context) {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const sessionId: string = ctx.sessionId
   const user: t.User | void = await db.userBySessionId(sessionId)
   if (!user) {
@@ -161,11 +156,6 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
  */
 
 export async function getCategories(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
   const categories: t.Categories = await n.fetchCategories(client)
 
@@ -179,11 +169,6 @@ export async function getCategories(ctx: t.Context): Promise<void> {
  */
 
 export async function getPayees(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
   const payees: t.Payees = await n.fetchPayees(client)
 
@@ -197,11 +182,6 @@ export async function getPayees(ctx: t.Context): Promise<void> {
  */
 
 export async function getTransactions(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
   const filter: t.Filter = ctx.query
   const txs: t.Transactions = await n.fetchTransactions(client, filter)
@@ -210,11 +190,6 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
 
   const id: string | void = ctx.params.id
@@ -233,11 +208,6 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 }
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
   // TODO Add validation of transaction
   // Arbitrary data can be passed as transaction, we must validate it
@@ -252,11 +222,6 @@ export async function createTransaction(ctx: t.Context): Promise<void> {
 }
 
 export async function updateTransaction(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
   const id: string | void = ctx.params.id
 
@@ -278,11 +243,6 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
 }
 
 export async function deleteTransaction(ctx: t.Context): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
   const client: t.GOAuth2Client = ctx.client
   const id: string | void = ctx.params.id
 
@@ -299,3 +259,18 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
 
   ctx.body = tx
 }
+
+
+
+/**
+ *
+ */
+export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
+  await next()
+}
+
