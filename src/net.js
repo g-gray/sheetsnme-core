@@ -484,6 +484,169 @@ function filterTransactionsQuery(filter: t.Filter): string {
  * Utils
  */
 
+// TODO Probably replace generic by a common type for all key entities
+async function queryEntityById<T>(
+  sheet      : t.GSheet,
+  id         : string,
+  rowToEntity: (row: t.GRow) => T,
+): Promise<T | void> {
+  if (!id) {
+    throw new u.PublicError('Entity id is required')
+  }
+
+  const query: string = `select * where A = '${id}'`
+  // TODO Add return type
+  const data = await querySheet(sheet.properties.sheetId, query)
+  const entities: Array<T> = f.map(data.rows, row => rowToEntity(queryRowToRow(row)))
+  const entity: T | void = f.first(entities)
+
+  return entity
+}
+
+// TODO Probably replace generic by a common type for all key entities
+async function queryEntities<T>(
+  sheet: t.GSheet,
+  rowToEntity: (row: t.GRow) => T,
+): Promise<Array<T>> {
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+  const query: string = `select * offset ${frozenRows}`
+  // TODO Add return type
+  const data = await querySheet(sheet.properties.sheetId, query)
+  const entities: Array<T> = f.map(data.rows, row => rowToEntity(queryRowToRow(row)))
+  return entities
+}
+
+// TODO Probably replace generic by a common type for all key entities
+async function createEntity<T>(
+  client     : t.GOAuth2Client,
+  sheet      : t.GSheet,
+  entity     : T,
+  entityToRow: (entity: T) => t.GRow,
+  rowToEntity: (row: t.GRow) => T,
+): Promise<T> {
+  // TODO Probably replace generic by a common type for all key entities
+  const row: t.GRow | void = await appendRow(client, sheet, entityToRow(entity))
+  if (!row) {
+    throw new u.PublicError('Row not found')
+  }
+
+  const result: T = rowToEntity(row)
+  return result
+}
+
+// TODO Probably replace generic by a common type for all key entities
+async function deleteEntityById<T>(
+  client     : t.GOAuth2Client,
+  sheet      : t.GSheet,
+  id         : string,
+  rowToEntity: (row: t.GRow) => T,
+): Promise<T> {
+  if (!id) {
+    throw new u.PublicError('Entity id is required')
+  }
+
+  const toDelete: T | void = await queryEntityById<T>(sheet, id, rowToEntity)
+  if (!toDelete) {
+    throw new u.PublicError('Entity not found')
+  }
+
+  const rowNumber: number = toDelete.row
+  if (!rowNumber) {
+    throw new u.PublicError('Row number not found')
+  }
+
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+  await deleteRow(client, sheet, frozenRows + rowNumber)
+
+  return toDelete
+}
+
+// TODO Probably replace generic by a common type for all key entities
+async function updateEntityById<T>(
+  client     : t.GOAuth2Client,
+  sheet      : t.GSheet,
+  id         : string,
+  entity     : T,
+  entityToRow: (entity: T) => t.GRow,
+  rowToEntity: (row: t.GRow) => T,
+): Promise<T> {
+  if (!id) {
+    throw new u.PublicError('Entity id is required')
+  }
+
+  const toUpdate: T | void = await queryEntityById<T>(sheet, id, rowToEntity)
+  if (!toUpdate) {
+    throw new u.PublicError('Entity not found')
+  }
+
+  const rowNumber: number = toUpdate.row
+  if (!rowNumber) {
+    throw new u.PublicError('Row number not found')
+  }
+
+  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+  const row: t.GRow | void = await updateRow(
+    client,
+    sheet,
+    frozenRows + rowNumber,
+    entityToRow({...toUpdate, ...entity}),
+  )
+  if (!row) {
+    throw new u.PublicError('Row not found')
+  }
+
+  const updated: T = rowToEntity(row)
+  return updated
+}
+
+
+async function fetchSheetByTitle(client: t.GOAuth2Client, title: string): Promise<t.GSheet> {
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
+  }
+
+  const sheet = findSheetByTitle(spreadsheet.sheets, title)
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  return sheet
+}
+
+
+async function appendRow(client: t.GOAuth2Client, sheet: t.GSheet, row: t.GRow): Promise<t.GRow | void> {
+  const sheetTitle : string = sheet.properties.title
+  const range      : string = `${sheetTitle}`
+  const rows       : t.GRows = await appendValues(client, range, [row])
+  const appendedRow: t.GRow | void = rows[0]
+  return appendedRow
+}
+
+async function updateRow(client: t.GOAuth2Client, sheet: t.GSheet, rowNumber: number, row: t.GRow): Promise<t.GRow | void> {
+  const sheetTitle: string = sheet.properties.title
+  const range     : string = `${sheetTitle}!A${rowNumber}:${rowNumber}`
+  const rows      : t.GRows = await updateValues(client, range, [row])
+  const updatedRow: t.GRow | void = rows[0]
+  return updatedRow
+}
+
+async function deleteRow(client: t.GOAuth2Client, sheet: t.GSheet, rowNumber: number): Promise<void> {
+  const requests: t.GRequests = [{
+    deleteDimension: {
+      range: {
+        sheetId: sheet.properties.sheetId,
+        dimension: 'ROWS',
+        startIndex: rowNumber - 1,
+        endIndex: rowNumber,
+      },
+    },
+  }]
+
+  await batchUpdateSpreadsheet(client, requests)
+}
+
+
 export function fetchSpreadsheet(client: t.GOAuth2Client, ranges: ?string): Promise<t.GSpreadsheet | void> {
   const options = {
     spreadsheetId: SPREADSHEET_ID,
