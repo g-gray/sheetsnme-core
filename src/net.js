@@ -209,7 +209,7 @@ function filterAccountsQuery(filter: t.Filter): string {
  */
 
 export async function fetchCategories(client: t.GOAuth2Client): Promise<t.Categories> {
-  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
   if (!spreadsheet) {
     throw new u.PublicError('Spreadsheet not found')
   }
@@ -247,7 +247,7 @@ function rowToCategory(row: t.GRow): t.Category {
  */
 
 export async function fetchPayees(client: t.GOAuth2Client): Promise<t.Payees> {
-  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
   if (!spreadsheet) {
     throw new u.PublicError('Spreadsheet not found')
   }
@@ -285,7 +285,7 @@ function rowToPayee(row: t.GRow): t.Payee {
  */
 
 export async function fetchTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
-  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
   if (!spreadsheet) {
     throw new u.PublicError('Spreadsheet not found')
   }
@@ -320,7 +320,7 @@ export async function createTransaction(client: t.GOAuth2Client, transaction: t.
 }
 
 export async function updateTransaction(client: t.GOAuth2Client, id: string, transaction: t.Transaction): Promise<t.Transaction | void> {
-  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
   if (!spreadsheet) {
     throw new u.PublicError('Spreadsheet not found')
   }
@@ -361,7 +361,7 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tra
 }
 
 export async function deleteTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
-  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
   if (!spreadsheet) {
     throw new u.PublicError('Spreadsheet not found')
   }
@@ -404,7 +404,7 @@ export async function deleteTransaction(client: t.GOAuth2Client, id: string): Pr
 }
 
 export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Filter): Promise<t.Transactions> {
-  const spreadsheet: t.GSpreadsheet | void = await getSpreadsheet(client)
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
   if (!spreadsheet) {
     throw new u.PublicError('Spreadsheet not found')
   }
@@ -484,7 +484,7 @@ function filterTransactionsQuery(filter: t.Filter): string {
  * Utils
  */
 
-export function getSpreadsheet(client: t.GOAuth2Client, ranges: ?string): Promise<t.GSpreadsheet | void> {
+export function fetchSpreadsheet(client: t.GOAuth2Client, ranges: ?string): Promise<t.GSpreadsheet | void> {
   const options = {
     spreadsheetId: SPREADSHEET_ID,
     ranges,
