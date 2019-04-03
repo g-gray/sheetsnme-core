@@ -1,5 +1,4 @@
 // @flow
-import uuid from 'uuid/v4'
 import * as t from './types'
 import * as e from './env'
 import * as n from './net'
@@ -367,81 +366,73 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
 
 export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const filter: t.Filter = ctx.query
-  const txs: t.Transactions = await n.fetchTransactions(client, filter)
-
-  ctx.body = txs
+  const filter: t.TransactionsFilter = ctx.query
+  const transactions: t.Transactions = await n.fetchTransactions(client, filter)
+  ctx.body = transactions
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {
-  const client: t.GOAuth2Client = ctx.client
-
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Transaction id is required')
     return
   }
 
-  const tx: t.Transaction | void = await n.fetchTransaction(client, id)
-  if (!tx) {
+  const client: t.GOAuth2Client = ctx.client
+  const transaction: t.Transaction | void = await n.fetchTransaction(client, id)
+  if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
   }
 
-  ctx.body = tx
+  ctx.body = transaction
 }
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  // TODO Add validation of transaction
-  // Arbitrary data can be passed as transaction, we must validate it
-  const newTx: t.Transaction = {...ctx.request.body, id: uuid()}
-  const tx: t.Transaction | void = await n.createTransaction(client, newTx)
-  if (!tx) {
+  const newTransaction: t.Transaction = ctx.request.body
+  const transaction: t.Transaction | void = await n.createTransaction(client, newTransaction)
+  if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
   }
 
-  ctx.body = tx
+  ctx.body = transaction
 }
 
 export async function updateTransaction(ctx: t.Context): Promise<void> {
-  const client: t.GOAuth2Client = ctx.client
   const id: string | void = ctx.params.id
-
   if (!id) {
     ctx.throw(400, 'Transaction id is required')
     return
   }
 
-  // TODO Add validation of transaction
-  // Arbitrary data can be passed as transaction, we must validate it
-  const newTx: t.Transaction = ctx.request.body
-  const tx: t.Transaction | void = await n.updateTransaction(client, id, newTx)
-  if (!tx) {
+  const client: t.GOAuth2Client = ctx.client
+  const newTransaction: t.Transaction = ctx.request.body
+  const transaction: t.Transaction | void = await n.updateTransaction(client, id, newTransaction)
+  if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
   }
 
-  ctx.body = tx
+  ctx.body = transaction
 }
 
 export async function deleteTransaction(ctx: t.Context): Promise<void> {
-  const client: t.GOAuth2Client = ctx.client
   const id: string | void = ctx.params.id
-
   if (!id) {
     ctx.throw(400, 'Transaction id is required')
     return
   }
 
-  const tx: t.Transaction | void = await n.deleteTransaction(client, id)
-  if (!tx) {
+  const client: t.GOAuth2Client = ctx.client
+  const transaction: t.Transaction | void = await n.deleteTransaction(client, id)
+  if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
   }
 
-  ctx.body = tx
+  ctx.body = transaction
 }
 
 

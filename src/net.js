@@ -312,140 +312,69 @@ function payeeToRow(payee: t.Payee): t.GRow {
  */
 
 export async function fetchTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Transactions')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  // TODO Add return type
-  const data = await querySheet(sheet.properties.sheetId, filterTransactionsQuery({id}))
-  const filtered: t.Transactions = f.map(data.rows, row => rowToTransaction(queryRowToRow(row)))
-  const result: t.Transaction | void = f.first(filtered)
-
+  const result: t.Transaction | void = await queryEntityById<t.Transaction>(sheet, id, rowToTransaction)
   return result
 }
 
 export async function createTransaction(client: t.GOAuth2Client, transaction: t.Transaction): Promise<t.Transaction | void> {
-  const rows: t.GRows = await appendValues(
-    client,
-    `Transactions!A:K`,
-    [transactionToRow(transaction)]
-  )
-  const row: t.GRow | void = rows[0]
-
-  if (!row) {
-    throw new u.PublicError('Row not found')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Transactions')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
   }
 
-  const created: t.Transaction = rowToTransaction(row)
-  return created
+  // TODO Add validation of transaction
+  // Arbitrary data can be passed as transaction, we must validate it
+  const result: t.Transaction | void = await createEntity<t.Transaction>(
+    client,
+    sheet,
+    {...transaction, id: uuid()},
+    transactionToRow,
+    rowToTransaction,
+  )
+  return result
 }
 
 export async function updateTransaction(client: t.GOAuth2Client, id: string, transaction: t.Transaction): Promise<t.Transaction | void> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Transactions')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  // TODO Add return type
-  const data = await querySheet(sheet.properties.sheetId, filterTransactionsQuery({id}))
-  const filtered: t.Transactions = f.map(data.rows, row => rowToTransaction(queryRowToRow(row)))
-  const toUpdate: t.Transaction | void = f.first(filtered)
-  if (!toUpdate) {
-    throw new u.PublicError('Transaction not found')
-  }
-
-  const rowNumber: number = toUpdate.row
-  if (!rowNumber) {
-    throw new u.PublicError('Row number not found')
-  }
-
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
-
-  const rows: t.GRows = await updateValues(
+  const result: t.Transaction = await updateEntityById<t.Transaction>(
     client,
-    `Transactions!A${frozenRows + rowNumber}:K${frozenRows + rowNumber}`,
-    [transactionToRow({...toUpdate, ...transaction})]
+    sheet,
+    id,
+    transaction,
+    transactionToRow,
+    rowToTransaction,
   )
-
-  const row: t.GRow | void = rows[0]
-  if (!row) {
-    throw new u.PublicError('Row not found')
-  }
-
-  const updated: t.Transaction = rowToTransaction(row)
-  return updated
+  return result
 }
 
 export async function deleteTransaction(client: t.GOAuth2Client, id: string): Promise<t.Transaction | void> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Transactions')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  // TODO Add return type
-  const sheetId = sheet.properties.sheetId
-  const data = await querySheet(sheetId, filterTransactionsQuery({id}))
-  const filtered: t.Transactions = f.map(data.rows, row => rowToTransaction(queryRowToRow(row)))
-  const toDelete: t.Transaction | void = f.first(filtered)
-  if (!toDelete) {
-    throw new u.PublicError('Transaction not found')
-  }
-
-  const rowNumber: number = toDelete.row
-  if (!rowNumber) {
-    throw new u.PublicError('Row number not found')
-  }
-
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
-
-  const requests: t.GRequests = [{
-    deleteDimension: {
-      range: {
-        sheetId,
-        dimension: 'ROWS',
-        startIndex: frozenRows + rowNumber - 1,
-        endIndex: frozenRows + rowNumber,
-      },
-    },
-  }]
-
-  await batchUpdateSpreadsheet(client, requests)
-
-  return toDelete
+  const result: t.Transaction = await deleteEntityById<t.Transaction>(client, sheet, id, rowToTransaction)
+  return result
 }
 
-export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Filter): Promise<t.Transactions> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, 'Transactions')
+export async function fetchTransactions(client: t.GOAuth2Client, filter: t.TransactionsFilter): Promise<t.Transactions> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Transactions')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  // TODO Add return type
-  const data = await querySheet(sheet.properties.sheetId, filterTransactionsQuery(filter))
-  const filtered: t.Transactions = f.map(data.rows, row => rowToTransaction(queryRowToRow(row)))
-
-  return filtered
+  const query: string = filterTransactionsQuery(filter)
+  const result: t.Transactions = await queryEntities<t.Transaction>(sheet, rowToTransaction, query)
+  return result
 }
 
 
@@ -488,7 +417,7 @@ function transactionToRow(tx: t.Transaction): t.GRow {
   ]
 }
 
-function filterTransactionsQuery(filter: t.Filter): string {
+function filterTransactionsQuery(filter: t.TransactionsFilter): string {
   const where = f.compact([
     filter.id         ? `A = '${filter.id}'`                                       : undefined,
     filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                           : undefined,
@@ -501,7 +430,11 @@ function filterTransactionsQuery(filter: t.Filter): string {
     filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
   ]).join(' AND ')
 
-  const query: string = `select * ${where ? 'where ' + where : ''} order by B desc, J desc`
+  const query: string = [
+    `select *`,
+    where ? `where ${where}` : '',
+    `order by B desc, J desc`,
+  ].join(' ')
   return query
 }
 

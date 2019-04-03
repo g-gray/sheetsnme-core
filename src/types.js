@@ -206,7 +206,7 @@ export type Transactions = Array<Transaction>
 
 
 
-export type Filter = {|
+export type TransactionsFilter = {|
   id?        : string,
   dateFrom?  : string,
   dateTo?    : string,
