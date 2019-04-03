@@ -127,36 +127,90 @@ function accountToRow(account: t.Account): t.GRow {
  * Categories
  */
 
-export async function fetchCategories(client: t.GOAuth2Client): Promise<t.Categories> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, 'Categories')
+export async function fetchCategory(client: t.GOAuth2Client, id: string): Promise<t.Category | void> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Categories')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+  const result: t.Category | void = await queryEntityById<t.Category>(sheet, id, rowToCategory)
+  return result
+}
 
-  const rows: t.GRows = await getValues(
+export async function createCategory(client: t.GOAuth2Client, category: t.Category): Promise<t.Category | void> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Categories')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  // TODO Add validation of category
+  // Arbitrary data can be passed as category, we must validate it
+  const result: t.Category | void = await createEntity<t.Category>(
     client,
-    `Categories!A${frozenRows + 1}:D`
+    sheet,
+    {...category, id: uuid()},
+    categoryToRow,
+    rowToCategory,
   )
+  return result
+}
 
-  const categories: t.Categories = f.map(rows, rowToCategory)
-  return categories
+export async function updateCategory(client: t.GOAuth2Client, id: string, category: t.Category): Promise<t.Category | void> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Categories')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const result: t.Category = await updateEntityById<t.Category>(
+    client,
+    sheet,
+    id,
+    category,
+    categoryToRow,
+    rowToCategory,
+  )
+  return result
+}
+
+export async function deleteCategory(client: t.GOAuth2Client, id: string): Promise<t.Category | void> {
+  // TODO Don't allow if there are transactions with this category id
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Categories')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const result: t.Category = await deleteEntityById<t.Category>(client, sheet, id, rowToCategory)
+  return result
+}
+
+export async function fetchCategories(client: t.GOAuth2Client): Promise<t.Categories> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Categories')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const result: t.Categories = await queryEntities<t.Category>(sheet, rowToCategory)
+  return result
 }
 
 
 function rowToCategory(row: t.GRow): t.Category {
   return {
-    id          : row[0],
-    title       : row[1],
-    createdAt   : row[2],
-    updatedAt   : row[3],
+    id       : row[0],
+    title    : row[1],
+    createdAt: row[2],
+    updatedAt: row[3],
   }
+}
+
+function categoryToRow(category: t.Category): t.GRow {
+  const date: Date = new Date()
+  return [
+    category.id           || '',
+    category.title        || '',
+    category.createdAt    || u.formatDateTime(date),
+    u.formatDateTime(date),
+  ]
 }
 
 

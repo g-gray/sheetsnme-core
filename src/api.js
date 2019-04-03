@@ -216,8 +216,71 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
 export async function getCategories(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const categories: t.Categories = await n.fetchCategories(client)
-
   ctx.body = categories
+}
+
+export async function getCategory(ctx: t.Context): Promise<void> {
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Category id is required')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const category: t.Category | void = await n.fetchCategory(client, id)
+  if (!category) {
+    ctx.throw(404, 'Category not found')
+    return
+  }
+
+  ctx.body = category
+}
+
+export async function createCategory(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+  const newCategory: t.Category = ctx.request.body
+  const category: t.Category | void = await n.createCategory(client, newCategory)
+  if (!category) {
+    ctx.throw(404, 'Category not found')
+    return
+  }
+
+  ctx.body = category
+}
+
+export async function updateCategory(ctx: t.Context): Promise<void> {
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Category id is required')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const newCategory: t.Category = ctx.request.body
+  const category: t.Category | void = await n.updateCategory(client, id, newCategory)
+  if (!category) {
+    ctx.throw(404, 'Category not found')
+    return
+  }
+
+  ctx.body = category
+}
+
+export async function deleteCategory(ctx: t.Context): Promise<void> {
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Category id is required')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const category: t.Category | void = await n.deleteCategory(client, id)
+  if (!category) {
+    ctx.throw(404, 'Category not found')
+    return
+  }
+
+  ctx.body = category
 }
 
 
