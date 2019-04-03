@@ -197,6 +197,13 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
+
+  const transactions: t.Transactions = await n.fetchTransactions(client, {accountId: id})
+  if (transactions.length) {
+    ctx.throw(400, 'Can not delete. There are related transactions')
+    return
+  }
+
   const account: t.Account | void = await n.deleteAccount(client, id)
   if (!account) {
     ctx.throw(404, 'Account not found')
@@ -273,6 +280,13 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
+
+  const transactions: t.Transactions = await n.fetchTransactions(client, {categoryId: id})
+  if (transactions.length) {
+    ctx.throw(400, 'Can not delete. There are related transactions')
+    return
+  }
+
   const category: t.Category | void = await n.deleteCategory(client, id)
   if (!category) {
     ctx.throw(404, 'Category not found')
@@ -349,6 +363,13 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
+
+  const transactions: t.Transactions = await n.fetchTransactions(client, {payeeId: id})
+  if (transactions.length) {
+    ctx.throw(400, 'Can not delete. There are related transactions')
+    return
+  }
+
   const payee: t.Payee | void = await n.deletePayee(client, id)
   if (!payee) {
     ctx.throw(404, 'Payee not found')
