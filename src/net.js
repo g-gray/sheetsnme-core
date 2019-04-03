@@ -27,13 +27,21 @@ export function fetchGUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void>
  */
 
 export async function fetchAccount(client: t.GOAuth2Client, id: string): Promise<t.Account | void> {
-  const sheet: t.GSheet = await fetchSheetByTitle(client, 'Accounts')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
   const result: t.Account | void = await queryEntityById<t.Account>(sheet, id, rowToAccount)
   return result
 }
 
 export async function createAccount(client: t.GOAuth2Client, account: t.Account): Promise<t.Account | void> {
-  const sheet: t.GSheet = await fetchSheetByTitle(client, 'Accounts')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
   const result: t.Account | void = await createEntity<t.Account>(
     client,
     sheet,
@@ -45,7 +53,11 @@ export async function createAccount(client: t.GOAuth2Client, account: t.Account)
 }
 
 export async function updateAccount(client: t.GOAuth2Client, id: string, account: t.Account): Promise<t.Account | void> {
-  const sheet: t.GSheet = await fetchSheetByTitle(client, 'Accounts')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
   const result: t.Account = await updateEntityById<t.Account>(
     client,
     sheet,
@@ -59,13 +71,21 @@ export async function updateAccount(client: t.GOAuth2Client, id: string, account
 
 export async function deleteAccount(client: t.GOAuth2Client, id: string): Promise<t.Account | void> {
   // TODO Don't allow if there are transactions with this account id
-  const sheet: t.GSheet = await fetchSheetByTitle(client, 'Accounts')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
   const result: t.Account = await deleteEntityById<t.Account>(client, sheet, id, rowToAccount)
   return result
 }
 
 export async function fetchAccounts(client: t.GOAuth2Client): Promise<t.Accounts> {
-  const sheet: t.GSheet = await fetchSheetByTitle(client, 'Accounts')
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Accounts')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
   const result: t.Accounts = await queryEntities<t.Account>(sheet, rowToAccount)
   return result
 }
@@ -496,17 +516,13 @@ async function updateEntityById<T>(
 }
 
 
-async function fetchSheetByTitle(client: t.GOAuth2Client, title: string): Promise<t.GSheet> {
+async function fetchSheetByTitle(client: t.GOAuth2Client, title: string): Promise<t.GSheet | void> {
   const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
   if (!spreadsheet) {
     throw new u.PublicError('Spreadsheet not found')
   }
 
   const sheet = findSheetByTitle(spreadsheet.sheets, title)
-  if (!sheet) {
-    throw new u.PublicError('Sheet not found')
-  }
-
   return sheet
 }
 
