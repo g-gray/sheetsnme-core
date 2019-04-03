@@ -522,9 +522,7 @@ async function queryEntityById<T>(
   }
 
   const query: string = `select * where A = '${id}'`
-  // TODO Add return type
-  const data = await querySheet(sheet.properties.sheetId, query)
-  const entities: Array<T> = f.map(data.rows, row => rowToEntity(queryRowToRow(row)))
+  const entities: Array<T> = await queryEntities<T>(sheet, rowToEntity, query)
   const entity: T | void = f.first(entities)
 
   return entity
@@ -532,14 +530,17 @@ async function queryEntityById<T>(
 
 // TODO Probably replace generic by a common type for all key entities
 async function queryEntities<T>(
-  sheet: t.GSheet,
+  sheet      : t.GSheet,
   rowToEntity: (row: t.GRow) => T,
+  query?: string,
 ): Promise<Array<T>> {
   const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
-  const query: string = `select * offset ${frozenRows}`
-  // TODO Add return type
-  const data = await querySheet(sheet.properties.sheetId, query)
-  const entities: Array<T> = f.map(data.rows, row => rowToEntity(queryRowToRow(row)))
+  const table: t.GQueryTable = await querySheet(
+    sheet.properties.sheetId,
+    query || `select * offset ${frozenRows}`
+  )
+  const entities: Array<T> = f.map(table.rows, row => rowToEntity(queryRowToRow(row)))
+    .filter(entity => entity.id !== 'id') // TODO Replace by better solution
   return entities
 }
 
@@ -551,7 +552,6 @@ async function createEntity<T>(
   entityToRow: (entity: T) => t.GRow,
   rowToEntity: (row: t.GRow) => T,
 ): Promise<T> {
-  // TODO Probably replace generic by a common type for all key entities
   const row: t.GRow | void = await appendRow(client, sheet, entityToRow(entity))
   if (!row) {
     throw new u.PublicError('Row not found')
@@ -766,21 +766,23 @@ function findSheetByTitle(sheets: Array<t.GSheet>, title: string): t.GSheet | vo
   return f.find(sheets, sheet => sheet.properties.title === title)
 }
 
-// TODO Add return type
-async function querySheet(sheetId: number, query: string | void) {
+async function querySheet(sheetId: number, query: string | void): Promise<t.GQueryTable> {
   const encodedQuery: string = encodeURIComponent(query || '')
+  // TODO Use util to join query params instead of inline them
   const url: string = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tq=${encodedQuery}&gid=${sheetId}`
 
   return await u.fetch({url}).then(({body}) => {
     const matches = body && body.match(/google\.visualization\.Query\.setResponse\((.*)\);$/)
-    const match = matches && matches[1]
+    const match: string | null = matches && matches[1]
+    if (!match) {
+      return undefined
+    }
 
-    if (!match) return undefined
+    const data: t.GQueryRes = JSON.parse(match)
+    if (!data) {
+      return undefined
+    }
 
-    const json = JSON.parse(match)
-
-    if (!json) return undefined
-
-    return json.table
+    return data.table
   })
 }

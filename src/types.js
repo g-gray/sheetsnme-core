@@ -293,6 +293,29 @@ export type GSpreadsheet = {|
 |}
 
 
+
+export type GQueryResCol = {|
+  id     : string,
+  label  : string,
+  type   : string,
+  pattern: string,
+|}
+
+export type GQueryResRow = {|
+  c: Array<{ v: string, f: string }>
+|}
+
+export type GQueryTable = {|
+  cols: Array<GQueryResCol>,
+  rows: Array<GQueryResRow>,
+  parsedNumHeaders: number,
+|}
+
+export type GQueryRes = {|
+  table: GQueryTable,
+|}
+
+
 export type XHttpParams = {|
   url     : string,
   method? : string,
