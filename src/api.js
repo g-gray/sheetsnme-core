@@ -292,8 +292,71 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
 export async function getPayees(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const payees: t.Payees = await n.fetchPayees(client)
-
   ctx.body = payees
+}
+
+export async function getPayee(ctx: t.Context): Promise<void> {
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Payee id is required')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const payee: t.Payee | void = await n.fetchPayee(client, id)
+  if (!payee) {
+    ctx.throw(404, 'Payee not found')
+    return
+  }
+
+  ctx.body = payee
+}
+
+export async function createPayee(ctx: t.Context): Promise<void> {
+  const client: t.GOAuth2Client = ctx.client
+  const newPayee: t.Payee = ctx.request.body
+  const payee: t.Payee | void = await n.createPayee(client, newPayee)
+  if (!payee) {
+    ctx.throw(404, 'Payee not found')
+    return
+  }
+
+  ctx.body = payee
+}
+
+export async function updatePayee(ctx: t.Context): Promise<void> {
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Payee id is required')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const newPayee: t.Payee = ctx.request.body
+  const payee: t.Payee | void = await n.updatePayee(client, id, newPayee)
+  if (!payee) {
+    ctx.throw(404, 'Payee not found')
+    return
+  }
+
+  ctx.body = payee
+}
+
+export async function deletePayee(ctx: t.Context): Promise<void> {
+  const id: string | void = ctx.params.id
+  if (!id) {
+    ctx.throw(400, 'Payee id is required')
+    return
+  }
+
+  const client: t.GOAuth2Client = ctx.client
+  const payee: t.Payee | void = await n.deletePayee(client, id)
+  if (!payee) {
+    ctx.throw(404, 'Payee not found')
+    return
+  }
+
+  ctx.body = payee
 }
 
 

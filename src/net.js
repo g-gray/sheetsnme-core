@@ -219,36 +219,90 @@ function categoryToRow(category: t.Category): t.GRow {
  * Payees
  */
 
-export async function fetchPayees(client: t.GOAuth2Client): Promise<t.Payees> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, 'Payees')
+export async function fetchPayee(client: t.GOAuth2Client, id: string): Promise<t.Payee | void> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Payees')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
+  const result: t.Payee | void = await queryEntityById<t.Payee>(sheet, id, rowToPayee)
+  return result
+}
 
-  const rows: t.GRows = await getValues(
+export async function createPayee(client: t.GOAuth2Client, payee: t.Payee): Promise<t.Payee | void> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Payees')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  // TODO Add validation of payee
+  // Arbitrary data can be passed as payee, we must validate it
+  const result: t.Payee | void = await createEntity<t.Payee>(
     client,
-    `Payees!A${frozenRows + 1}:D`
+    sheet,
+    {...payee, id: uuid()},
+    payeeToRow,
+    rowToPayee,
   )
+  return result
+}
 
-  const payees: t.Payees = f.map(rows, rowToPayee)
-  return payees
+export async function updatePayee(client: t.GOAuth2Client, id: string, payee: t.Payee): Promise<t.Payee | void> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Payees')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const result: t.Payee = await updateEntityById<t.Payee>(
+    client,
+    sheet,
+    id,
+    payee,
+    payeeToRow,
+    rowToPayee,
+  )
+  return result
+}
+
+export async function deletePayee(client: t.GOAuth2Client, id: string): Promise<t.Payee | void> {
+  // TODO Don't allow if there are transactions with this payee id
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Payees')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const result: t.Payee = await deleteEntityById<t.Payee>(client, sheet, id, rowToPayee)
+  return result
+}
+
+export async function fetchPayees(client: t.GOAuth2Client): Promise<t.Payees> {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Payees')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const result: t.Payees = await queryEntities<t.Payee>(sheet, rowToPayee)
+  return result
 }
 
 
 function rowToPayee(row: t.GRow): t.Payee {
   return {
-    id          : row[0],
-    title       : row[1],
-    createdAt   : row[2],
-    updatedAt   : row[3],
+    id       : row[0],
+    title    : row[1],
+    createdAt: row[2],
+    updatedAt: row[3],
   }
+}
+
+function payeeToRow(payee: t.Payee): t.GRow {
+  const date: Date = new Date()
+  return [
+    payee.id        || '',
+    payee.title     || '',
+    payee.createdAt || u.formatDateTime(date),
+    u.formatDateTime(date),
+  ]
 }
 
 

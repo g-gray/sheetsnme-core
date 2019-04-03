@@ -23,6 +23,7 @@ router
   .get('/api/categories/:id',             api.jsonOnly, api.authRequired, api.getCategory)
 
   .get('/api/payees',                     api.jsonOnly, api.authRequired, api.getPayees)
+  .get('/api/payees/:id',                 api.jsonOnly, api.authRequired, api.getPayee)
 
   .get('/api/transactions',               api.jsonOnly, api.authRequired, api.getTransactions)
   .get('/api/transactions/:id',           api.jsonOnly, api.authRequired, api.getTransaction)
@@ -41,16 +42,21 @@ router
   .post('/api/categories',                api.jsonOnly, api.authRequired, api.createCategory)
   .post('/api/categories/:id',            api.jsonOnly, api.authRequired, api.updateCategory)
 
+  .post('/api/payees',                    api.jsonOnly, api.authRequired, api.createPayee)
+  .post('/api/payees/:id',                api.jsonOnly, api.authRequired, api.updatePayee)
+
 /**
  * DEL
  */
 
 router
-  .del('/api/transactions/:id',           api.jsonOnly, api.authRequired, api.deleteTransaction)
-
   .del('/api/accounts/:id',               api.jsonOnly, api.authRequired, api.deleteAccount)
 
   .del('/api/categories/:id',             api.jsonOnly, api.authRequired, api.deleteCategory)
+
+  .del('/api/payees/:id',                 api.jsonOnly, api.authRequired, api.deletePayee)
+
+  .del('/api/transactions/:id',           api.jsonOnly, api.authRequired, api.deleteTransaction)
 
 export const routes = router.routes()
 export const allowedMethods = router.allowedMethods()
