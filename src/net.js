@@ -1,6 +1,7 @@
 // @flow
 import {google} from 'googleapis'
 import * as f from 'fpx'
+import uuid from 'uuid/v4'
 import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
@@ -41,11 +42,12 @@ export async function createAccount(client: t.GOAuth2Client, account: t.Account)
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
-
+  // TODO Add validation of account
+  // Arbitrary data can be passed as account, we must validate it
   const result: t.Account | void = await createEntity<t.Account>(
     client,
     sheet,
-    account,
+    {...account, id: uuid()},
     accountToRow,
     rowToAccount,
   )
@@ -57,7 +59,8 @@ export async function updateAccount(client: t.GOAuth2Client, id: string, account
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
-
+  // TODO Add validation of account
+  // Arbitrary data can be passed as account, we must validate it
   const result: t.Account = await updateEntityById<t.Account>(
     client,
     sheet,
