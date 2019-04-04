@@ -100,11 +100,10 @@ function rowToAccount(row: t.GRow): t.Account {
     id          : row[0],
     title       : row[1],
     currencyCode: row[2],
-    rubRate     : Number(row[3]),
-    initial     : Number(row[4]),
-    createdAt   : row[5],
-    updatedAt   : row[6],
-    row         : Number(row[7]),
+    initial     : Number(row[3]),
+    createdAt   : row[4],
+    updatedAt   : row[5],
+    row         : Number(row[6]),
   }
 }
 
@@ -114,7 +113,6 @@ function accountToRow(account: t.Account): t.GRow {
     account.id           || '',
     account.title        || '',
     account.currencyCode || '',
-    account.rubRate      || 1,
     account.initial      || 0,
     account.createdAt    || u.formatDateTime(date),
     u.formatDateTime(date),

@@ -142,7 +142,6 @@ export type Account = {|
   id          : string,
   title       : string,
   currencyCode: string,
-  rubRate     : number,
   initial     : number,
   createdAt   : Date,
   updatedAt   : Date,
