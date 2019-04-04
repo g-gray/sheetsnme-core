@@ -153,7 +153,7 @@ export type Accounts = Array<Account>
 
 
 /**
- * Accounts
+ * Categories
  */
 
 export type Category = {|
@@ -204,7 +204,6 @@ export type Transaction = {|
 export type Transactions = Array<Transaction>
 
 
-
 export type TransactionsFilter = {|
   id?        : string,
   dateFrom?  : string,
@@ -218,6 +217,9 @@ export type TransactionsFilter = {|
 |}
 
 
+/**
+ * Google
+ */
 
 export type GRow = Array<any>
 
@@ -314,6 +316,9 @@ export type GQueryRes = {|
   table: GQueryTable,
 |}
 
+/**
+ * XHttp
+ */
 
 export type XHttpParams = {|
   url     : string,
@@ -332,3 +337,13 @@ export type XHttpResponse = {|
   body      : (Object | string),
   params    : XHttpParams,
 |}
+
+/**
+ * Errors
+ */
+
+export type ResError = {|
+  text: string,
+|}
+
+export type ResErrors = Array<ResError>

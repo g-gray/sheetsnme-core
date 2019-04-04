@@ -32,7 +32,13 @@ export async function handlePublicError(ctx: t.Context, next: () => Promise<void
   }
   catch (error) {
     if (error instanceof u.PublicError) {
-      ctx.throw(400, error.message)
+      ctx.status = 400
+      ctx.body = error.message
+      if (error.body) {
+        ctx.body = error.body
+      }
+
+      ctx.app.emit('error', error, ctx)
       return
     }
     throw error

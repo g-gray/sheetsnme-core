@@ -42,8 +42,12 @@ export async function createAccount(client: t.GOAuth2Client, account: t.Account)
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
-  // TODO Add validation of account
-  // Arbitrary data can be passed as account, we must validate it
+
+  const errors: t.ResErrors = validateAccountFields(account)
+  if (errors.length) {
+    throw new u.PublicError('Validation error', {errors})
+  }
+
   const result: t.Account | void = await createEntity<t.Account>(
     client,
     sheet,
@@ -119,6 +123,23 @@ function accountToRow(account: t.Account): t.GRow {
   ]
 }
 
+function validateAccountFields(fields: any): t.ResErrors {
+  const errors = []
+
+  if (f.isNil(fields.title) || !f.isString(fields.title) || !f.size(fields.title)) {
+    errors.push({text: 'Title must be non empty string'})
+  }
+
+  if (fields.currencyCode === 'RUB') {
+    errors.push({text: 'Currency Code must be one of these: \'RUB\''})
+  }
+
+  if (f.isNil(fields.initial) || !f.isNumber(fields.initial) || fields.initial < 0) {
+    errors.push({text: 'Initial amount must be a positive number'})
+  }
+
+  return errors
+}
 
 
 /**
