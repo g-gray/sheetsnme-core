@@ -419,6 +419,7 @@ function transactionToRow(tx: t.Transaction): t.GRow {
 
 function filterTransactionsQuery(filter: t.TransactionsFilter): string {
   const where = f.compact([
+    `A != 'id'`,
     filter.id         ? `A = '${filter.id}'`                                       : undefined,
     filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                           : undefined,
     filter.dateTo     ? `B <= date '${filter.dateTo}'`                             : undefined,
@@ -432,7 +433,7 @@ function filterTransactionsQuery(filter: t.TransactionsFilter): string {
 
   const query: string = [
     `select *`,
-    where ? `where ${where}` : '',
+    `where ${where}`,
     `order by B desc, J desc`,
   ].join(' ')
   return query
@@ -467,13 +468,11 @@ async function queryEntities<T>(
   rowToEntity: (row: t.GRow) => T,
   query?: string,
 ): Promise<Array<T>> {
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
   const table: t.GQueryTable = await querySheet(
     sheet.properties.sheetId,
-    query || `select * offset ${frozenRows}`
+    query || `select * where A != 'id'`
   )
   const entities: Array<T> = f.map(table.rows, row => rowToEntity(queryRowToRow(row)))
-    .filter(entity => entity.id !== 'id') // TODO Replace by better solution
   return entities
 }
 
@@ -695,10 +694,6 @@ export function updateValues(client: t.GOAuth2Client, range: string, values: t.G
 }
 
 
-function findSheetByTitle(sheets: Array<t.GSheet>, title: string): t.GSheet | void {
-  return f.find(sheets, sheet => sheet.properties.title === title)
-}
-
 async function querySheet(sheetId: number, query: string | void): Promise<t.GQueryTable> {
   const encodedQuery: string = encodeURIComponent(query || '')
   // TODO Use util to join query params instead of inline them
@@ -718,4 +713,9 @@ async function querySheet(sheetId: number, query: string | void): Promise<t.GQue
 
     return data.table
   })
+}
+
+
+function findSheetByTitle(sheets: Array<t.GSheet>, title: string): t.GSheet | void {
+  return f.find(sheets, sheet => sheet.properties.title === title)
 }
