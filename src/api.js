@@ -161,8 +161,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
 
 export async function createAccount(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const newAccount: t.Account = ctx.request.body
-  const account: t.Account | void = await n.createAccount(client, newAccount)
+  const account: t.Account | void = await n.createAccount(client, ctx.request.body)
   if (!account) {
     ctx.throw(404, 'Account not found')
     return
@@ -179,8 +178,7 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const newAccount: t.Account = ctx.request.body
-  const account: t.Account | void = await n.updateAccount(client, id, newAccount)
+  const account: t.Account | void = await n.updateAccount(client, id, ctx.request.body)
   if (!account) {
     ctx.throw(404, 'Account not found')
     return
@@ -244,8 +242,7 @@ export async function getCategory(ctx: t.Context): Promise<void> {
 
 export async function createCategory(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const newCategory: t.Category = ctx.request.body
-  const category: t.Category | void = await n.createCategory(client, newCategory)
+  const category: t.Category | void = await n.createCategory(client, ctx.request.body)
   if (!category) {
     ctx.throw(404, 'Category not found')
     return
@@ -262,8 +259,7 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const newCategory: t.Category = ctx.request.body
-  const category: t.Category | void = await n.updateCategory(client, id, newCategory)
+  const category: t.Category | void = await n.updateCategory(client, id, ctx.request.body)
   if (!category) {
     ctx.throw(404, 'Category not found')
     return
@@ -327,8 +323,7 @@ export async function getPayee(ctx: t.Context): Promise<void> {
 
 export async function createPayee(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const newPayee: t.Payee = ctx.request.body
-  const payee: t.Payee | void = await n.createPayee(client, newPayee)
+  const payee: t.Payee | void = await n.createPayee(client, ctx.request.body)
   if (!payee) {
     ctx.throw(404, 'Payee not found')
     return
@@ -345,8 +340,7 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const newPayee: t.Payee = ctx.request.body
-  const payee: t.Payee | void = await n.updatePayee(client, id, newPayee)
+  const payee: t.Payee | void = await n.updatePayee(client, id, ctx.request.body)
   if (!payee) {
     ctx.throw(404, 'Payee not found')
     return
@@ -411,8 +405,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const newTransaction: t.Transaction = ctx.request.body
-  const transaction: t.Transaction | void = await n.createTransaction(client, newTransaction)
+  const transaction: t.Transaction | void = await n.createTransaction(client, ctx.request.body)
   if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
@@ -429,8 +422,7 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const newTransaction: t.Transaction = ctx.request.body
-  const transaction: t.Transaction | void = await n.updateTransaction(client, id, newTransaction)
+  const transaction: t.Transaction | void = await n.updateTransaction(client, id, ctx.request.body)
   if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return

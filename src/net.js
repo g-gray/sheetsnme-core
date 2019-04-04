@@ -37,39 +37,36 @@ export async function fetchAccount(client: t.GOAuth2Client, id: string): Promise
   return result
 }
 
-export async function createAccount(client: t.GOAuth2Client, account: t.Account): Promise<t.Account | void> {
+export async function createAccount(client: t.GOAuth2Client, fields: any): Promise<t.Account | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Accounts')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  const errors: t.ResErrors = validateAccountFields(account)
-  if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
-  }
-
+  const account: t.Account = fields
   const result: t.Account | void = await createEntity<t.Account>(
     client,
     sheet,
     {...account, id: uuid()},
+    validateAccountFields,
     accountToRow,
     rowToAccount,
   )
   return result
 }
 
-export async function updateAccount(client: t.GOAuth2Client, id: string, account: t.Account): Promise<t.Account | void> {
+export async function updateAccount(client: t.GOAuth2Client, id: string, fields: any): Promise<t.Account | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Accounts')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
-  // TODO Add validation of account
-  // Arbitrary data can be passed as account, we must validate it
+
   const result: t.Account = await updateEntityById<t.Account>(
     client,
     sheet,
     id,
-    account,
+    validateAccountFields,
+    fields,
     accountToRow,
     rowToAccount,
   )
@@ -156,25 +153,24 @@ export async function fetchCategory(client: t.GOAuth2Client, id: string): Promis
   return result
 }
 
-export async function createCategory(client: t.GOAuth2Client, category: t.Category): Promise<t.Category | void> {
+export async function createCategory(client: t.GOAuth2Client, fields: any): Promise<t.Category | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Categories')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  // TODO Add validation of category
-  // Arbitrary data can be passed as category, we must validate it
   const result: t.Category | void = await createEntity<t.Category>(
     client,
     sheet,
-    {...category, id: uuid()},
+    {...fields, id: uuid()},
+    validateCategoryFields,
     categoryToRow,
     rowToCategory,
   )
   return result
 }
 
-export async function updateCategory(client: t.GOAuth2Client, id: string, category: t.Category): Promise<t.Category | void> {
+export async function updateCategory(client: t.GOAuth2Client, id: string, fields: any): Promise<t.Category | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Categories')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
@@ -184,7 +180,8 @@ export async function updateCategory(client: t.GOAuth2Client, id: string, catego
     client,
     sheet,
     id,
-    category,
+    fields,
+    validateCategoryFields,
     categoryToRow,
     rowToCategory,
   )
@@ -232,6 +229,20 @@ function categoryToRow(category: t.Category): t.GRow {
   ]
 }
 
+function validateCategoryFields(fields: any): t.ResErrors {
+  const errors = []
+
+  if (f.isNil(fields.title) || !f.isString(fields.title) || !f.size(fields.title)) {
+    errors.push({text: 'Title must be non empty string'})
+  }
+
+  if (f.isNil(fields.initial) || !f.isNumber(fields.initial) || fields.initial < 0) {
+    errors.push({text: 'Initial amount must be a positive number'})
+  }
+
+  return errors
+}
+
 
 
 /**
@@ -248,25 +259,24 @@ export async function fetchPayee(client: t.GOAuth2Client, id: string): Promise<t
   return result
 }
 
-export async function createPayee(client: t.GOAuth2Client, payee: t.Payee): Promise<t.Payee | void> {
+export async function createPayee(client: t.GOAuth2Client, fields: any): Promise<t.Payee | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Payees')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  // TODO Add validation of payee
-  // Arbitrary data can be passed as payee, we must validate it
   const result: t.Payee | void = await createEntity<t.Payee>(
     client,
     sheet,
-    {...payee, id: uuid()},
+    {...fields, id: uuid()},
+    validatePayeeFields,
     payeeToRow,
     rowToPayee,
   )
   return result
 }
 
-export async function updatePayee(client: t.GOAuth2Client, id: string, payee: t.Payee): Promise<t.Payee | void> {
+export async function updatePayee(client: t.GOAuth2Client, id: string, fields: any): Promise<t.Payee | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Payees')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
@@ -276,7 +286,8 @@ export async function updatePayee(client: t.GOAuth2Client, id: string, payee: t.
     client,
     sheet,
     id,
-    payee,
+    fields,
+    validatePayeeFields,
     payeeToRow,
     rowToPayee,
   )
@@ -324,6 +335,20 @@ function payeeToRow(payee: t.Payee): t.GRow {
   ]
 }
 
+function validatePayeeFields(fields: any): t.ResErrors {
+  const errors = []
+
+  if (f.isNil(fields.title) || !f.isString(fields.title) || !f.size(fields.title)) {
+    errors.push({text: 'Title must be non empty string'})
+  }
+
+  if (f.isNil(fields.initial) || !f.isNumber(fields.initial) || fields.initial < 0) {
+    errors.push({text: 'Initial amount must be a positive number'})
+  }
+
+  return errors
+}
+
 
 
 /**
@@ -340,25 +365,24 @@ export async function fetchTransaction(client: t.GOAuth2Client, id: string): Pro
   return result
 }
 
-export async function createTransaction(client: t.GOAuth2Client, transaction: t.Transaction): Promise<t.Transaction | void> {
+export async function createTransaction(client: t.GOAuth2Client, fields: any): Promise<t.Transaction | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Transactions')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
   }
 
-  // TODO Add validation of transaction
-  // Arbitrary data can be passed as transaction, we must validate it
   const result: t.Transaction | void = await createEntity<t.Transaction>(
     client,
     sheet,
-    {...transaction, id: uuid()},
+    {...fields, id: uuid()},
+    validateTransactionFields,
     transactionToRow,
     rowToTransaction,
   )
   return result
 }
 
-export async function updateTransaction(client: t.GOAuth2Client, id: string, transaction: t.Transaction): Promise<t.Transaction | void> {
+export async function updateTransaction(client: t.GOAuth2Client, id: string, fields: any): Promise<t.Transaction | void> {
   const sheet: t.GSheet | void = await fetchSheetByTitle(client, 'Transactions')
   if (!sheet) {
     throw new u.PublicError('Sheet not found')
@@ -368,7 +392,8 @@ export async function updateTransaction(client: t.GOAuth2Client, id: string, tra
     client,
     sheet,
     id,
-    transaction,
+    fields,
+    validateTransactionFields,
     transactionToRow,
     rowToTransaction,
   )
@@ -396,11 +421,6 @@ export async function fetchTransactions(client: t.GOAuth2Client, filter: t.Trans
   return result
 }
 
-
-// TODO Better name
-function queryRowToRow(queryRow) {
-  return f.map(queryRow.c, col => col ? (col.f || col.v) : undefined)
-}
 
 function rowToTransaction(row: t.GRow): t.Transaction {
   return {
@@ -458,6 +478,28 @@ function filterTransactionsQuery(filter: t.TransactionsFilter): string {
   return query
 }
 
+function validateTransactionFields(fields: any): t.ResErrors {
+  const errors = []
+
+  if (f.isNil(fields.date) || !f.isValidDate(new Date(fields.date))) {
+    errors.push({text: 'Date must be non empty and valid'})
+  }
+
+  if (f.isNil(fields.outcomeAccountId) && f.isNil(fields.incomeAccountId)) {
+    errors.push({text: 'Outcome/Income account required'})
+  }
+
+  if (!f.isNil(fields.outcomeAccountId) && !f.isNumber(fields.outcomeAmount)) {
+    errors.push({text: 'Outcome amount must be a valid number'})
+  }
+
+  if (!f.isNil(fields.incomeAccountId) && !f.isNumber(fields.incomeAmount)) {
+    errors.push({text: 'Income amount must be a valid number'})
+  }
+
+  return errors
+}
+
 
 
 /**
@@ -497,12 +539,19 @@ async function queryEntities<T>(
 
 // TODO Probably replace generic by a common type for all key entities
 async function createEntity<T>(
-  client     : t.GOAuth2Client,
-  sheet      : t.GSheet,
-  entity     : T,
-  entityToRow: (entity: T) => t.GRow,
-  rowToEntity: (row: t.GRow) => T,
+  client        : t.GOAuth2Client,
+  sheet         : t.GSheet,
+  fields        : any,
+  validateFields: (fields: any) => t.ResErrors,
+  entityToRow   : (entity: T) => t.GRow,
+  rowToEntity   : (row: t.GRow) => T,
 ): Promise<T> {
+  const errors: t.ResErrors = validateFields(fields)
+  if (errors.length) {
+    throw new u.PublicError('Validation error', {errors})
+  }
+
+  const entity: T = fields
   const row: t.GRow | void = await appendRow(client, sheet, entityToRow(entity))
   if (!row) {
     throw new u.PublicError('Row not found')
@@ -541,15 +590,21 @@ async function deleteEntityById<T>(
 
 // TODO Probably replace generic by a common type for all key entities
 async function updateEntityById<T>(
-  client     : t.GOAuth2Client,
-  sheet      : t.GSheet,
-  id         : string,
-  entity     : T,
-  entityToRow: (entity: T) => t.GRow,
-  rowToEntity: (row: t.GRow) => T,
+  client        : t.GOAuth2Client,
+  sheet         : t.GSheet,
+  id            : string,
+  fields        : any,
+  validateFields: (fields: any) => t.ResErrors,
+  entityToRow   : (entity: T) => t.GRow,
+  rowToEntity   : (row: t.GRow) => T,
 ): Promise<T> {
   if (!id) {
     throw new u.PublicError('Entity id is required')
+  }
+
+  const errors: t.ResErrors = validateFields(fields)
+  if (errors.length) {
+    throw new u.PublicError('Validation error', {errors})
   }
 
   const toUpdate: T | void = await queryEntityById<T>(sheet, id, rowToEntity)
@@ -562,6 +617,7 @@ async function updateEntityById<T>(
     throw new u.PublicError('Row number not found')
   }
 
+  const entity: T = fields
   const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
   const row: t.GRow | void = await updateRow(
     client,
@@ -732,6 +788,10 @@ async function querySheet(sheetId: number, query: string | void): Promise<t.GQue
 
     return data.table
   })
+}
+
+function queryRowToRow(queryRow) {
+  return f.map(queryRow.c, col => col ? (col.f || col.v) : undefined)
 }
 
 
