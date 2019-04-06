@@ -5,6 +5,7 @@ import uuid from 'uuid/v4'
 import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
+import * as s from './sheets'
 
 const {SPREADSHEET_ID} = e.properties
 
@@ -503,6 +504,42 @@ function validateTransactionFields(fields: any): t.ResErrors {
 
 
 /**
+ * Spreadsheet
+ */
+
+export async function createAppSpreadsheet(client: t.GOAuth2Client) {
+  const spreadsheet: t.GSpreadsheet | void = await createSpreadsheet(client, {
+    resource: {
+      properties: {
+        title: `Test Spreadsheet`,
+      },
+      sheets: [
+        s.transactions,
+        s.accounts,
+        s.categories,
+        s.payees,
+      ],
+    },
+  })
+
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
+  }
+
+  await addPermissions(client, {
+    fileId: spreadsheet.spreadsheetId,
+    resource: {
+      type: 'anyone',
+      role: 'reader',
+    },
+  })
+
+  return spreadsheet
+}
+
+
+
+/**
  * Utils
  */
 
@@ -634,17 +671,6 @@ async function updateEntityById<T>(
 }
 
 
-async function fetchSheetByTitle(client: t.GOAuth2Client, title: string): Promise<t.GSheet | void> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client)
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, title)
-  return sheet
-}
-
-
 async function appendRow(client: t.GOAuth2Client, sheet: t.GSheet, row: t.GRow): Promise<t.GRow | void> {
   const sheetTitle : string = sheet.properties.title
   const range      : string = `${sheetTitle}`
@@ -662,27 +688,35 @@ async function updateRow(client: t.GOAuth2Client, sheet: t.GSheet, rowNumber: nu
 }
 
 async function deleteRow(client: t.GOAuth2Client, sheet: t.GSheet, rowNumber: number): Promise<void> {
-  const requests: t.GRequests = [{
-    deleteDimension: {
-      range: {
-        sheetId: sheet.properties.sheetId,
-        dimension: 'ROWS',
-        startIndex: rowNumber - 1,
-        endIndex: rowNumber,
-      },
+  await batchUpdateSpreadsheet(client, {
+    spreadsheetId: SPREADSHEET_ID,
+    resource: {
+      requests: [{
+        deleteDimension: {
+          range: {
+            sheetId: sheet.properties.sheetId,
+            dimension: 'ROWS',
+            startIndex: rowNumber - 1,
+            endIndex: rowNumber,
+          },
+        },
+      }],
     },
-  }]
-
-  await batchUpdateSpreadsheet(client, requests)
+  })
 }
 
 
-export function fetchSpreadsheet(client: t.GOAuth2Client, ranges: ?string): Promise<t.GSpreadsheet | void> {
-  const options = {
-    spreadsheetId: SPREADSHEET_ID,
-    ranges,
+async function fetchSheetByTitle(client: t.GOAuth2Client, title: string): Promise<t.GSheet | void> {
+  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client, {spreadsheetId: SPREADSHEET_ID})
+  if (!spreadsheet) {
+    throw new u.PublicError('Spreadsheet not found')
   }
 
+  const sheet = findSheetByTitle(spreadsheet.sheets, title)
+  return sheet
+}
+
+export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.get(options, (err, res) => {
       if (err) if (err) throw Error(err)
@@ -691,16 +725,29 @@ export function fetchSpreadsheet(client: t.GOAuth2Client, ranges: ?string): Prom
   })
 }
 
-export function batchUpdateSpreadsheet(client: t.GOAuth2Client, requests: t.GRequests): Promise<any> {
-  const options: t.GBatchRequest = {
-    spreadsheetId: SPREADSHEET_ID,
-    resource: {requests},
-  }
+export function createSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
+  return new Promise(resolve => {
+    google.sheets({version: 'v4', auth: client}).spreadsheets.create(options, (err, res) => {
+      if (err) if (err) throw Error(err)
+      resolve(res.data)
+    })
+  })
+}
 
+export function batchUpdateSpreadsheet(client: t.GOAuth2Client, options: any): Promise<any> {
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options, (err, res) => {
       if (err) if (err) throw Error(err)
       resolve(res.data.replies)
+    })
+  })
+}
+
+export function addPermissions(client: t.GOAuth2Client, options: any): Promise<void> {
+  return new Promise(resolve => {
+    google.drive({version: 'v3', auth: client}).permissions.create(options, err => {
+      if (err) if (err) throw Error(err)
+      resolve()
     })
   })
 }

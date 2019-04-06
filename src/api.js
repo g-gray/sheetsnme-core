@@ -130,6 +130,26 @@ export async function getUser(ctx: t.Context) {
   ctx.body = user
 }
 
+export async function createSpreadsheet(ctx: t.Context) {
+  // const sessionId: string = ctx.sessionId
+  const client: t.GOAuth2Client = ctx.client
+  // const spreadsheets: t.Spreadsheets = await db.spreadsheetsByUserId(user.id)
+
+  const gSpreadsheet: t.GSpreadsheet | void = await n.createAppSpreadsheet(client)
+  if (!gSpreadsheet) {
+    ctx.throw(400, 'Spreadsheet not found')
+    return
+  }
+
+  console.info(`gSpreadsheet.spreadsheetId:`, gSpreadsheet.spreadsheetId)
+
+  // const spreadsheet: t.Spreadsheet | void = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
+
+  // console.info(`spreadsheet:`, spreadsheet)
+
+  ctx.body = gSpreadsheet
+}
+
 
 
 /**
@@ -461,4 +481,3 @@ export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promi
 
   await next()
 }
-

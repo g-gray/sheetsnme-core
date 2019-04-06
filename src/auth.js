@@ -8,6 +8,7 @@ const SCOPES: Array<string> = [
   'https://www.googleapis.com/auth/spreadsheets',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
+  'https://www.googleapis.com/auth/drive.file',
 ]
 
 const {SCHEMA, HOST, PORT, CLIENT_ID, CLIENT_SECRET} = e.properties

@@ -16,6 +16,8 @@ router
 
   .get('/api/user',                       api.jsonOnly, api.authRequired, api.getUser)
 
+  .get('/api/spreadsheet/create',         api.jsonOnly, api.authRequired, api.createSpreadsheet)
+
   .get('/api/accounts',                   api.jsonOnly, api.authRequired, api.getAccounts)
   .get('/api/accounts/:id',               api.jsonOnly, api.authRequired, api.getAccount)
 

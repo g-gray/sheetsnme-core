@@ -225,96 +225,116 @@ export type GRow = Array<any>
 
 export type GRows = Array<GRow>
 
-export type GValueRange = {|
+export type GValueRange = {
   range: string,
   majorDimension: 'ROWS' | 'COLUMNS',
   values: GRows,
-|}
+}
 
-export type GValuesRequest = {|
+export type GValuesRequest = {
   spreadsheetId            : string,
   range                    : string,
   resource?                : {values: GRows},
   valueInputOption?        : 'RAW' | 'USER_ENTERED',
   includeValuesInResponse? : boolean,
   valueRanges?             : Array<GValueRange>,
-|}
+}
 
-export type GRequests = [
-  {|
-    deleteDimension?: {|
-      range: {|
-        sheetId    : number,
-        dimension  : 'ROWS' | 'COLUMNS',
-        startIndex?: number,
-        endIndex?  : number,
-      |}
-    |},
-  |}
-]
+export type GRequest = {
+  deleteDimension: {
+    range: {
+      sheetId    : number,
+      dimension  : 'ROWS' | 'COLUMNS',
+      startIndex?: number,
+      endIndex?  : number,
+    }
+  },
+}
 
-export type GBatchRequest = {|
-  spreadsheetId: string,
-  resource: {requests: GRequests},
-|}
+export type GErrorType = 'ERROR_TYPE_UNSPECIFIED' | 'ERROR' | 'NULL_VALUE' | 'DIVIDE_BY_ZERO' | 'VALUE' | 'REF' | 'NAME' | 'NUM' | 'N_A' | 'LOADING'
 
-export type GGridProperties = {|
+export type GErrorValue = {
+  type: GErrorType,
+  message: string
+}
+
+export type GExtendedValue = {
+  numberValue? : number,
+  stringValue? : string,
+  boolValue?   : boolean,
+  formulaValue?: string,
+  errorValue?  : GErrorValue
+}
+
+export type GCellData = {
+  userEnteredValue: GExtendedValue,
+}
+
+export type GRowData = {
+  values: Array<GCellData>,
+}
+
+export type GGridData = {
+  startRow: number,
+  startColumn: number,
+  rowData: Array<GRowData>,
+}
+
+export type GGridProperties = {
   rowCount      : number,
   columnCount   : number,
   frozenRowCount: number,
-|}
+}
 
-export type GSheetProperties = {|
-  sheetId       : number,
+
+export type GSheetProperties = {
+  sheetId?      : number,
   title         : string,
-  index         : number,
-  sheetType     : 'GRID',
+  index?        : number,
+  sheetType?    : 'GRID',
   gridProperties: GGridProperties,
-|}
+}
 
-export type GSheet = {|
+export type GSheet = {
   properties  : GSheetProperties,
-  filterViews?: any,
-  basicFilter?: any,
-|}
+  data: Array<GGridData>,
+}
 
-export type GSpreadsheetProperties = {|
+export type GSpreadsheetProperties = {
   title        : string,
   locale       : string,
   autoRecalc   : 'ON_CHANGE',
   timeZone     : string,
   defaultFormat: any
-|}
+}
 
-export type GSpreadsheet = {|
+export type GSpreadsheet = {
   spreadsheetId : string,
   properties    : GSpreadsheetProperties,
   sheets        : Array<GSheet>,
   spreadsheetUrl: string,
-|}
+}
 
-
-
-export type GQueryResCol = {|
+export type GQueryResCol = {
   id     : string,
   label  : string,
   type   : string,
   pattern: string,
-|}
+}
 
-export type GQueryResRow = {|
+export type GQueryResRow = {
   c: Array<{ v: string, f: string }>
-|}
+}
 
-export type GQueryTable = {|
+export type GQueryTable = {
   cols: Array<GQueryResCol>,
   rows: Array<GQueryResRow>,
   parsedNumHeaders: number,
-|}
+}
 
-export type GQueryRes = {|
+export type GQueryRes = {
   table: GQueryTable,
-|}
+}
 
 /**
  * XHttp
