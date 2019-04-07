@@ -30,6 +30,8 @@ export function formatDateTime(value: any): string {
 }
 
 export class PublicError extends Error {
+  body: any
+
   constructor(message: string, body?: any) {
     super(...arguments)
     Error.captureStackTrace(this, this.constructor)
