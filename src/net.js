@@ -862,33 +862,6 @@ export function addPermissions(client: t.GOAuth2Client, options: any): Promise<v
 }
 
 
-export function getValues(client: t.GOAuth2Client, range: string): Promise<t.GRows> {
-  const options: t.GValuesRequest = {
-    spreadsheetId: SPREADSHEET_ID,
-    range,
-  }
-
-  return new Promise(resolve => {
-    google.sheets({version: 'v4', auth: client}).spreadsheets.values.get(options, (err, res) => {
-      if (err) throw Error(err)
-      resolve(res.data.values)
-    })
-  })
-}
-
-export function clearValues(client: t.GOAuth2Client, range: string): Promise<void> {
-  const options: t.GValuesRequest = {
-    spreadsheetId: SPREADSHEET_ID,
-    range,
-  }
-
-  return new Promise(resolve => {
-    google.sheets({version: 'v4', auth: client}).spreadsheets.values.clear(options, err => {
-      if (err) if (err) throw Error(err)
-      resolve()
-    })
-  })
-}
 export function appendValues(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
