@@ -8,7 +8,7 @@ import * as db from './db'
 const {SESSION_HEADER_NAME, SESSION_COOKIE_NAME} = e.properties
 
 /**
- * Auth
+ * Middlewares
  */
 
 export async function authRequired(ctx: t.Context, next: () => Promise<void>): Promise<void> {
@@ -20,18 +20,11 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     : undefined
 
   if (!session) {
-    // const redirectUri: string = ctx.headers.referer
-    //   ? encodeURIComponent(ctx.headers.referer)
-    //   : '/'
-    // const redirectUri: string = encodeURIComponent(ctx.url)
-    // ctx.redirect(`/auth/login?redirectUri=${redirectUri}`)
     ctx.throw(401, 'Unauthorized')
     return
   }
 
-  const token: t.GAuthToken | void = session
-    ? session.externalToken
-    : undefined
+  const token: t.GAuthToken | void = session.externalToken
   if (!token) {
     ctx.throw(400, 'Token is required')
   }
@@ -41,6 +34,42 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
 
   await next()
 }
+
+export async function spreadsheetIdRequired(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+  const sessionId: string = ctx.sessionId
+  // const spreadsheetId: string | void = ctx.query.spreadsheetId
+  // if (!spreadsheetId) {
+  //   ctx.throw(400, 'Spreadsheet id is required')
+  //   return
+  // }
+
+  const spreadsheets: t.Spreadsheets = await db.spreadsheetsBySessionId(sessionId)
+  // const spreadsheet: t.Spreadsheet | void = spreadsheets.filter(s => s.id === spreadsheetId)
+  const spreadsheet: t.Spreadsheet | void = spreadsheets[0]
+  if (!spreadsheet) {
+    ctx.throw(400, 'Spreadsheet not found')
+    return
+  }
+
+  ctx.gSpreadsheetId = spreadsheet.externalId
+
+  await next()
+}
+
+export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+  if (!ctx.accepts('application/json')) {
+    ctx.throw(406, 'Not acceptable')
+    return
+  }
+
+  await next()
+}
+
+
+
+/**
+ * Auth
+ */
 
 export function authLogin(ctx: t.Context): void {
   const redirectTo: string | void = ctx.query.redirectTo
@@ -81,7 +110,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
   }
 
   const oAuth2Client = a.createOAuth2Client(token)
-  const gUser: t.GUser | void = await n.fetchGUserInfo(oAuth2Client)
+  const gUser: t.GUser | void = await n.fetchUserInfo(oAuth2Client)
   if (!gUser) {
     ctx.throw(400, 'User not found')
     return
@@ -127,27 +156,25 @@ export async function getUser(ctx: t.Context) {
     return
   }
 
-  ctx.body = user
-}
+  const spreadsheets: t.Spreadsheets = await db.spreadsheetsBySessionId(sessionId)
+  let spreadsheet: t.Spreadsheet | void = spreadsheets[0]
 
-export async function createSpreadsheet(ctx: t.Context) {
-  // const sessionId: string = ctx.sessionId
-  const client: t.GOAuth2Client = ctx.client
-  // const spreadsheets: t.Spreadsheets = await db.spreadsheetsByUserId(user.id)
+  if (!spreadsheet) {
+    const client: t.GOAuth2Client = ctx.client
+    const gSpreadsheet: t.GSpreadsheet | void = await n.createAppSpreadsheet(client)
+    if (!gSpreadsheet) {
+      ctx.throw(400, 'Spreadsheet not found')
+      return
+    }
+    spreadsheet = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
+  }
 
-  const gSpreadsheet: t.GSpreadsheet | void = await n.createAppSpreadsheet(client)
-  if (!gSpreadsheet) {
+  if (!spreadsheet) {
     ctx.throw(400, 'Spreadsheet not found')
     return
   }
 
-  console.info(`gSpreadsheet.spreadsheetId:`, gSpreadsheet.spreadsheetId)
-
-  // const spreadsheet: t.Spreadsheet | void = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
-
-  // console.info(`spreadsheet:`, spreadsheet)
-
-  ctx.body = gSpreadsheet
+  ctx.body = {...user, spreadsheets: [{id: spreadsheet.id}]}
 }
 
 
@@ -158,7 +185,8 @@ export async function createSpreadsheet(ctx: t.Context) {
 
 export async function getAccounts(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const accounts: t.Accounts = await n.fetchAccounts(client)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const accounts: t.Accounts = await n.fetchAccounts(client, gSpreadsheetId)
   ctx.body = accounts
 }
 
@@ -170,7 +198,8 @@ export async function getAccount(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const account: t.Account | void = await n.fetchAccount(client, id)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const account: t.Account | void = await n.fetchAccount(client, gSpreadsheetId, id)
   if (!account) {
     ctx.throw(404, 'Account not found')
     return
@@ -181,7 +210,8 @@ export async function getAccount(ctx: t.Context): Promise<void> {
 
 export async function createAccount(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const account: t.Account | void = await n.createAccount(client, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const account: t.Account | void = await n.createAccount(client, gSpreadsheetId, ctx.request.body)
   if (!account) {
     ctx.throw(404, 'Account not found')
     return
@@ -198,7 +228,8 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const account: t.Account | void = await n.updateAccount(client, id, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const account: t.Account | void = await n.updateAccount(client, gSpreadsheetId, id, ctx.request.body)
   if (!account) {
     ctx.throw(404, 'Account not found')
     return
@@ -215,14 +246,14 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-
-  const transactions: t.Transactions = await n.fetchTransactions(client, {accountId: id})
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, {accountId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return
   }
 
-  const account: t.Account | void = await n.deleteAccount(client, id)
+  const account: t.Account | void = await n.deleteAccount(client, gSpreadsheetId, id)
   if (!account) {
     ctx.throw(404, 'Account not found')
     return
@@ -239,7 +270,8 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
 
 export async function getCategories(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const categories: t.Categories = await n.fetchCategories(client)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const categories: t.Categories = await n.fetchCategories(client, gSpreadsheetId)
   ctx.body = categories
 }
 
@@ -251,7 +283,8 @@ export async function getCategory(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const category: t.Category | void = await n.fetchCategory(client, id)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const category: t.Category | void = await n.fetchCategory(client, gSpreadsheetId, id)
   if (!category) {
     ctx.throw(404, 'Category not found')
     return
@@ -262,7 +295,8 @@ export async function getCategory(ctx: t.Context): Promise<void> {
 
 export async function createCategory(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const category: t.Category | void = await n.createCategory(client, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const category: t.Category | void = await n.createCategory(client, gSpreadsheetId, ctx.request.body)
   if (!category) {
     ctx.throw(404, 'Category not found')
     return
@@ -279,7 +313,8 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const category: t.Category | void = await n.updateCategory(client, id, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const category: t.Category | void = await n.updateCategory(client, gSpreadsheetId, id, ctx.request.body)
   if (!category) {
     ctx.throw(404, 'Category not found')
     return
@@ -296,14 +331,14 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-
-  const transactions: t.Transactions = await n.fetchTransactions(client, {categoryId: id})
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, {categoryId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return
   }
 
-  const category: t.Category | void = await n.deleteCategory(client, id)
+  const category: t.Category | void = await n.deleteCategory(client, gSpreadsheetId, id)
   if (!category) {
     ctx.throw(404, 'Category not found')
     return
@@ -320,7 +355,8 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
 
 export async function getPayees(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const payees: t.Payees = await n.fetchPayees(client)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const payees: t.Payees = await n.fetchPayees(client, gSpreadsheetId)
   ctx.body = payees
 }
 
@@ -332,7 +368,8 @@ export async function getPayee(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const payee: t.Payee | void = await n.fetchPayee(client, id)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const payee: t.Payee | void = await n.fetchPayee(client, gSpreadsheetId, id)
   if (!payee) {
     ctx.throw(404, 'Payee not found')
     return
@@ -343,7 +380,8 @@ export async function getPayee(ctx: t.Context): Promise<void> {
 
 export async function createPayee(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const payee: t.Payee | void = await n.createPayee(client, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const payee: t.Payee | void = await n.createPayee(client, gSpreadsheetId, ctx.request.body)
   if (!payee) {
     ctx.throw(404, 'Payee not found')
     return
@@ -360,7 +398,8 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const payee: t.Payee | void = await n.updatePayee(client, id, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const payee: t.Payee | void = await n.updatePayee(client, gSpreadsheetId, id, ctx.request.body)
   if (!payee) {
     ctx.throw(404, 'Payee not found')
     return
@@ -377,14 +416,14 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-
-  const transactions: t.Transactions = await n.fetchTransactions(client, {payeeId: id})
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, {payeeId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return
   }
 
-  const payee: t.Payee | void = await n.deletePayee(client, id)
+  const payee: t.Payee | void = await n.deletePayee(client, gSpreadsheetId, id)
   if (!payee) {
     ctx.throw(404, 'Payee not found')
     return
@@ -402,7 +441,8 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
 export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const filter: t.TransactionsFilter = ctx.query
-  const transactions: t.Transactions = await n.fetchTransactions(client, filter)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
   ctx.body = transactions
 }
 
@@ -414,7 +454,8 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
   }
 
   const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction | void = await n.fetchTransaction(client, id)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transaction: t.Transaction | void = await n.fetchTransaction(client, gSpreadsheetId, id)
   if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
@@ -425,7 +466,8 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction | void = await n.createTransaction(client, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transaction: t.Transaction | void = await n.createTransaction(client, gSpreadsheetId, ctx.request.body)
   if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
@@ -441,8 +483,9 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
   const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction | void = await n.updateTransaction(client, id, ctx.request.body)
+  const transaction: t.Transaction | void = await n.updateTransaction(client, gSpreadsheetId, id, ctx.request.body)
   if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
@@ -458,26 +501,13 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
   const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction | void = await n.deleteTransaction(client, id)
+  const transaction: t.Transaction | void = await n.deleteTransaction(client, gSpreadsheetId, id)
   if (!transaction) {
     ctx.throw(404, 'Transaction not found')
     return
   }
 
   ctx.body = transaction
-}
-
-
-
-/**
- *
- */
-export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promise<void> {
-  if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
-  }
-
-  await next()
 }

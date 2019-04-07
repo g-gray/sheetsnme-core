@@ -17,8 +17,10 @@ const app: t.Koa = new Koa()
 app
   .use(bodyParser())
   .use(handlePublicError)
-  .use(r.routes)
-  .use(r.allowedMethods)
+  .use(r.authRoutes)
+  .use(r.authAllowedMethods)
+  .use(r.apiRoutes)
+  .use(r.apiAllowedMethods)
 
 
 const {SCHEMA, HOST, PORT} = e.properties

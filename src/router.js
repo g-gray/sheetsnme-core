@@ -3,62 +3,71 @@ import Router from 'koa-router'
 import * as t from './types'
 import * as api from './api'
 
-const router: t.Router = new Router()
+const authRouter: t.Router = new Router()
+
+authRouter
+  .get('/auth/login',                     api.authLogin)
+  .get('/auth/logout',                    api.authLogout)
+  .get('/auth/code',                      api.authCode)
+
+export const authRoutes = authRouter.routes()
+export const authAllowedMethods = authRouter.allowedMethods()
+
+
+const apiRouter: t.Router = new Router()
+
+apiRouter
+  .use(api.jsonOnly)
+  .use(api.authRequired)
 
 /**
  * GET
  */
 
-router
-  .get('/auth/login',                     api.authLogin)
-  .get('/auth/logout',                    api.authLogout)
-  .get('/auth/code',                      api.authCode)
+apiRouter
+  .get('/api/user',                       api.getUser)
 
-  .get('/api/user',                       api.jsonOnly, api.authRequired, api.getUser)
+  .get('/api/accounts',                   api.spreadsheetIdRequired, api.getAccounts)
+  .get('/api/accounts/:id',               api.spreadsheetIdRequired, api.getAccount)
 
-  .get('/api/spreadsheet/create',         api.jsonOnly, api.authRequired, api.createSpreadsheet)
+  .get('/api/categories',                 api.spreadsheetIdRequired, api.getCategories)
+  .get('/api/categories/:id',             api.spreadsheetIdRequired, api.getCategory)
 
-  .get('/api/accounts',                   api.jsonOnly, api.authRequired, api.getAccounts)
-  .get('/api/accounts/:id',               api.jsonOnly, api.authRequired, api.getAccount)
+  .get('/api/payees',                     api.spreadsheetIdRequired, api.getPayees)
+  .get('/api/payees/:id',                 api.spreadsheetIdRequired, api.getPayee)
 
-  .get('/api/categories',                 api.jsonOnly, api.authRequired, api.getCategories)
-  .get('/api/categories/:id',             api.jsonOnly, api.authRequired, api.getCategory)
-
-  .get('/api/payees',                     api.jsonOnly, api.authRequired, api.getPayees)
-  .get('/api/payees/:id',                 api.jsonOnly, api.authRequired, api.getPayee)
-
-  .get('/api/transactions',               api.jsonOnly, api.authRequired, api.getTransactions)
-  .get('/api/transactions/:id',           api.jsonOnly, api.authRequired, api.getTransaction)
+  .get('/api/transactions',               api.spreadsheetIdRequired, api.getTransactions)
+  .get('/api/transactions/:id',           api.spreadsheetIdRequired, api.getTransaction)
 
 /**
  * POST
  */
 
-router
-  .post('/api/transactions',              api.jsonOnly, api.authRequired, api.createTransaction)
-  .post('/api/transactions/:id',          api.jsonOnly, api.authRequired, api.updateTransaction)
+apiRouter
+  .post('/api/transactions',              api.spreadsheetIdRequired, api.createTransaction)
+  .post('/api/transactions/:id',          api.spreadsheetIdRequired, api.updateTransaction)
 
-  .post('/api/accounts',                  api.jsonOnly, api.authRequired, api.createAccount)
-  .post('/api/accounts/:id',              api.jsonOnly, api.authRequired, api.updateAccount)
+  .post('/api/accounts',                  api.spreadsheetIdRequired, api.createAccount)
+  .post('/api/accounts/:id',              api.spreadsheetIdRequired, api.updateAccount)
 
-  .post('/api/categories',                api.jsonOnly, api.authRequired, api.createCategory)
-  .post('/api/categories/:id',            api.jsonOnly, api.authRequired, api.updateCategory)
+  .post('/api/categories',                api.spreadsheetIdRequired, api.createCategory)
+  .post('/api/categories/:id',            api.spreadsheetIdRequired, api.updateCategory)
 
-  .post('/api/payees',                    api.jsonOnly, api.authRequired, api.createPayee)
-  .post('/api/payees/:id',                api.jsonOnly, api.authRequired, api.updatePayee)
+  .post('/api/payees',                    api.spreadsheetIdRequired, api.createPayee)
+  .post('/api/payees/:id',                api.spreadsheetIdRequired, api.updatePayee)
 
 /**
  * DEL
  */
 
-router
-  .del('/api/accounts/:id',               api.jsonOnly, api.authRequired, api.deleteAccount)
+apiRouter
+  .del('/api/accounts/:id',               api.spreadsheetIdRequired, api.deleteAccount)
 
-  .del('/api/categories/:id',             api.jsonOnly, api.authRequired, api.deleteCategory)
+  .del('/api/categories/:id',             api.spreadsheetIdRequired, api.deleteCategory)
 
-  .del('/api/payees/:id',                 api.jsonOnly, api.authRequired, api.deletePayee)
+  .del('/api/payees/:id',                 api.spreadsheetIdRequired, api.deletePayee)
 
-  .del('/api/transactions/:id',           api.jsonOnly, api.authRequired, api.deleteTransaction)
+  .del('/api/transactions/:id',           api.spreadsheetIdRequired, api.deleteTransaction)
 
-export const routes = router.routes()
-export const allowedMethods = router.allowedMethods()
+export const apiRoutes = apiRouter.routes()
+export const apiAllowedMethods = apiRouter.allowedMethods()

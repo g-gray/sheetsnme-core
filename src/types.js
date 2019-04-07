@@ -38,7 +38,7 @@ export type EnvProperties = {|
   PORT               : number,
   CLIENT_ID          : string,
   CLIENT_SECRET      : string,
-  SPREADSHEET_ID     : string,
+  SPREADSHEET_NAME   : string,
   DB_NAME            : string,
   DB_HOST            : string,
   POSTGRES_USER      : string,
@@ -124,13 +124,28 @@ export type User = {|
 
 
 /**
+ * Spreadsheet
+ */
+
+export type Spreadsheet = {|
+  id        : string,
+  userId    : string,
+  externalId: string,
+  createdAt : Date,
+  updatedAt : Date,
+|}
+
+export type Spreadsheets = Array<Spreadsheet>
+
+/**
  * Context
  */
 
 export type Context = {|
   ...Context,
-  sessionId?: string,
-  client?   : GOAuth2Client,
+  sessionId    : string,
+  client       : GOAuth2Client,
+  spreadsheetId: string,
 |}
 
 

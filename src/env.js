@@ -10,7 +10,7 @@ export const properties: t.EnvProperties = {
   PORT                : Number(process.env.PORT)        || 0,
   CLIENT_ID           : process.env.CLIENT_ID           || '',
   CLIENT_SECRET       : process.env.CLIENT_SECRET       || '',
-  SPREADSHEET_ID      : process.env.SPREADSHEET_ID      || '',
+  SPREADSHEET_NAME    : process.env.SPREADSHEET_NAME    || '',
   DB_NAME             : process.env.DB_NAME             || '',
   DB_HOST             : process.env.DB_HOST             || '',
   POSTGRES_USER       : process.env.POSTGRES_USER       || '',

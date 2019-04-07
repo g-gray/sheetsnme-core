@@ -14,7 +14,7 @@ check (
 
 
 
-create table user_roles (
+create table roles (
   id                 uuid         primary key default gen_random_uuid(),
   sym                text         not null unique check (sym <> ''),
   name               text         not null check (name <> ''),
@@ -23,15 +23,21 @@ create table user_roles (
 
 create table users (
   id                 uuid         primary key default gen_random_uuid(),
-
   external_id        text         not null unique check (external_id <> ''),
   picture_url        text         not null default '',
   email              text         not null default '', -- intentionally "text"
   email_verified     bool         not null default false,
   first_name         text         not null default '',
   last_name          text         not null default '',
+  role_id            uuid         not null references roles(id),
+  created_at         timestamp    null default current_timestamp,
+  updated_at         timestamp    null default current_timestamp
+);
 
-  user_role_id       uuid         not null references user_roles(id),
+create table spreadsheets (
+  id                 uuid         primary key default gen_random_uuid(),
+  user_id            uuid         not null references users(id),
+  external_id        text         not null unique check (external_id <> ''),
   created_at         timestamp    null default current_timestamp,
   updated_at         timestamp    null default current_timestamp
 );

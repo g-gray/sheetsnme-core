@@ -1,6 +1,7 @@
 // @flow
 
 import {Pool} from 'pg'
+import f from 'fpx'
 import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
@@ -28,7 +29,7 @@ export function query(text: string, values: Array<mixed> | void): Promise<t.Resu
 export async function login(user: t.User, token: t.GAuthToken): Promise<t.Session | void> {
   const q: string = `
   with
-    ur as (select id from user_roles where sym='user'),
+    ur as (select id from roles where sym='user'),
     u as (
       insert into users
         (
@@ -38,7 +39,7 @@ export async function login(user: t.User, token: t.GAuthToken): Promise<t.Sessio
           email_verified,
           first_name,
           last_name,
-          user_role_id
+          role_id
         )
       values
         ($1, $2, $3, $4, $5, $6, (select id from ur))
@@ -123,7 +124,6 @@ export async function sessionById(id: string): Promise<t.Session | void> {
 
   const result: t.ResultSet = await query(q, v)
   const row: t.Row | void = result.rows[0]
-
   if (!row) {
     return undefined
   }
@@ -159,7 +159,6 @@ export async function userBySessionId(sessionId: string): Promise<t.User | void>
 
   const result: t.ResultSet = await query(q, v)
   const row: t.Row | void = result.rows[0]
-
   if (!row) {
     return undefined
   }
@@ -177,8 +176,60 @@ function rowToUser(row: t.Row): t.User {
     emailVerified:((row.email_verified: any): boolean),
     firstName    :((row.first_name    : any): string),
     lastName     :((row.last_name     : any): string),
-    userRoleId   :((row.user_role_id  : any): string),
+    userRoleId   :((row.role_id       : any): string),
     createdAt    :((row.created_at    : any): Date),
     updatedAt    :((row.updated_at    : any): Date),
+  }
+}
+
+/**
+ * Sheets
+ */
+
+export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spreadsheets> {
+  const q: string = `
+  select sh.*
+  from spreadsheets sh
+  left join sessions s on s.user_id = sh.user_id
+  where s.id = $1
+  `
+  const v: Array<mixed> = [sessionId]
+
+  const result: t.ResultSet = await query(q, v)
+  const rows: Array<t.Row> = result.rows
+
+  const spreadsheets = f.map(rows, rowToSpreadsheet)
+  return spreadsheets
+}
+
+export async function createSpreadsheet(sessionId: string, spreadsheetId: string): Promise<t.Spreadsheet | void> {
+  const q: string = `
+  with
+    s as (select user_id from sessions where id = $1)
+  insert into spreadsheets
+    (user_id, external_id)
+  values
+    ((select user_id from s), $2)
+  returning *
+  `
+  const v: Array<mixed> = [sessionId, spreadsheetId]
+
+  const result: t.ResultSet = await query(q, v)
+  const row: t.Row = result.rows[0]
+  if (!row) {
+    return undefined
+  }
+
+  const spreadsheet: t.Spreadsheet = rowToSpreadsheet(row)
+  return spreadsheet
+}
+
+function rowToSpreadsheet(row: t.Row): t.Spreadsheet {
+  return {
+    id        :((row.id         : any): string),
+    userId    :((row.user_id    : any): string),
+    externalId:((row.external_id: any): string),
+    createdAt :((row.created_at : any): Date),
+    updatedAt :((row.updated_at : any): Date),
   }
 }
