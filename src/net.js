@@ -245,6 +245,7 @@ function rowToCategory(row: t.GRow): t.Category {
     title    : row[1],
     createdAt: row[2],
     updatedAt: row[3],
+    row      : Number(row[4]),
   }
 }
 
@@ -369,6 +370,7 @@ function rowToPayee(row: t.GRow): t.Payee {
     title    : row[1],
     createdAt: row[2],
     updatedAt: row[3],
+    row      : Number(row[4]),
   }
 }
 
@@ -387,10 +389,6 @@ function validatePayeeFields(fields: any): t.ResErrors {
 
   if (f.isNil(fields.title) || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
-  }
-
-  if (f.isNil(fields.initial) || !f.isNumber(fields.initial) || fields.initial < 0) {
-    errors.push({text: 'Initial amount must be a positive number'})
   }
 
   return errors
