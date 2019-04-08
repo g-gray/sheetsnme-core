@@ -130,7 +130,7 @@ function accountToRow(account: t.Account): t.GRow {
 function validateAccountFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (f.isNil(fields.title) || !f.isString(fields.title) || !f.size(fields.title)) {
+  if (f.isNil(fields.title) || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
   }
 
@@ -261,12 +261,8 @@ function categoryToRow(category: t.Category): t.GRow {
 function validateCategoryFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (f.isNil(fields.title) || !f.isString(fields.title) || !f.size(fields.title)) {
+  if (f.isNil(fields.title) || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
-  }
-
-  if (f.isNil(fields.initial) || !f.isNumber(fields.initial) || fields.initial < 0) {
-    errors.push({text: 'Initial amount must be a positive number'})
   }
 
   return errors
@@ -389,7 +385,7 @@ function payeeToRow(payee: t.Payee): t.GRow {
 function validatePayeeFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (f.isNil(fields.title) || !f.isString(fields.title) || !f.size(fields.title)) {
+  if (f.isNil(fields.title) || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
   }
 
