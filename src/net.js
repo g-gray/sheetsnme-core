@@ -65,8 +65,8 @@ export async function updateAccount(
     spreadsheetId,
     sheet,
     id,
-    validateAccountFields,
     fields,
+    validateAccountFields,
     accountToRow,
     rowToAccount,
   )
