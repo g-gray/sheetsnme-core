@@ -67,7 +67,6 @@ export async function login(user: t.User, token: t.GAuthToken): Promise<t.Sessio
     user.lastName,
     token,
   ]
-
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
   if (!row) {
@@ -87,7 +86,6 @@ export async function logout(id: string): Promise<t.Session | void> {
   returning *
   `
   const v: Array<mixed> = [id]
-
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
   if (!row) {
@@ -121,7 +119,6 @@ export async function sessionById(id: string): Promise<t.Session | void> {
   where id = $1
   `
   const v: Array<mixed> = [id]
-
   const result: t.ResultSet = await query(q, v)
   const row: t.Row | void = result.rows[0]
   if (!row) {
@@ -156,7 +153,6 @@ export async function userBySessionId(sessionId: string): Promise<t.User | void>
   where s.id = $1
   `
   const v: Array<mixed> = [sessionId]
-
   const result: t.ResultSet = await query(q, v)
   const row: t.Row | void = result.rows[0]
   if (!row) {
@@ -194,7 +190,6 @@ export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spre
   where s.id = $1
   `
   const v: Array<mixed> = [sessionId]
-
   const result: t.ResultSet = await query(q, v)
   const rows: Array<t.Row> = result.rows
 
@@ -213,7 +208,6 @@ export async function createSpreadsheet(sessionId: string, spreadsheetId: string
   returning *
   `
   const v: Array<mixed> = [sessionId, spreadsheetId]
-
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
   if (!row) {

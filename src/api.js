@@ -161,11 +161,7 @@ export async function getUser(ctx: t.Context) {
 
   if (!spreadsheet) {
     const client: t.GOAuth2Client = ctx.client
-    const gSpreadsheet: t.GSpreadsheet | void = await n.createAppSpreadsheet(client)
-    if (!gSpreadsheet) {
-      ctx.throw(400, 'Spreadsheet not found')
-      return
-    }
+    const gSpreadsheet: t.GSpreadsheet = await n.createAppSpreadsheet(client)
     spreadsheet = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
   }
 
@@ -211,12 +207,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
 export async function createAccount(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: t.Account | void = await n.createAccount(client, gSpreadsheetId, ctx.request.body)
-  if (!account) {
-    ctx.throw(404, 'Account not found')
-    return
-  }
-
+  const account: t.Account = await n.createAccount(client, gSpreadsheetId, ctx.request.body)
   ctx.body = account
 }
 
@@ -229,12 +220,7 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: t.Account | void = await n.updateAccount(client, gSpreadsheetId, id, ctx.request.body)
-  if (!account) {
-    ctx.throw(404, 'Account not found')
-    return
-  }
-
+  const account: t.Account = await n.updateAccount(client, gSpreadsheetId, id, ctx.request.body)
   ctx.body = account
 }
 
@@ -253,12 +239,7 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
     return
   }
 
-  const account: t.Account | void = await n.deleteAccount(client, gSpreadsheetId, id)
-  if (!account) {
-    ctx.throw(404, 'Account not found')
-    return
-  }
-
+  const account: t.Account = await n.deleteAccount(client, gSpreadsheetId, id)
   ctx.body = account
 }
 
@@ -296,12 +277,7 @@ export async function getCategory(ctx: t.Context): Promise<void> {
 export async function createCategory(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const category: t.Category | void = await n.createCategory(client, gSpreadsheetId, ctx.request.body)
-  if (!category) {
-    ctx.throw(404, 'Category not found')
-    return
-  }
-
+  const category: t.Category = await n.createCategory(client, gSpreadsheetId, ctx.request.body)
   ctx.body = category
 }
 
@@ -314,12 +290,7 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const category: t.Category | void = await n.updateCategory(client, gSpreadsheetId, id, ctx.request.body)
-  if (!category) {
-    ctx.throw(404, 'Category not found')
-    return
-  }
-
+  const category: t.Category = await n.updateCategory(client, gSpreadsheetId, id, ctx.request.body)
   ctx.body = category
 }
 
@@ -338,12 +309,7 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
     return
   }
 
-  const category: t.Category | void = await n.deleteCategory(client, gSpreadsheetId, id)
-  if (!category) {
-    ctx.throw(404, 'Category not found')
-    return
-  }
-
+  const category: t.Category = await n.deleteCategory(client, gSpreadsheetId, id)
   ctx.body = category
 }
 
@@ -381,12 +347,7 @@ export async function getPayee(ctx: t.Context): Promise<void> {
 export async function createPayee(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee | void = await n.createPayee(client, gSpreadsheetId, ctx.request.body)
-  if (!payee) {
-    ctx.throw(404, 'Payee not found')
-    return
-  }
-
+  const payee: t.Payee = await n.createPayee(client, gSpreadsheetId, ctx.request.body)
   ctx.body = payee
 }
 
@@ -399,12 +360,7 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee | void = await n.updatePayee(client, gSpreadsheetId, id, ctx.request.body)
-  if (!payee) {
-    ctx.throw(404, 'Payee not found')
-    return
-  }
-
+  const payee: t.Payee = await n.updatePayee(client, gSpreadsheetId, id, ctx.request.body)
   ctx.body = payee
 }
 
@@ -423,12 +379,7 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
     return
   }
 
-  const payee: t.Payee | void = await n.deletePayee(client, gSpreadsheetId, id)
-  if (!payee) {
-    ctx.throw(404, 'Payee not found')
-    return
-  }
-
+  const payee: t.Payee = await n.deletePayee(client, gSpreadsheetId, id)
   ctx.body = payee
 }
 
@@ -467,12 +418,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 export async function createTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction | void = await n.createTransaction(client, gSpreadsheetId, ctx.request.body)
-  if (!transaction) {
-    ctx.throw(404, 'Transaction not found')
-    return
-  }
-
+  const transaction: t.Transaction = await n.createTransaction(client, gSpreadsheetId, ctx.request.body)
   ctx.body = transaction
 }
 
@@ -485,12 +431,7 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
 
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction | void = await n.updateTransaction(client, gSpreadsheetId, id, ctx.request.body)
-  if (!transaction) {
-    ctx.throw(404, 'Transaction not found')
-    return
-  }
-
+  const transaction: t.Transaction = await n.updateTransaction(client, gSpreadsheetId, id, ctx.request.body)
   ctx.body = transaction
 }
 
@@ -503,11 +444,6 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
 
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction | void = await n.deleteTransaction(client, gSpreadsheetId, id)
-  if (!transaction) {
-    ctx.throw(404, 'Transaction not found')
-    return
-  }
-
+  const transaction: t.Transaction = await n.deleteTransaction(client, gSpreadsheetId, id)
   ctx.body = transaction
 }
