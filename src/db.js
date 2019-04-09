@@ -26,7 +26,7 @@ export function query(text: string, values: Array<mixed> | void): Promise<t.Resu
  * Auth
  */
 
-export async function login(user: t.User, token: t.GAuthToken): Promise<t.Session | void> {
+export async function login(user: t.User, token: t.GAuthToken): Promise<t.Session> {
   const q: string = `
   with
     ur as (select id from roles where sym='user'),
@@ -69,12 +69,10 @@ export async function login(user: t.User, token: t.GAuthToken): Promise<t.Sessio
   ]
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
-  if (!row) {
-    return undefined
-  }
-
   const session: t.Session = rowToSession(row)
+
   await deleteExpiredSessions(session.userId)
+
   return session
 }
 

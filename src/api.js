@@ -125,11 +125,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     lastName     : gUser.family_name,
   }
 
-  const session: t.Session | void = await db.login(user, token)
-  if (!session) {
-    ctx.throw(400, 'Session not found')
-    return
-  }
+  const session: t.Session = await db.login(user, token)
 
   a.setCookie(ctx, SESSION_COOKIE_NAME, session.id)
 
