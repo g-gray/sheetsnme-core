@@ -158,9 +158,9 @@ export type Account = {|
   title       : string,
   currencyCode: string,
   initial     : number,
-  createdAt   : Date,
-  updatedAt   : Date,
-  row         : number,
+  createdAt   : string,
+  updatedAt   : string,
+  row?        : number,
 |}
 
 export type Accounts = Array<Account>
@@ -172,10 +172,11 @@ export type Accounts = Array<Account>
  */
 
 export type Category = {|
-  id          : string,
-  title       : string,
-  createdAt   : Date,
-  updatedAt   : Date,
+  id       : string,
+  title    : string,
+  createdAt: string,
+  updatedAt: string,
+  row?     : number,
 |}
 
 export type Categories = Array<Category>
@@ -189,8 +190,9 @@ export type Categories = Array<Category>
 export type Payee = {|
   id       : string,
   title    : string,
-  createdAt: Date,
-  updatedAt: Date,
+  createdAt: string,
+  updatedAt: string,
+  row?     : number,
 |}
 
 export type Payees = Array<Payee>
@@ -203,7 +205,7 @@ export type Payees = Array<Payee>
 
 export type Transaction = {|
   id              : string,
-  date            : Date,
+  date            : string,
   categoryId      : string,
   payeeId         : string,
   comment         : string,
@@ -211,9 +213,9 @@ export type Transaction = {|
   outcomeAmount   : number,
   incomeAccountId : string,
   incomeAmount    : number,
-  createdAt       : Date,
-  updatedAt       : Date,
-  row             : number,
+  createdAt       : string,
+  updatedAt       : string,
+  row?            : number,
 |}
 
 export type Transactions = Array<Transaction>
@@ -235,36 +237,6 @@ export type TransactionsFilter = {|
 /**
  * Google
  */
-
-export type GRow = Array<any>
-
-export type GRows = Array<GRow>
-
-export type GValueRange = {
-  range: string,
-  majorDimension: 'ROWS' | 'COLUMNS',
-  values: GRows,
-}
-
-export type GValuesRequest = {
-  spreadsheetId            : string,
-  range                    : string,
-  resource?                : {values: GRows},
-  valueInputOption?        : 'RAW' | 'USER_ENTERED',
-  includeValuesInResponse? : boolean,
-  valueRanges?             : Array<GValueRange>,
-}
-
-export type GRequest = {
-  deleteDimension: {
-    range: {
-      sheetId    : number,
-      dimension  : 'ROWS' | 'COLUMNS',
-      startIndex?: number,
-      endIndex?  : number,
-    }
-  },
-}
 
 export type GErrorType = 'ERROR_TYPE_UNSPECIFIED' | 'ERROR' | 'NULL_VALUE' | 'DIVIDE_BY_ZERO' | 'VALUE' | 'REF' | 'NAME' | 'NUM' | 'N_A' | 'LOADING'
 
@@ -330,20 +302,25 @@ export type GSpreadsheet = {
   spreadsheetUrl: string,
 }
 
-export type GQueryResCol = {
+export type GQueryCol = {
   id     : string,
   label  : string,
   type   : string,
   pattern: string,
 }
 
-export type GQueryResRow = {
-  c: Array<{ v: string, f: string }>
+export type GQueryCell = {
+  v: string | number,
+  f?: string,
+}
+
+export type GQueryRow = {
+  c: Array<GQueryCell | null>
 }
 
 export type GQueryTable = {
-  cols: Array<GQueryResCol>,
-  rows: Array<GQueryResRow>,
+  cols: Array<GQueryCol>,
+  rows: Array<GQueryRow>,
   parsedNumHeaders: number,
 }
 
