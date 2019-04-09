@@ -195,7 +195,7 @@ export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spre
   return spreadsheets
 }
 
-export async function createSpreadsheet(sessionId: string, spreadsheetId: string): Promise<t.Spreadsheet | void> {
+export async function createSpreadsheet(sessionId: string, spreadsheetId: string): Promise<t.Spreadsheet> {
   const q: string = `
   with
     s as (select user_id from sessions where id = $1)
@@ -208,10 +208,6 @@ export async function createSpreadsheet(sessionId: string, spreadsheetId: string
   const v: Array<mixed> = [sessionId, spreadsheetId]
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
-  if (!row) {
-    return undefined
-  }
-
   const spreadsheet: t.Spreadsheet = rowToSpreadsheet(row)
   return spreadsheet
 }

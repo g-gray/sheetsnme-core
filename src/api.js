@@ -161,11 +161,6 @@ export async function getUser(ctx: t.Context) {
     spreadsheet = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
   }
 
-  if (!spreadsheet) {
-    ctx.throw(400, 'Spreadsheet not found')
-    return
-  }
-
   ctx.body = {...user, spreadsheets: [{id: spreadsheet.id}]}
 }
 
