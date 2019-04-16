@@ -282,9 +282,35 @@ export type GSheetProperties = {
   gridProperties: GGridProperties,
 }
 
+export type GGridRange = {
+  sheetId          : number,
+  startRowIndex?   : number,
+  endRowIndex?     : number,
+  startColumnIndex?: number,
+  endColumnIndex?  : number,
+}
+
+export type GEditor = {
+  users             : Array<string>,
+  groups            : Array<string>,
+  domainUsersCanEdit: boolean
+}
+
+export type GSheetProtectedRange = {
+  protectedRangeId?     : number,
+  range                 : GGridRange,
+  namedRangeId?         : string,
+  description?          : string,
+  warningOnly?          : boolean,
+  requestingUserCanEdit?: boolean,
+  unprotectedRanges?    : Array<GGridRange>,
+  editors?              : Array<GEditor>
+}
+
 export type GSheet = {
-  properties  : GSheetProperties,
-  data: Array<GGridData>,
+  properties      : GSheetProperties,
+  protectedRanges?: Array<GSheetProtectedRange>,
+  data            : Array<GGridData>,
 }
 
 export type GSpreadsheetProperties = {
