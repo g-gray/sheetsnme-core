@@ -107,13 +107,16 @@ function rowToAccount(row: t.GQueryRow): t.Account {
 
 function accountToRow(account: t.Account): t.GRowData {
   const date: string = new Date().toJSON()
+  const createdAt: string = account.createdAt
+    ? new Date(account.createdAt).toJSON()
+    : date
   return {
     values: [
       {userEnteredValue: {stringValue: account.id}},
       {userEnteredValue: {stringValue: account.title}},
       {userEnteredValue: {stringValue: account.currencyCode}},
       {userEnteredValue: {numberValue: account.initial}},
-      {userEnteredValue: {stringValue: new Date(account.createdAt).toJSON() || date}},
+      {userEnteredValue: {stringValue: createdAt}},
       {userEnteredValue: {stringValue: date}},
     ],
   }
@@ -122,7 +125,7 @@ function accountToRow(account: t.Account): t.GRowData {
 function validateAccountFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (f.isNil(fields.title) || !f.isString(fields.title) || !fields.title.length) {
+  if (!fields.title || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
   }
 
@@ -234,11 +237,14 @@ function rowToCategory(row: t.GQueryRow): t.Category {
 
 function categoryToRow(category: t.Category): t.GRowData {
   const date: string = new Date().toJSON()
+  const createdAt: string = category.createdAt
+    ? new Date(category.createdAt).toJSON()
+    : date
   return {
     values: [
       {userEnteredValue: {stringValue: category.id}},
       {userEnteredValue: {stringValue: category.title}},
-      {userEnteredValue: {stringValue: new Date(category.createdAt).toJSON() || date}},
+      {userEnteredValue: {stringValue: createdAt}},
       {userEnteredValue: {stringValue: date}},
     ],
   }
@@ -247,7 +253,7 @@ function categoryToRow(category: t.Category): t.GRowData {
 function validateCategoryFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (f.isNil(fields.title) || !f.isString(fields.title) || !fields.title.length) {
+  if (!fields.title || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
   }
 
@@ -353,11 +359,14 @@ function rowToPayee(row: t.GQueryRow): t.Payee {
 
 function payeeToRow(payee: t.Payee): t.GRowData {
   const date: string = new Date().toJSON()
+  const createdAt: string = payee.createdAt
+    ? new Date(payee.createdAt).toJSON()
+    : date
   return {
     values: [
       {userEnteredValue: {stringValue: payee.id}},
       {userEnteredValue: {stringValue: payee.title}},
-      {userEnteredValue: {stringValue: new Date(payee.createdAt).toJSON()}},
+      {userEnteredValue: {stringValue: createdAt}},
       {userEnteredValue: {stringValue: date}},
     ],
   }
@@ -366,7 +375,7 @@ function payeeToRow(payee: t.Payee): t.GRowData {
 function validatePayeeFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (f.isNil(fields.title) || !f.isString(fields.title) || !fields.title.length) {
+  if (fields.title || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
   }
 
@@ -481,6 +490,9 @@ function rowToTransaction(row: t.GQueryRow): t.Transaction {
 
 function transactionToRow(transaction: t.Transaction): t.GRowData {
   const date: string = new Date().toJSON()
+  const createdAt: string = transaction.createdAt
+    ? new Date(transaction.createdAt).toJSON()
+    : date
   return {
     values: [
       {userEnteredValue: {stringValue: transaction.id}},
@@ -492,7 +504,7 @@ function transactionToRow(transaction: t.Transaction): t.GRowData {
       {userEnteredValue: {numberValue: transaction.outcomeAmount}},
       {userEnteredValue: {stringValue: transaction.incomeAccountId}},
       {userEnteredValue: {numberValue: transaction.incomeAmount}},
-      {userEnteredValue: {stringValue: new Date(transaction.createdAt).toJSON() || date}},
+      {userEnteredValue: {stringValue: createdAt}},
       {userEnteredValue: {stringValue: date}},
     ],
   }
@@ -523,19 +535,19 @@ function filterTransactionsQuery(filter: t.TransactionsFilter): string {
 function validateTransactionFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (f.isNil(fields.date) || !f.isValidDate(new Date(fields.date))) {
+  if (!fields.date || !f.isValidDate(new Date(fields.date))) {
     errors.push({text: 'Date must be non empty and valid'})
   }
 
-  if (f.isNil(fields.outcomeAccountId) && f.isNil(fields.incomeAccountId)) {
+  if (!fields.outcomeAccountId && !fields.incomeAccountId) {
     errors.push({text: 'Outcome/Income account required'})
   }
 
-  if (!f.isNil(fields.outcomeAccountId) && !f.isNumber(fields.outcomeAmount)) {
+  if (fields.outcomeAccountId && !f.isNumber(fields.outcomeAmount)) {
     errors.push({text: 'Outcome amount must be a valid number'})
   }
 
-  if (!f.isNil(fields.incomeAccountId) && !f.isNumber(fields.incomeAmount)) {
+  if (fields.incomeAccountId && !f.isNumber(fields.incomeAmount)) {
     errors.push({text: 'Income amount must be a valid number'})
   }
 
