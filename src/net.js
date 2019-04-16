@@ -567,10 +567,10 @@ export async function createAppSpreadsheet(client: t.GOAuth2Client): Promise<t.G
         title: SPREADSHEET_NAME,
       },
       sheets: [
-        s.transactions,
-        s.accounts,
-        s.categories,
-        s.payees,
+        s.createTransactionsSheet(),
+        s.createAccountsSheet(),
+        s.createCategoriesSheet(),
+        s.createPayeesSheet(),
       ],
     },
   })
