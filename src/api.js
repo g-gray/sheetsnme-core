@@ -3,6 +3,7 @@ import * as t from './types'
 import * as e from './env'
 import * as n from './net'
 import * as a from './auth'
+import * as s from './sheets'
 import * as db from './db'
 
 const {SESSION_HEADER_NAME, SESSION_COOKIE_NAME} = e.properties
@@ -209,6 +210,10 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
     return
   }
 
+  if (id === s.DEBT_ACCOUNT_ID) {
+    ctx.throw(400, 'You can not change this account')
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const account: t.Account = await n.updateAccount(client, gSpreadsheetId, id, ctx.request.body)
@@ -220,6 +225,10 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
   if (!id) {
     ctx.throw(400, 'Account id is required')
     return
+  }
+
+  if (id === s.DEBT_ACCOUNT_ID) {
+    ctx.throw(400, 'You can not delete this account')
   }
 
   const client: t.GOAuth2Client = ctx.client
