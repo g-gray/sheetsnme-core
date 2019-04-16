@@ -783,7 +783,7 @@ async function updateEntityById<T>(
 async function appendRow(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  sheetId      : string,
+  sheetId      : number,
   row          : t.GRowData,
 ): Promise<void> {
   await batchUpdateSpreadsheet(client, {
@@ -803,7 +803,7 @@ async function appendRow(
 async function updateRow(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  sheetId      : string,
+  sheetId      : number,
   rowNumber    : number,
   row          : t.GRowData,
 ): Promise<void> {
@@ -828,7 +828,7 @@ async function updateRow(
 async function deleteRow(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  sheetId      : string,
+  sheetId      : number,
   rowNumber    : number,
 ): Promise<void> {
   await batchUpdateSpreadsheet(client, {

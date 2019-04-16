@@ -275,7 +275,7 @@ export type GGridProperties = {
 
 
 export type GSheetProperties = {
-  sheetId?      : number,
+  sheetId       : number,
   title         : string,
   index?        : number,
   sheetType?    : 'GRID',

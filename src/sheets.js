@@ -5,6 +5,7 @@ import * as t from './types'
 export function createTransactionsSheet(): t.GSheet {
   return {
     properties: {
+      sheetId: 0,
       title: 'Transactions',
       gridProperties: {
         rowCount: 2,
@@ -45,6 +46,7 @@ export function createAccountsSheet(): t.GSheet {
   const date: string = new Date().toJSON()
   return {
     properties: {
+      sheetId: 1,
       title: 'Accounts',
       gridProperties: {
         rowCount: 5,
@@ -118,6 +120,7 @@ export function createCategoriesSheet(): t.GSheet {
   const date: string = new Date().toJSON()
   return {
     properties: {
+      sheetId: 2,
       title: 'Categories',
       gridProperties: {
         rowCount: 10,
@@ -221,6 +224,7 @@ export function createPayeesSheet(): t.GSheet {
   const date: string = new Date().toJSON()
   return {
     properties: {
+      sheetId: 3,
       title: 'Payees',
       gridProperties: {
         rowCount: 2,
