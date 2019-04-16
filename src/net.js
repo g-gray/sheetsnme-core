@@ -870,7 +870,7 @@ function findSheetByTitle(sheets: Array<t.GSheet>, title: string): t.GSheet | vo
 export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.get(options, (err, res) => {
-      if (err) if (err) throw Error(err)
+      if (err) throw Error(err)
       resolve(res.data)
     })
   })
@@ -879,7 +879,7 @@ export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise
 export function createSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.create(options, (err, res) => {
-      if (err) if (err) throw Error(err)
+      if (err) throw Error(err)
       resolve(res.data)
     })
   })
@@ -888,7 +888,7 @@ export function createSpreadsheet(client: t.GOAuth2Client, options: any): Promis
 export function batchUpdateSpreadsheet(client: t.GOAuth2Client, options: any): Promise<any> {
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options, (err, res) => {
-      if (err) if (err) throw Error(err)
+      if (err) throw Error(err)
       resolve(res.data.replies)
     })
   })
@@ -897,7 +897,7 @@ export function batchUpdateSpreadsheet(client: t.GOAuth2Client, options: any): P
 export function addPermissions(client: t.GOAuth2Client, options: any): Promise<void> {
   return new Promise(resolve => {
     google.drive({version: 'v3', auth: client}).permissions.create(options, err => {
-      if (err) if (err) throw Error(err)
+      if (err) throw Error(err)
       resolve()
     })
   })
