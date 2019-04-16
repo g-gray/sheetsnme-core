@@ -114,7 +114,8 @@ function accountToRow(account: t.Account): t.GRowData {
     values: [
       {userEnteredValue: {stringValue: account.id}},
       {userEnteredValue: {stringValue: account.title}},
-      {userEnteredValue: {stringValue: account.currencyCode}},
+      // {userEnteredValue: {stringValue: account.currencyCode}},
+      {userEnteredValue: {stringValue: 'RUB'}},
       {userEnteredValue: {numberValue: account.initial}},
       {userEnteredValue: {stringValue: createdAt}},
       {userEnteredValue: {stringValue: date}},
@@ -129,9 +130,9 @@ function validateAccountFields(fields: any): t.ResErrors {
     errors.push({text: 'Title must be non empty string'})
   }
 
-  if (fields.currencyCode === 'RUB') {
-    errors.push({text: 'Currency Code must be one of these: \'RUB\''})
-  }
+  // if (fields.currencyCode !== 'RUB') {
+  //   errors.push({text: 'Currency Code must be one of these: \'RUB\''})
+  // }
 
   if (f.isNil(fields.initial) || !f.isNumber(fields.initial) || fields.initial < 0) {
     errors.push({text: 'Initial amount must be a positive number'})
