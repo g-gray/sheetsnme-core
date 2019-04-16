@@ -99,8 +99,8 @@ function rowToAccount(row: t.GQueryRow): t.Account {
     title       : row.c[1] ? String(row.c[1].v) : '',
     currencyCode: row.c[2] ? String(row.c[2].v) : '',
     initial     : row.c[3] ? Number(row.c[3].v) : 0,
-    createdAt   : row.c[4] ? String(row.c[4].f) : '',
-    updatedAt   : row.c[5] ? String(row.c[5].f) : '',
+    createdAt   : row.c[4] ? String(row.c[4].v) : '',
+    updatedAt   : row.c[5] ? String(row.c[5].v) : '',
     row         : row.c[6] ? Number(row.c[6].v) : 0,
   }
 }
@@ -229,8 +229,8 @@ function rowToCategory(row: t.GQueryRow): t.Category {
   return {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
-    createdAt   : row.c[2] ? String(row.c[2].f) : '',
-    updatedAt   : row.c[3] ? String(row.c[3].f) : '',
+    createdAt   : row.c[2] ? String(row.c[2].v) : '',
+    updatedAt   : row.c[3] ? String(row.c[3].v) : '',
     row         : row.c[4] ? Number(row.c[4].v) : 0,
   }
 }
@@ -351,8 +351,8 @@ function rowToPayee(row: t.GQueryRow): t.Payee {
   return {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
-    createdAt   : row.c[2] ? String(row.c[2].f) : '',
-    updatedAt   : row.c[3] ? String(row.c[3].f) : '',
+    createdAt   : row.c[2] ? String(row.c[2].v) : '',
+    updatedAt   : row.c[3] ? String(row.c[3].v) : '',
     row         : row.c[4] ? Number(row.c[4].v) : 0,
   }
 }
