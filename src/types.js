@@ -51,6 +51,19 @@ export type EnvProperties = {|
 
 
 /**
+ * Context
+ */
+
+export type Context = {|
+  ...Context,
+  sessionId    : string,
+  client       : GOAuth2Client,
+  spreadsheetId: string,
+|}
+
+
+
+/**
  * Auth
  */
 
@@ -137,20 +150,10 @@ export type Spreadsheet = {|
 
 export type Spreadsheets = Array<Spreadsheet>
 
-/**
- * Context
- */
-
-export type Context = {|
-  ...Context,
-  sessionId    : string,
-  client       : GOAuth2Client,
-  spreadsheetId: string,
-|}
 
 
 /**
- * Accounts
+ * Account
  */
 
 export type Account = {|
@@ -166,9 +169,17 @@ export type Account = {|
 export type Accounts = Array<Account>
 
 
+export type Balance = {|
+  accountId: string,
+  balance  : number,
+|}
+
+export type Balances = {[string]: Balance}
+
+
 
 /**
- * Categories
+ * Category
  */
 
 export type Category = {|
@@ -184,7 +195,7 @@ export type Categories = Array<Category>
 
 
 /**
- * Payees
+ * Payee
  */
 
 export type Payee = {|
@@ -200,7 +211,7 @@ export type Payees = Array<Payee>
 
 
 /**
- * Transacations
+ * Transacation
  */
 
 export type Transaction = {|

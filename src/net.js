@@ -143,6 +143,62 @@ function validateAccountFields(fields: any): t.ResErrors {
 }
 
 
+export async function fetchBalancesByAccountIds(
+  client: t.GOAuth2Client,
+  spreadsheetId: string,
+  accountIds: Array<string>,
+): t.Balances {
+  const sheet: t.GSheet | void = await fetchSheetByTitle(client, spreadsheetId, 'Transactions')
+  if (!sheet) {
+    throw new u.PublicError('Sheet not found')
+  }
+
+  const sheetId: number = sheet.properties.sheetId
+
+  const outcomeIdsCond: string = f.map(accountIds, id => `F = '${id}'`).join(' OR ')
+  const outcomeTable: t.GQueryTable = await querySheet(
+    spreadsheetId,
+    sheetId,
+    `select F, sum(G) where ${outcomeIdsCond} group by F`,
+  )
+  const outcomeBalances: t.Balances = f.keyBy(f.map(outcomeTable.rows, rowToBalance), ({accountId}) => accountId)
+
+  const incomeIdsCond: string = f.map(accountIds, id => `H = '${id}'`).join(' OR ')
+  const incomeTable: t.GQueryTable = await querySheet(
+    spreadsheetId,
+    sheetId,
+    `select H, sum(I) where ${incomeIdsCond} group by H`,
+  )
+  const incomeBalances: t.Balances = f.keyBy(f.map(incomeTable.rows, rowToBalance), ({accountId}) => accountId)
+
+  const ids = f.uniq(f.concat(f.keys(outcomeBalances), f.keys(incomeBalances)))
+
+  const result: t.Balances = f.fold(ids, {}, (acc, id) => {
+    const incomeBalance: t.Balance | void = incomeBalances[id]
+    const outcomeBalance: t.Balance | void = outcomeBalances[id]
+    const income = incomeBalance ? incomeBalance.balance : 0
+    const outcome = outcomeBalance ? outcomeBalance.balance : 0
+    return {
+      ...acc,
+      [id]: {
+        accountId: id,
+        balance: income - outcome,
+      },
+    }
+  })
+
+  return result
+}
+
+
+function rowToBalance(row: t.GQueryRow): t.Balance {
+  return {
+    accountId: row.c[0] ? String(row.c[0].v) : '',
+    balance  : row.c[1] ? Number(row.c[1].v) : 0,
+  }
+}
+
+
 /**
  * Categories
  */

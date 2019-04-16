@@ -1,4 +1,5 @@
 // @flow
+import * as f from 'fpx'
 import * as t from './types'
 import * as e from './env'
 import * as n from './net'
@@ -175,7 +176,14 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const accounts: t.Accounts = await n.fetchAccounts(client, gSpreadsheetId)
-  ctx.body = accounts
+
+  const accountIds = f.map(accounts, ({id}) => id)
+  const balances: t.Balances = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, accountIds)
+
+  ctx.body = f.map(accounts, account => ({
+    ...account,
+    balance: account.initial + (balances[account.id] ? balances[account.id].balance : 0),
+  }))
 }
 
 export async function getAccount(ctx: t.Context): Promise<void> {
@@ -193,7 +201,12 @@ export async function getAccount(ctx: t.Context): Promise<void> {
     return
   }
 
-  ctx.body = account
+  const balances: t.Balances = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, [account.id])
+
+  ctx.body = {
+    ...account,
+    balance: account.initial + (balances[account.id] ? balances[account.id].balance : 0),
+  }
 }
 
 export async function createAccount(ctx: t.Context): Promise<void> {
