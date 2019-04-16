@@ -88,6 +88,7 @@ export async function fetchAccounts(
     spreadsheetId,
     'Accounts',
     rowToAccount,
+    `select * where A != 'id' AND A !='${s.DEBT_ACCOUNT_ID}' order by B`
   )
   return result
 }
@@ -221,6 +222,7 @@ export async function fetchCategories(
     spreadsheetId,
     'Categories',
     rowToCategory,
+    `select * where A != 'id' order by B`
   )
   return result
 }
@@ -343,6 +345,7 @@ export async function fetchPayees(
     spreadsheetId,
     'Payees',
     rowToPayee,
+    `select * where A != 'id' order by B`
   )
   return result
 }
