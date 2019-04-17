@@ -259,3 +259,39 @@ export function createPayeesSheet(): t.GSheet {
     ],
   }
 }
+
+export function createVersionsSheet(): t.GSheet {
+  return {
+    properties: {
+      sheetId: 4,
+      title: 'Versions',
+      gridProperties: {
+        rowCount: 2,
+        columnCount: 3,
+        frozenRowCount: 1,
+      },
+    },
+    data: [
+      {
+        startRow: 0,
+        startColumn: 0,
+        rowData: [
+          {
+            values: [
+              {userEnteredValue: {stringValue: 'id'}},
+              {userEnteredValue: {stringValue: 'version'}},
+              {userEnteredValue: {stringValue: 'comment'}},
+            ],
+          },
+          {
+            values: [
+              {userEnteredValue: {stringValue: uuid()}},
+              {userEnteredValue: {numberValue: 0}},
+              {userEnteredValue: {stringValue: 'Initial version'}},
+            ],
+          },
+        ],
+      },
+    ],
+  }
+}

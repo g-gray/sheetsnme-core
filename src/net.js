@@ -631,6 +631,7 @@ export async function createAppSpreadsheet(client: t.GOAuth2Client): Promise<t.G
         s.createAccountsSheet(),
         s.createCategoriesSheet(),
         s.createPayeesSheet(),
+        s.createVersionsSheet(),
       ],
     },
   })
