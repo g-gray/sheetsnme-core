@@ -46,6 +46,9 @@ export type EnvProperties = {|
   PGSCRIPT_DB_URL    : string,
   SESSION_COOKIE_NAME: string,
   SESSION_HEADER_NAME: string,
+  CRYPTO_ALGORITHM   : string,
+  CRYPTO_PASSWORD    : string,
+  CRYPTO_SALT        : string,
 |}
 
 
@@ -97,11 +100,11 @@ export type GOAuth2Client = {|
 |}
 
 export type Session = {|
-  id           : string,
-  userId       : string,
-  externalToken: GAuthToken,
-  createdAt?   : Date,
-  updatedAt?   : Date,
+  id            : string,
+  userId        : string,
+  externalToken?: string,
+  createdAt?    : Date,
+  updatedAt?    : Date,
 |}
 
 

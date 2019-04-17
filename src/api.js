@@ -2,12 +2,19 @@
 import * as f from 'fpx'
 import * as t from './types'
 import * as e from './env'
+import * as u from './utils'
 import * as n from './net'
 import * as a from './auth'
 import * as s from './sheets'
 import * as db from './db'
 
-const {SESSION_HEADER_NAME, SESSION_COOKIE_NAME} = e.properties
+const {
+  SESSION_HEADER_NAME,
+  SESSION_COOKIE_NAME,
+  CRYPTO_ALGORITHM,
+  CRYPTO_PASSWORD,
+  CRYPTO_SALT,
+} = e.properties
 
 /**
  * Middlewares
@@ -26,10 +33,20 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     return
   }
 
-  const token: t.GAuthToken | void = session.externalToken
-  if (!token) {
+  const encryptedToken: string | void = session.externalToken
+  if (!encryptedToken) {
     ctx.throw(400, 'Token is required')
+    return
   }
+
+  const decryptedToken: string = u.decrypt(
+    CRYPTO_ALGORITHM,
+    CRYPTO_PASSWORD,
+    CRYPTO_SALT,
+    encryptedToken
+  )
+
+  const token: t.GAuthToken | void = JSON.parse(decryptedToken)
 
   ctx.client = a.createOAuth2Client(token)
   ctx.sessionId = session.id
@@ -127,7 +144,14 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     lastName     : gUser.family_name,
   }
 
-  const session: t.Session = await db.login(user, token)
+  const encryptedToken: string = u.encrypt(
+    CRYPTO_ALGORITHM,
+    CRYPTO_PASSWORD,
+    CRYPTO_SALT,
+    JSON.stringify(token)
+  )
+
+  const session: t.Session = await db.login(user, encryptedToken)
 
   a.setCookie(ctx, SESSION_COOKIE_NAME, session.id)
 

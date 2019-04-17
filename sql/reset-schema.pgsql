@@ -45,7 +45,7 @@ create table spreadsheets (
 create table sessions (
   id                 uuid         primary key default gen_random_uuid(),
   user_id            uuid         not null references users(id),
-  external_token     json         not null,
+  external_token     text         not null default '',
   created_at         timestamp    null default current_timestamp,
   updated_at         timestamp    null default current_timestamp
 );

@@ -26,7 +26,7 @@ export function query(text: string, values: Array<mixed> | void): Promise<t.Resu
  * Auth
  */
 
-export async function login(user: t.User, token: t.GAuthToken): Promise<t.Session> {
+export async function login(user: t.User, token: string): Promise<t.Session> {
   const q: string = `
   with
     ur as (select id from roles where sym='user'),
@@ -131,7 +131,7 @@ function rowToSession(row: t.Row): t.Session {
   return {
     id            : ((row.id            : any): string),
     userId        : ((row.user_id       : any): string),
-    externalToken : ((row.external_token: any): t.GAuthToken),
+    externalToken : ((row.external_token: any): string),
     createdAt     : ((row.created_at    : any): Date),
     updatedAt     : ((row.updated_at    : any): Date),
   }
