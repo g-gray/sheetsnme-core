@@ -161,7 +161,10 @@ export async function fetchBalancesByAccountIds(
     sheetId,
     `select F, sum(G) where ${outcomeIdsCond} group by F`,
   )
-  const outcomeBalances: t.Balances = f.keyBy(f.map(outcomeTable.rows, rowToBalance), ({accountId}) => accountId)
+  const outcomeBalances: t.Balances = f.keyBy(
+    f.map(outcomeTable && outcomeTable.rows, rowToBalance),
+    ({accountId}) => accountId
+  )
 
   const incomeIdsCond: string = f.map(accountIds, id => `H = '${id}'`).join(' OR ')
   const incomeTable: t.GQueryTable = await querySheet(
@@ -169,7 +172,10 @@ export async function fetchBalancesByAccountIds(
     sheetId,
     `select H, sum(I) where ${incomeIdsCond} group by H`,
   )
-  const incomeBalances: t.Balances = f.keyBy(f.map(incomeTable.rows, rowToBalance), ({accountId}) => accountId)
+  const incomeBalances: t.Balances = f.keyBy(
+    f.map(incomeTable && incomeTable.rows, rowToBalance),
+    ({accountId}) => accountId
+  )
 
   const ids = f.uniq(f.concat(f.keys(outcomeBalances), f.keys(incomeBalances)))
 

@@ -1,12 +1,10 @@
 // @flow
-
 import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
 import * as t from './types'
 import * as e from './env'
 import * as r from './router'
 import * as u from './utils'
-
 
 /**
  * App entry
