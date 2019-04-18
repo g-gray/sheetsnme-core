@@ -1,8 +1,17 @@
 // @flow
 import uuid from 'uuid/v4'
 import * as t from './types'
+import * as u from './utils'
+
+export const DEBT_ACCOUNT_ID = '00000000-0000-0000-0000-000000000000'
+const CARD_ACCOUNT_ID        = '00000000-0000-0000-0000-000000000001'
+
+const SALARY_CATEGORY_ID     = '00000000-0000-0000-0001-000000000001'
+
+const EMPLOYER_PAYEE_ID      = '00000000-0000-0000-0002-000000000001'
 
 export function createTransactionsSheet(): t.GSheet {
+  const date: Date = new Date()
   return {
     properties: {
       sheetId: 0,
@@ -34,16 +43,29 @@ export function createTransactionsSheet(): t.GSheet {
               {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A) - 1, ""))'}},
             ],
           },
+          {
+            values: [
+              {userEnteredValue: {stringValue: uuid()}},
+              {userEnteredValue: {stringValue: u.formatDate(date)}},
+              {userEnteredValue: {stringValue: SALARY_CATEGORY_ID}},
+              {userEnteredValue: {stringValue: EMPLOYER_PAYEE_ID}},
+              {userEnteredValue: {stringValue: 'It is an initial transaction. Feel free to edit or delete it.'}},
+              {userEnteredValue: {stringValue: ''}},
+              {userEnteredValue: {numberValue: 0}},
+              {userEnteredValue: {stringValue: CARD_ACCOUNT_ID}},
+              {userEnteredValue: {numberValue: 10000}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+            ],
+          },
         ],
       },
     ],
   }
 }
 
-export const DEBT_ACCOUNT_ID = '00000000-0000-0000-0000-000000000000'
-
 export function createAccountsSheet(): t.GSheet {
-  const date: string = new Date().toJSON()
+  const date: Date = new Date()
   return {
     properties: {
       sheetId: 1,
@@ -74,35 +96,35 @@ export function createAccountsSheet(): t.GSheet {
               {userEnteredValue: {stringValue: DEBT_ACCOUNT_ID}},
               {userEnteredValue: {stringValue: 'Debt'}},
               {userEnteredValue: {stringValue: 'RUB'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+            ],
+          },
+          {
+            values: [
+              {userEnteredValue: {stringValue: CARD_ACCOUNT_ID}},
+              {userEnteredValue: {stringValue: 'Card'}},
+              {userEnteredValue: {stringValue: 'RUB'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Карта'}},
+              {userEnteredValue: {stringValue: 'Cash'}},
               {userEnteredValue: {stringValue: 'RUB'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Наличные'}},
+              {userEnteredValue: {stringValue: 'Deposit'}},
               {userEnteredValue: {stringValue: 'RUB'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
-            ],
-          },
-          {
-            values: [
-              {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Вклад'}},
-              {userEnteredValue: {stringValue: 'RUB'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
         ],
@@ -112,7 +134,7 @@ export function createAccountsSheet(): t.GSheet {
 }
 
 export function createCategoriesSheet(): t.GSheet {
-  const date: string = new Date().toJSON()
+  const date: Date = new Date()
   return {
     properties: {
       sheetId: 2,
@@ -139,74 +161,74 @@ export function createCategoriesSheet(): t.GSheet {
           },
           {
             values: [
-              {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Жилье'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: SALARY_CATEGORY_ID}},
+              {userEnteredValue: {stringValue: 'Salary'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Здоровье'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Household'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Внешний вид'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Healthcare'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Образование'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Appearance'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Комиссии, налоги, пошлины'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Education'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Продукты и питание'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Taxes & Charges'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Отдых и развлечения'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Food'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Транспорт'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Entertainment'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Зарплата'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Transport'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
         ],
@@ -216,13 +238,13 @@ export function createCategoriesSheet(): t.GSheet {
 }
 
 export function createPayeesSheet(): t.GSheet {
-  const date: string = new Date().toJSON()
+  const date: Date = new Date()
   return {
     properties: {
       sheetId: 3,
       title: 'Payees',
       gridProperties: {
-        rowCount: 2,
+        rowCount: 4,
         columnCount: 5,
         frozenRowCount: 1,
       },
@@ -243,10 +265,26 @@ export function createPayeesSheet(): t.GSheet {
           },
           {
             values: [
+              {userEnteredValue: {stringValue: EMPLOYER_PAYEE_ID}},
+              {userEnteredValue: {stringValue: 'Employer'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+            ],
+          },
+          {
+            values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Государство'}},
-              {userEnteredValue: {stringValue: date}},
-              {userEnteredValue: {stringValue: date}},
+              {userEnteredValue: {stringValue: 'Jack'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+            ],
+          },
+          {
+            values: [
+              {userEnteredValue: {stringValue: uuid()}},
+              {userEnteredValue: {stringValue: 'Sarah'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
         ],
@@ -256,13 +294,14 @@ export function createPayeesSheet(): t.GSheet {
 }
 
 export function createVersionsSheet(): t.GSheet {
+  const date: Date = new Date()
   return {
     properties: {
       sheetId: 4,
       title: 'Versions',
       gridProperties: {
         rowCount: 2,
-        columnCount: 3,
+        columnCount: 5,
         frozenRowCount: 1,
       },
     },
@@ -276,6 +315,8 @@ export function createVersionsSheet(): t.GSheet {
               {userEnteredValue: {stringValue: 'id'}},
               {userEnteredValue: {stringValue: 'version'}},
               {userEnteredValue: {stringValue: 'comment'}},
+              {userEnteredValue: {stringValue: 'createdAt'}},
+              {userEnteredValue: {stringValue: 'updatedAt'}},
             ],
           },
           {
@@ -283,6 +324,8 @@ export function createVersionsSheet(): t.GSheet {
               {userEnteredValue: {stringValue: uuid()}},
               {userEnteredValue: {numberValue: 0}},
               {userEnteredValue: {stringValue: 'Initial version'}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
+              {userEnteredValue: {stringValue: date.toJSON()}},
             ],
           },
         ],
