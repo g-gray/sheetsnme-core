@@ -49,6 +49,7 @@ export type EnvProperties = {|
   CRYPTO_ALGORITHM   : string,
   CRYPTO_PASSWORD    : string,
   CRYPTO_SALT        : string,
+  CRYPTO_KEYLENGTH   : number,
 |}
 
 

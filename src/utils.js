@@ -53,11 +53,12 @@ export function fetch(params: t.XHttpParams): Promise<t.XHttpResponse> {
 
 export function encrypt(
   algorythm: string,
-  password: string,
-  salt: string,
-  text: string,
+  password : string,
+  salt     : string,
+  keyLength: number,
+  text     : string,
 ): string {
-  const key: Buffer = crypto.scryptSync(password, salt, 32) // Use the async `crypto.scrypt()` instead.
+  const key: Buffer = crypto.scryptSync(password, salt, keyLength) // Use the async `crypto.scrypt()` instead.
   const iv: Buffer = Buffer.alloc(16, 0) // Initialization vector. Use `crypto.randomBytes` to generate a random iv instead of the static iv shown here.
   const cipher = crypto.createCipheriv(algorythm, key, iv)
   let encrypted: string = cipher.update(text, 'utf8', 'hex')
@@ -68,11 +69,12 @@ export function encrypt(
 
 export function decrypt(
   algorythm: string,
-  password: string,
-  salt: string,
-  cipher: string
+  password : string,
+  salt     : string,
+  keyLength: number,
+  cipher   : string
 ): string {
-  const key: Buffer = crypto.scryptSync(password, salt, 32) // Use the async `crypto.scrypt()` instead.
+  const key: Buffer = crypto.scryptSync(password, salt, keyLength) // Use the async `crypto.scrypt()` instead.
   const iv: Buffer = Buffer.alloc(16, 0) // Initialization vector. Use `crypto.randomBytes` to generate a random iv instead of the static iv shown here.
   const decipher = crypto.createDecipheriv(algorythm, key, iv) // Encrypted using same algorithm, key and iv.
   let decrypted: string = decipher.update(cipher, 'hex', 'utf8')

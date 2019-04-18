@@ -14,6 +14,7 @@ const {
   CRYPTO_ALGORITHM,
   CRYPTO_PASSWORD,
   CRYPTO_SALT,
+  CRYPTO_KEYLENGTH,
 } = e.properties
 
 /**
@@ -43,6 +44,7 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     CRYPTO_ALGORITHM,
     CRYPTO_PASSWORD,
     CRYPTO_SALT,
+    CRYPTO_KEYLENGTH,
     encryptedToken
   )
 
@@ -148,6 +150,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     CRYPTO_ALGORITHM,
     CRYPTO_PASSWORD,
     CRYPTO_SALT,
+    CRYPTO_KEYLENGTH,
     JSON.stringify(token)
   )
 
