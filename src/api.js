@@ -209,7 +209,7 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
 
   ctx.body = f.map(accounts, account => ({
     ...account,
-    balance: account.initial + (balances[account.id] ? balances[account.id].balance : 0),
+    balance: balances[account.id] ? balances[account.id].balance : 0,
   }))
 }
 
@@ -232,7 +232,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
 
   ctx.body = {
     ...account,
-    balance: account.initial + (balances[account.id] ? balances[account.id].balance : 0),
+    balance: balances[account.id] ? balances[account.id].balance : 0,
   }
 }
 

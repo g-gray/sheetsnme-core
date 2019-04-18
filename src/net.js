@@ -99,10 +99,9 @@ function rowToAccount(row: t.GQueryRow): t.Account {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
     currencyCode: row.c[2] ? String(row.c[2].v) : '',
-    initial     : row.c[3] ? Number(row.c[3].v) : 0,
-    createdAt   : row.c[4] ? String(row.c[4].v) : '',
-    updatedAt   : row.c[5] ? String(row.c[5].v) : '',
-    row         : row.c[6] ? Number(row.c[6].v) : 0,
+    createdAt   : row.c[3] ? String(row.c[3].v) : '',
+    updatedAt   : row.c[4] ? String(row.c[4].v) : '',
+    row         : row.c[5] ? Number(row.c[5].v) : 0,
   }
 }
 
@@ -117,7 +116,6 @@ function accountToRow(account: t.Account): t.GRowData {
       {userEnteredValue: {stringValue: account.title}},
       // {userEnteredValue: {stringValue: account.currencyCode}},
       {userEnteredValue: {stringValue: 'RUB'}},
-      {userEnteredValue: {numberValue: account.initial}},
       {userEnteredValue: {stringValue: createdAt}},
       {userEnteredValue: {stringValue: date}},
     ],
@@ -134,10 +132,6 @@ function validateAccountFields(fields: any): t.ResErrors {
   // if (fields.currencyCode !== 'RUB') {
   //   errors.push({text: 'Currency Code must be one of these: \'RUB\''})
   // }
-
-  if (f.isNil(fields.initial) || !f.isNumber(fields.initial) || fields.initial < 0) {
-    errors.push({text: 'Initial amount must be a positive number'})
-  }
 
   return errors
 }

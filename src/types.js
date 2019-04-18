@@ -164,7 +164,6 @@ export type Account = {|
   id          : string,
   title       : string,
   currencyCode: string,
-  initial     : number,
   createdAt   : string,
   updatedAt   : string,
   row?        : number,
