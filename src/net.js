@@ -21,7 +21,7 @@ export async function fetchAccount(
   const result: t.Account | void = await queryEntityById<t.Account>(
     client,
     spreadsheetId,
-    'Accounts',
+    s.ACCOUNTS_SHEET_ID,
     id,
     rowToAccount,
   )
@@ -36,7 +36,7 @@ export async function createAccount(
   const result: t.Account = await createEntity<t.Account>(
     client,
     spreadsheetId,
-    'Accounts',
+    s.ACCOUNTS_SHEET_ID,
     {...fields, id: uuid()},
     validateAccountFields,
     accountToRow,
@@ -54,7 +54,7 @@ export async function updateAccount(
   const result: t.Account = await updateEntityById<t.Account>(
     client,
     spreadsheetId,
-    'Accounts',
+    s.ACCOUNTS_SHEET_ID,
     id,
     fields,
     validateAccountFields,
@@ -72,7 +72,7 @@ export async function deleteAccount(
   const result: t.Account = await deleteEntityById<t.Account>(
     client,
     spreadsheetId,
-    'Accounts',
+    s.ACCOUNTS_SHEET_ID,
     id,
     rowToAccount,
   )
@@ -86,7 +86,7 @@ export async function fetchAccounts(
   const result: t.Accounts = await queryEntities<t.Account>(
     client,
     spreadsheetId,
-    'Accounts',
+    s.ACCOUNTS_SHEET_ID,
     rowToAccount,
     `select * where A != 'id' AND A !='${s.DEBT_ACCOUNT_ID}' order by B`
   )
@@ -142,17 +142,10 @@ export async function fetchBalancesByAccountIds(
   spreadsheetId: string,
   accountIds: Array<string>,
 ): t.Balances {
-  const sheet: t.GSheet | void = await fetchSheetByTitle(client, spreadsheetId, 'Transactions')
-  if (!sheet) {
-    throw new u.PublicError('Sheet not found')
-  }
-
-  const sheetId: number = sheet.properties.sheetId
-
   const outcomeIdsCond: string = f.map(accountIds, id => `F = '${id}'`).join(' OR ')
   const outcomeTable: t.GQueryTable = await querySheet(
     spreadsheetId,
-    sheetId,
+    s.TRANSACTIONS_SHEET_ID,
     `select F, sum(G) where ${outcomeIdsCond} group by F`,
   )
   const outcomeBalances: t.Balances = f.keyBy(
@@ -163,7 +156,7 @@ export async function fetchBalancesByAccountIds(
   const incomeIdsCond: string = f.map(accountIds, id => `H = '${id}'`).join(' OR ')
   const incomeTable: t.GQueryTable = await querySheet(
     spreadsheetId,
-    sheetId,
+    s.TRANSACTIONS_SHEET_ID,
     `select H, sum(I) where ${incomeIdsCond} group by H`,
   )
   const incomeBalances: t.Balances = f.keyBy(
@@ -211,7 +204,7 @@ export async function fetchCategory(
   const result: t.Category | void = await queryEntityById<t.Category>(
     client,
     spreadsheetId,
-    'Categories',
+    s.CATEGORIES_SHEET_ID,
     id,
     rowToCategory,
   )
@@ -226,7 +219,7 @@ export async function createCategory(
   const result: t.Category = await createEntity<t.Category>(
     client,
     spreadsheetId,
-    'Categories',
+    s.CATEGORIES_SHEET_ID,
     {...fields, id: uuid()},
     validateCategoryFields,
     categoryToRow,
@@ -244,7 +237,7 @@ export async function updateCategory(
   const result: t.Category = await updateEntityById<t.Category>(
     client,
     spreadsheetId,
-    'Categories',
+    s.CATEGORIES_SHEET_ID,
     id,
     fields,
     validateCategoryFields,
@@ -262,7 +255,7 @@ export async function deleteCategory(
   const result: t.Category = await deleteEntityById<t.Category>(
     client,
     spreadsheetId,
-    'Categories',
+    s.CATEGORIES_SHEET_ID,
     id,
     rowToCategory,
   )
@@ -276,7 +269,7 @@ export async function fetchCategories(
   const result: t.Categories = await queryEntities<t.Category>(
     client,
     spreadsheetId,
-    'Categories',
+    s.CATEGORIES_SHEET_ID,
     rowToCategory,
     `select * where A != 'id' order by B`
   )
@@ -333,7 +326,7 @@ export async function fetchPayee(
   const result: t.Payee | void = await queryEntityById<t.Payee>(
     client,
     spreadsheetId,
-    'Payees',
+    s.PAYEES_SHEET_ID,
     id,
     rowToPayee,
   )
@@ -349,7 +342,7 @@ export async function createPayee(
   const result: t.Payee = await createEntity<t.Payee>(
     client,
     spreadsheetId,
-    'Payees',
+    s.PAYEES_SHEET_ID,
     {...fields, id: uuid()},
     validatePayeeFields,
     payeeToRow,
@@ -367,7 +360,7 @@ export async function updatePayee(
   const result: t.Payee = await updateEntityById<t.Payee>(
     client,
     spreadsheetId,
-    'Payees',
+    s.PAYEES_SHEET_ID,
     id,
     fields,
     validatePayeeFields,
@@ -385,7 +378,7 @@ export async function deletePayee(
   const result: t.Payee = await deleteEntityById<t.Payee>(
     client,
     spreadsheetId,
-    'Payees',
+    s.PAYEES_SHEET_ID,
     id,
     rowToPayee,
   )
@@ -399,7 +392,7 @@ export async function fetchPayees(
   const result: t.Payees = await queryEntities<t.Payee>(
     client,
     spreadsheetId,
-    'Payees',
+    s.PAYEES_SHEET_ID,
     rowToPayee,
     `select * where A != 'id' order by B`
   )
@@ -456,7 +449,7 @@ export async function fetchTransaction(
   const result: t.Transaction | void = await queryEntityById<t.Transaction>(
     client,
     spreadsheetId,
-    'Transactions',
+    s.TRANSACTIONS_SHEET_ID,
     id,
     rowToTransaction,
   )
@@ -471,7 +464,7 @@ export async function createTransaction(
   const result: t.Transaction = await createEntity<t.Transaction>(
     client,
     spreadsheetId,
-    'Transactions',
+    s.TRANSACTIONS_SHEET_ID,
     {...fields, id: uuid()},
     validateTransactionFields,
     transactionToRow,
@@ -489,7 +482,7 @@ export async function updateTransaction(
   const result: t.Transaction = await updateEntityById<t.Transaction>(
     client,
     spreadsheetId,
-    'Transactions',
+    s.TRANSACTIONS_SHEET_ID,
     id,
     fields,
     validateTransactionFields,
@@ -507,7 +500,7 @@ export async function deleteTransaction(
   const result: t.Transaction = await deleteEntityById<t.Transaction>(
     client,
     spreadsheetId,
-    'Transactions',
+    s.TRANSACTIONS_SHEET_ID,
     id,
     rowToTransaction,
   )
@@ -523,7 +516,7 @@ export async function fetchTransactions(
   const result: t.Transactions = await queryEntities<t.Transaction>(
     client,
     spreadsheetId,
-    'Transactions',
+    s.TRANSACTIONS_SHEET_ID,
     rowToTransaction,
     query,
   )
@@ -662,7 +655,7 @@ export async function createAppSpreadsheet(client: t.GOAuth2Client): Promise<t.G
 async function queryEntityById<T>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  sheetName    : string,
+  sheetId      : number,
   id           : string,
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T | void> {
@@ -674,7 +667,7 @@ async function queryEntityById<T>(
   const entities: Array<T> = await queryEntities<T>(
     client,
     spreadsheetId,
-    sheetName,
+    sheetId,
     rowToEntity,
     query,
   )
@@ -687,18 +680,13 @@ async function queryEntityById<T>(
 async function queryEntities<T>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  sheetName    : string,
+  sheetId      : number,
   rowToEntity  : (row: t.GQueryRow) => T,
   query?: string,
 ): Promise<Array<T>> {
-  const sheet: t.GSheet | void = await fetchSheetByTitle(client, spreadsheetId, sheetName)
-  if (!sheet) {
-    throw new u.PublicError('Sheet not found')
-  }
-
   const table: t.GQueryTable = await querySheet(
     spreadsheetId,
-    sheet.properties.sheetId,
+    sheetId,
     query || `select * where A != 'id'`,
   )
   const entities: Array<T> = f.map(table.rows, row => rowToEntity(row))
@@ -709,29 +697,24 @@ async function queryEntities<T>(
 async function createEntity<T>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
-  sheetName     : string,
+  sheetId       : number,
   fields        : any,
   validateFields: (fields: any) => t.ResErrors,
   entityToRow   : (entity: T) => t.GRowData,
   rowToEntity   : (row: t.GQueryRow) => T,
 ): Promise<T> {
-  const sheet: t.GSheet | void = await fetchSheetByTitle(client, spreadsheetId, sheetName)
-  if (!sheet) {
-    throw new u.PublicError('Sheet not found')
-  }
-
   const errors: t.ResErrors = validateFields(fields)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
 
   const entity: T = fields
-  await appendRow(client, spreadsheetId, sheet.properties.sheetId, entityToRow(entity))
+  await appendRow(client, spreadsheetId, sheetId, entityToRow(entity))
 
   const created: T | void = await queryEntityById<T>(
     client,
     spreadsheetId,
-    sheetName,
+    sheetId,
     entity.id,
     rowToEntity,
   )
@@ -746,7 +729,7 @@ async function createEntity<T>(
 async function deleteEntityById<T>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  sheetName    : string,
+  sheetId      : number,
   id           : string,
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T> {
@@ -754,15 +737,10 @@ async function deleteEntityById<T>(
     throw new u.PublicError('Entity id is required')
   }
 
-  const sheet: t.GSheet | void = await fetchSheetByTitle(client, spreadsheetId, sheetName)
-  if (!sheet) {
-    throw new u.PublicError('Sheet not found')
-  }
-
   const toDelete: T | void = await queryEntityById<T>(
     client,
     spreadsheetId,
-    sheetName,
+    sheetId,
     id,
     rowToEntity,
   )
@@ -775,8 +753,7 @@ async function deleteEntityById<T>(
     throw new u.PublicError('Row number not found')
   }
 
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
-  await deleteRow(client, spreadsheetId, sheet.properties.sheetId, frozenRows + rowNumber)
+  await deleteRow(client, spreadsheetId, sheetId, rowNumber)
 
   return toDelete
 }
@@ -785,7 +762,7 @@ async function deleteEntityById<T>(
 async function updateEntityById<T>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
-  sheetName     : string,
+  sheetId       : number,
   id            : string,
   fields        : any,
   validateFields: (fields: any) => t.ResErrors,
@@ -796,11 +773,6 @@ async function updateEntityById<T>(
     throw new u.PublicError('Entity id is required')
   }
 
-  const sheet: t.GSheet | void = await fetchSheetByTitle(client, spreadsheetId, sheetName)
-  if (!sheet) {
-    throw new u.PublicError('Sheet not found')
-  }
-
   const errors: t.ResErrors = validateFields(fields)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
@@ -809,7 +781,7 @@ async function updateEntityById<T>(
   const toUpdate: T | void = await queryEntityById<T>(
     client,
     spreadsheetId,
-    sheetName,
+    sheetId,
     id,
     rowToEntity,
   )
@@ -823,13 +795,12 @@ async function updateEntityById<T>(
   }
 
   const entity: T = fields
-  const frozenRows: number = sheet.properties.gridProperties.frozenRowCount || 0
-  await updateRow(client, spreadsheetId, sheet.properties.sheetId, frozenRows + rowNumber,  entityToRow(entity))
+  await updateRow(client, spreadsheetId, sheetId, rowNumber, entityToRow(entity))
 
   const updated: T | void = await queryEntityById<T>(
     client,
     spreadsheetId,
-    sheetName,
+    sheetId,
     entity.id,
     rowToEntity,
   )
@@ -909,25 +880,7 @@ async function deleteRow(
   })
 }
 
-
-async function fetchSheetByTitle(
-  client       : t.GOAuth2Client,
-  spreadsheetId: string,
-  title        : string,
-): Promise<t.GSheet | void> {
-  const spreadsheet: t.GSpreadsheet | void = await fetchSpreadsheet(client, {spreadsheetId})
-  if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
-  }
-
-  const sheet = findSheetByTitle(spreadsheet.sheets, title)
-  return sheet
-}
-
-function findSheetByTitle(sheets: Array<t.GSheet>, title: string): t.GSheet | void {
-  return f.find(sheets, sheet => sheet.properties.title === title)
-}
-
+// TODO It is unused currently. Candidate to be deleted
 export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
   return new Promise(resolve => {
     google.sheets({version: 'v4', auth: client}).spreadsheets.get(options, (err, res) => {

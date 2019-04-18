@@ -3,18 +3,24 @@ import uuid from 'uuid/v4'
 import * as t from './types'
 import * as u from './utils'
 
-export const DEBT_ACCOUNT_ID = '00000000-0000-0000-0000-000000000000'
-const CARD_ACCOUNT_ID        = '00000000-0000-0000-0000-000000000001'
+export const TRANSACTIONS_SHEET_ID = 0
+export const ACCOUNTS_SHEET_ID     = 1
+export const CATEGORIES_SHEET_ID   = 2
+export const PAYEES_SHEET_ID       = 3
+export const VERSIONS_SHEET_ID     = 4
 
-const SALARY_CATEGORY_ID     = '00000000-0000-0000-0001-000000000001'
+export const DEBT_ACCOUNT_ID    = '00000000-0000-0000-0001-000000000000'
+export const CARD_ACCOUNT_ID    = '00000000-0000-0000-0001-000000000001'
 
-const EMPLOYER_PAYEE_ID      = '00000000-0000-0000-0002-000000000001'
+export const SALARY_CATEGORY_ID = '00000000-0000-0000-0002-000000000001'
+
+export const EMPLOYER_PAYEE_ID  = '00000000-0000-0000-0003-000000000001'
 
 export function createTransactionsSheet(): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
-      sheetId: 0,
+      sheetId: TRANSACTIONS_SHEET_ID,
       title: 'Transactions',
       gridProperties: {
         rowCount: 2,
@@ -40,7 +46,7 @@ export function createTransactionsSheet(): t.GSheet {
               {userEnteredValue: {stringValue: 'incomeAmount'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A) - 1, ""))'}},
+              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
             ],
           },
           {
@@ -49,7 +55,7 @@ export function createTransactionsSheet(): t.GSheet {
               {userEnteredValue: {stringValue: u.formatDate(date)}},
               {userEnteredValue: {stringValue: SALARY_CATEGORY_ID}},
               {userEnteredValue: {stringValue: EMPLOYER_PAYEE_ID}},
-              {userEnteredValue: {stringValue: 'It is an initial transaction. Feel free to edit or delete it.'}},
+              {userEnteredValue: {stringValue: 'This is an initial transaction. Feel free to edit or delete it.'}},
               {userEnteredValue: {stringValue: ''}},
               {userEnteredValue: {numberValue: 0}},
               {userEnteredValue: {stringValue: CARD_ACCOUNT_ID}},
@@ -68,7 +74,7 @@ export function createAccountsSheet(): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
-      sheetId: 1,
+      sheetId: ACCOUNTS_SHEET_ID,
       title: 'Accounts',
       gridProperties: {
         rowCount: 5,
@@ -88,7 +94,7 @@ export function createAccountsSheet(): t.GSheet {
               {userEnteredValue: {stringValue: 'currencyCode'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A) - 1, ""))'}},
+              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
             ],
           },
           {
@@ -137,7 +143,7 @@ export function createCategoriesSheet(): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
-      sheetId: 2,
+      sheetId: CATEGORIES_SHEET_ID,
       title: 'Categories',
       gridProperties: {
         rowCount: 10,
@@ -156,7 +162,7 @@ export function createCategoriesSheet(): t.GSheet {
               {userEnteredValue: {stringValue: 'title'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A) - 1, ""))'}},
+              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
             ],
           },
           {
@@ -241,7 +247,7 @@ export function createPayeesSheet(): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
-      sheetId: 3,
+      sheetId: PAYEES_SHEET_ID,
       title: 'Payees',
       gridProperties: {
         rowCount: 4,
@@ -260,7 +266,7 @@ export function createPayeesSheet(): t.GSheet {
               {userEnteredValue: {stringValue: 'title'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A) - 1, ""))'}},
+              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
             ],
           },
           {
@@ -297,7 +303,7 @@ export function createVersionsSheet(): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
-      sheetId: 4,
+      sheetId: VERSIONS_SHEET_ID,
       title: 'Versions',
       gridProperties: {
         rowCount: 2,
