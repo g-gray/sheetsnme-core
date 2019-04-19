@@ -428,7 +428,7 @@ function payeeToRow(payee: t.Payee): t.GRowData {
 function validatePayeeFields(fields: any): t.ResErrors {
   const errors = []
 
-  if (fields.title || !f.isString(fields.title) || !fields.title.length) {
+  if (!fields.title || !f.isString(fields.title) || !fields.title.length) {
     errors.push({text: 'Title must be non empty string'})
   }
 
