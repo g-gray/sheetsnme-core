@@ -4,6 +4,7 @@
 !/.flowconfig
 !/.gitignore
 !/package.json
+!/yarn.lock
 !/readme.md
 !/webpack.config.js
 !/yarn.lock
