@@ -1,24 +1,11 @@
-// flow-typed signature: 22454723de346388533aa45cab75d46c
-// flow-typed version: 5a6a98aaa2/koa_v2.0.x/flow_>=v0.93.x
+// flow-typed signature: 421e823f8bc151f51c3051ff8fc453d3
+// flow-typed version: 14fe0603a9/koa_v2.0.x/flow_>=v0.94.x
 
 /*
  * Type def from from source code of koa.
  * this: https://github.com/koajs/koa/commit/fabf5864c6a5dca0782b867a263b1b0825a05bf9
 **/
 declare module 'koa' {
-  // Currently, import type doesn't work well ?
-  // so copy `Server` from flow/lib/node.js#L820
-  declare class Server extends net$Server {
-    listen(port?: number, hostname?: string, backlog?: number, callback?: Function): Server,
-    listen(path: string, callback?: Function): Server,
-    listen(handle: {}, callback?: Function): Server,
-    close(callback?: Function): Server,
-    maxHeadersCount: number,
-    setTimeout(msecs: number, callback: Function): Server,
-    timeout: number,
-  }
-  declare type ServerType = Server;
-
   declare type JSON = | string | number | boolean | null | JSONObject | JSONArray;
   declare type JSONObject = { [key: string]: JSON };
   declare type JSONArray = Array<JSON>;
@@ -191,8 +178,8 @@ declare module 'koa' {
   };
   // https://github.com/pillarjs/cookies
   declare type CookiesSetOptions = {
-    domain: string, // domain of the cookie (no default).
-    maxAge: number, // milliseconds from Date.now() for expiry
+    domain?: string, // domain of the cookie (no default).
+    maxAge?: number, // milliseconds from Date.now() for expiry
     expires?: Date, //cookie's expiration date (expires at the end of session by default).
     path?: string, //  the path of the cookie (/ by default).
     secure?: boolean, // false by default for HTTP, true by default for HTTPS
@@ -304,10 +291,10 @@ declare module 'koa' {
     proxy: boolean, // when true proxy header fields will be trusted
     request: Request,
     response: Response,
-    server: Server,
+    server: http$Server,
     subdomainOffset: number,
 
-    listen: $PropertyType<Server, 'listen'>,
+    listen: $PropertyType<http$Server, 'listen'>,
     toJSON(): ApplicationJSON,
     inspect(): ApplicationJSON,
     use(fn: Middleware): this,
