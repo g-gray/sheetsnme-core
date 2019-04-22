@@ -715,6 +715,7 @@ async function createEntity<T>(
     client,
     spreadsheetId,
     sheetId,
+    // $FlowFixMe
     entity.id,
     rowToEntity,
   )
@@ -748,6 +749,7 @@ async function deleteEntityById<T>(
     throw new u.PublicError('Entity not found')
   }
 
+  // $FlowFixMe
   const rowNumber: number = toDelete.row
   if (!rowNumber) {
     throw new u.PublicError('Row number not found')
@@ -789,6 +791,7 @@ async function updateEntityById<T>(
     throw new u.PublicError('Entity not found')
   }
 
+  // $FlowFixMe
   const rowNumber: number = toUpdate.row
   if (!rowNumber) {
     throw new u.PublicError('Row number not found')
@@ -801,6 +804,7 @@ async function updateEntityById<T>(
     client,
     spreadsheetId,
     sheetId,
+    // $FlowFixMe
     entity.id,
     rowToEntity,
   )
