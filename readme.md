@@ -4,7 +4,7 @@ Backend core for Accountant.
 
 ## Dependencies
 
-- Node, NPM, Yarn
+- Node, Yarn
 - Postgresql
 
 ## Development Setup
