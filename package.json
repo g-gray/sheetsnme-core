@@ -1,10 +1,8 @@
 {
   "scripts": {
     "start": "webpack --watch",
-    "db:setup": "(source .env.properties && PGPASSWORD=$POSTGRES_PASSWORD psql -d $DB_NAME -h $PGSCRIPT_DB_URL -U $POSTGRES_USER -f sql/setup.pgsql)",
-    "db:reset": "(source .env.properties && PGPASSWORD=$POSTGRES_PASSWORD psql -d $DB_NAME -h $PGSCRIPT_DB_URL -U $POSTGRES_USER -f sql/reset-schema.pgsql)",
-    "db:seed": "(source .env.properties && PGPASSWORD=$POSTGRES_PASSWORD psql -d $DB_NAME -h $PGSCRIPT_DB_URL -U $POSTGRES_USER -f sql/seed.pgsql)",
-    "db:reset-and-seed": "npm run db:setup && npm run db:reset && npm run db:seed"
+    "build": "NODE_ENV=production webpack",
+    "db:repopulate": "node src/db-repopulate.js"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
