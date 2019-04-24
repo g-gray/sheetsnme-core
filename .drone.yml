@@ -1,0 +1,57 @@
+kind: pipeline
+name: default
+
+steps:
+- name: backend
+  image: node:11
+  environment:
+    NODE_ENV: production
+
+    SCHEMA: http
+    HOST: 0.0.0.0
+    PORT: 3000
+
+    CLIENT_ID:
+      from_secret: CLIENT_ID
+    CLIENT_SECRET:
+      from_secret: CLIENT_SECRET
+
+    SPREADSHEET_NAME: Accountant
+
+    DB_HOST: database
+    DB_NAME: accountant
+    POSTGRES_USER:
+      from_secret: POSTGRES_USER
+    POSTGRES_PASSWORD:
+      from_secret: POSTGRES_PASSWORD
+
+    SESSION_COOKIE_NAME: accountant-session-id
+    SESSION_HEADER_NAME: x-accountant-session-id
+
+    CRYPTO_ALGORITHM:
+      from_secret: CRYPTO_ALGORITHM
+    CRYPTO_PASSWORD:
+      from_secret: CRYPTO_PASSWORD
+    CRYPTO_SALT:
+      from_secret: CRYPTO_SALT
+    CRYPTO_KEYLENGTH:
+      from_secret: CRYPTO_KEYLENGTH
+  commands:
+  - sleep 15
+  - yarn build
+  - node ./app/build/index.js
+  when:
+    branch:
+      - master
+    event:
+      - push
+
+services:
+- name: database
+  image: postgres:11-alpine
+  ports:
+  - 5432
+  environment:
+    POSTGRES_USER:
+      from_secret: POSTGRES_USER
+    POSTGRES_DB: accountant

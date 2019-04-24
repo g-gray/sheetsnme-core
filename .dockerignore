@@ -12,6 +12,3 @@
 !/flow-typed
 !/sql
 !/src
-!/.dockerignore
-!/docker-compose.yml
-!/Dockerfile

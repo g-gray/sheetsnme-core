@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  server:
+    image: accountant-backend
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - 3000:3000
+    env_file:
+      - .env.properties.docker
