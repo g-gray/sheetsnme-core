@@ -21,9 +21,9 @@ app
   .use(r.apiAllowedMethods)
 
 
-const {SCHEMA, HOST, PORT} = e.properties
+const {HOST, PORT} = e.properties
 app.listen(PORT, HOST, undefined, () => {
-  console.log(`Server listening on ${SCHEMA}://${HOST}:${PORT}`)
+  console.log(`Server listening on ${HOST}:${PORT}`)
 })
 
 export async function handlePublicError(ctx: t.Context, next: () => Promise<void>): Promise<void> {

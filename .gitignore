@@ -1,5 +1,6 @@
 /*
 !/.drone.yml
+!/Procfile
 !/.env.properties.example
 !/.eslintrc
 !/.flowconfig

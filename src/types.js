@@ -33,11 +33,11 @@ export type Env = {|
 |}
 
 export type EnvProperties = {|
-  SCHEMA             : string,
   HOST               : string,
   PORT               : number,
   CLIENT_ID          : string,
   CLIENT_SECRET      : string,
+  REDIRECT_URL       : string,
   SPREADSHEET_NAME   : string,
   DB_NAME            : string,
   DB_HOST            : string,
@@ -50,6 +50,7 @@ export type EnvProperties = {|
   CRYPTO_PASSWORD    : string,
   CRYPTO_SALT        : string,
   CRYPTO_KEYLENGTH   : number,
+  DATABASE_URL       : string,
 |}
 
 

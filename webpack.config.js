@@ -7,6 +7,7 @@ const webpack = require('webpack')
 const FlowWebpackPlugin = require('flow-webpack-plugin')
 const NodemonPlugin     = require('nodemon-webpack-plugin')
 
+const PROD    = process.env.NODE_ENV === 'production'
 const SRC_DIR = pt.resolve(__dirname, 'src')
 const OUT_DIR = pt.resolve(__dirname, 'app/build')
 
@@ -49,12 +50,14 @@ module.exports = {
 
   plugins: [
     // new webpack.IgnorePlugin(/\.(css|less)$/),
-    new webpack.BannerPlugin({
-      banner: 'require("source-map-support").install();',
-      raw: true,
-      entryOnly: false,
-    }),
-    new NodemonPlugin({watch: OUT_DIR}),
+      ...(PROD ? [] : [
+      new webpack.BannerPlugin({
+        banner: 'require("source-map-support").install();',
+        raw: true,
+        entryOnly: false,
+      }),
+      new NodemonPlugin({watch: OUT_DIR}),
+    ]),
     new FlowWebpackPlugin(),
   ],
 

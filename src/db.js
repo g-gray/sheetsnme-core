@@ -6,7 +6,7 @@ import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
 
-const {DB_HOST, DB_NAME, POSTGRES_USER, POSTGRES_PASSWORD} = e.properties
+const {DB_HOST, DB_NAME, POSTGRES_USER, POSTGRES_PASSWORD, DATABASE_URL} = e.properties
 
 const config: t.ClientConfig = {
   host    : DB_HOST,
@@ -14,7 +14,13 @@ const config: t.ClientConfig = {
   user    : POSTGRES_USER,
   password: POSTGRES_PASSWORD,
 }
-const pool: t.Pool = new Pool(config)
+
+const prodConfig: t.ClientConfig = {
+  connectionString: DATABASE_URL,
+  ssl: true,
+}
+
+const pool: t.Pool = new Pool(DATABASE_URL ? prodConfig : config)
 
 export function query(text: string, values: Array<mixed> | void): Promise<t.ResultSet> {
   return pool.query(text, values)

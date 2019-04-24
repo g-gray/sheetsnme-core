@@ -10,6 +10,7 @@ const properties = {
   POSTGRES_USER    : process.env.POSTGRES_USER     || '',
   POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD || '',
   PGSCRIPT_DB_URL  : process.env.PGSCRIPT_DB_URL   || '',
+  DATABASE_URL     : process.env.DATABASE_URL      || '',
 }
 
 const config = {
@@ -18,7 +19,13 @@ const config = {
   user    : properties.POSTGRES_USER,
   password: properties.POSTGRES_PASSWORD,
 }
-const pool = new pg.Pool(config)
+
+const prodConfig = {
+  connectionString: properties.DATABASE_URL,
+  ssl: true,
+}
+
+const pool = new pg.Pool(properties.DATABASE_URL ? prodConfig : config)
 
 function query(text, values) {
   return pool.query(text, values)
