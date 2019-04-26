@@ -46,6 +46,7 @@ steps:
       from_secret: CRYPTO_KEYLENGTH
   commands:
   - sleep 15
+  - yarn install
   - yarn build
   - node ./app/build/index.js
   when:
