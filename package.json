@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "webpack --watch",
-    "build": "NODE_ENV=production webpack",
+    "build": "webpack",
     "db:repopulate": "node src/db-repopulate.js"
   },
   "devDependencies": {
