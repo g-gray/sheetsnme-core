@@ -10,8 +10,7 @@ const SCOPES: Array<string> = [
   'https://www.googleapis.com/auth/drive.file',
 ]
 
-const {SCHEMA, HOST, PORT, CLIENT_ID, CLIENT_SECRET} = e.properties
-const REDIRECT_URL: string = `${SCHEMA}://${HOST}:${PORT}/auth/code/`
+const {REDIRECT_URL, CLIENT_ID, CLIENT_SECRET} = e.properties
 
 export function generateAuthUrl(state: string | void): string {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client()
