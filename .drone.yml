@@ -5,28 +5,36 @@ steps:
 - name: backend
   image: node:11
   environment:
-    NODE_ENV: production
+    NODE_ENV:
+      from_secret: NODE_ENV
 
-    SCHEMA: http
-    HOST: 0.0.0.0
-    PORT: 3000
+    HOST:
+      from_secret: HOST
+    PORT:
+      from_secret: PORT
 
     CLIENT_ID:
       from_secret: CLIENT_ID
     CLIENT_SECRET:
       from_secret: CLIENT_SECRET
+    REDIRECT_URL:
+      from_secret:
 
-    SPREADSHEET_NAME: Accountant
+    SPREADSHEET_NAME:
+      from_secret: SPREADSHEET_NAME
 
     DB_HOST: database
-    DB_NAME: accountant
+    DB_NAME:
+      from_secret: DB_NAME
     POSTGRES_USER:
       from_secret: POSTGRES_USER
     POSTGRES_PASSWORD:
       from_secret: POSTGRES_PASSWORD
 
-    SESSION_COOKIE_NAME: accountant-session-id
-    SESSION_HEADER_NAME: x-accountant-session-id
+    SESSION_COOKIE_NAME:
+      from_secret: SESSION_COOKIE_NAME
+    SESSION_HEADER_NAME:
+      from_secret: SESSION_HEADER_NAME
 
     CRYPTO_ALGORITHM:
       from_secret: CRYPTO_ALGORITHM
@@ -42,7 +50,7 @@ steps:
   - node ./app/build/index.js
   when:
     branch:
-      - master
+      - drone
     event:
       - push
 
@@ -54,4 +62,5 @@ services:
   environment:
     POSTGRES_USER:
       from_secret: POSTGRES_USER
-    POSTGRES_DB: accountant
+    POSTGRES_DB:
+      from_secret: DB_NAME
