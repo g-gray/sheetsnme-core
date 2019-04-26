@@ -1,5 +1,4 @@
 // @flow
-
 import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
 import * as t from './types'
