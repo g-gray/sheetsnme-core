@@ -14,7 +14,7 @@ These instructions are for MacOS.
 ### Postgres
 https://www.postgresql.org
 
-    brew install posgres
+    brew install postgres
 
 Launch in foreground and leave running:
 
