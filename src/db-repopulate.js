@@ -13,19 +13,16 @@ const properties = {
   DATABASE_URL     : process.env.DATABASE_URL      || '',
 }
 
-const config = {
-  host    : properties.DB_HOST,
-  database: properties.DB_NAME,
-  user    : properties.POSTGRES_USER,
-  password: properties.POSTGRES_PASSWORD,
-}
+const config = properties.DATABASE_URL
+  ? {connectionString: properties.DATABASE_URL, ssl: true}
+  : {
+    host    : properties.DB_HOST,
+    database: properties.DB_NAME,
+    user    : properties.POSTGRES_USER,
+    password: properties.POSTGRES_PASSWORD,
+  }
 
-const prodConfig = {
-  connectionString: properties.DATABASE_URL,
-  ssl: true,
-}
-
-const pool = new pg.Pool(properties.DATABASE_URL ? prodConfig : config)
+const pool = new pg.Pool(config)
 
 function query(text, values) {
   return pool.query(text, values)
