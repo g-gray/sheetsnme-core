@@ -50,7 +50,7 @@ module.exports = {
 
   plugins: [
     // new webpack.IgnorePlugin(/\.(css|less)$/),
-      ...(PROD ? [] : [
+    ...(PROD ? [] : [
       new webpack.BannerPlugin({
         banner: 'require("source-map-support").install();',
         raw: true,
