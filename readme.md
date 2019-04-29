@@ -1,6 +1,6 @@
 ## Overview
 
-Backend core for Accountant.
+Backend core for sheetsn.me.
 
 ## Dependencies
 
@@ -22,7 +22,7 @@ Launch in foreground and leave running:
 
 Create the database:
 
-    createdb accountant
+    createdb sheetsnme
 
 ### Env
 
