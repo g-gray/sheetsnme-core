@@ -1,5 +1,4 @@
 /*
-!/.drone.yml
 !/Procfile
 !/.env.properties.example
 !/.eslintrc
@@ -13,6 +12,3 @@
 !/flow-typed
 !/sql
 !/src
-!/.dockerignore
-!/docker-compose.yml
-!/Dockerfile
