@@ -39,6 +39,6 @@ POSTGRES_PASSWORD=
 
 ```bash
 yarn
-yarn run db:reset-and-seed
-yarn run dev
+yarn run db:repopulate
+yarn run start
 ```
