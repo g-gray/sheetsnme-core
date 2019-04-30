@@ -31,14 +31,13 @@ export async function fetchAccount(
 export async function createAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Account> {
   const result: t.Account = await createEntity<t.Account>(
     client,
     spreadsheetId,
     s.ACCOUNTS_SHEET_ID,
     {...fields, id: uuid()},
-    validateAccountFields,
     accountToRow,
     rowToAccount,
   )
@@ -49,15 +48,14 @@ export async function updateAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Account> {
   const result: t.Account = await updateEntityById<t.Account>(
     client,
     spreadsheetId,
     s.ACCOUNTS_SHEET_ID,
     id,
-    fields,
-    validateAccountFields,
+    {...fields},
     accountToRow,
     rowToAccount,
   )
@@ -122,20 +120,6 @@ function accountToRow(account: t.Account): t.GRowData {
   }
 }
 
-function validateAccountFields(fields: any): t.ResErrors {
-  const errors = []
-
-  if (!fields.title || !f.isString(fields.title) || !fields.title.length) {
-    errors.push({text: 'Title must be non empty string'})
-  }
-
-  // if (fields.currencyCode !== 'RUB') {
-  //   errors.push({text: 'Currency Code must be one of these: \'RUB\''})
-  // }
-
-  return errors
-}
-
 
 export async function fetchBalancesByAccountIds(
   client: t.GOAuth2Client,
@@ -192,6 +176,7 @@ function rowToBalance(row: t.GQueryRow): t.Balance {
 }
 
 
+
 /**
  * Categories
  */
@@ -214,14 +199,13 @@ export async function fetchCategory(
 export async function createCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Category> {
   const result: t.Category = await createEntity<t.Category>(
     client,
     spreadsheetId,
     s.CATEGORIES_SHEET_ID,
     {...fields, id: uuid()},
-    validateCategoryFields,
     categoryToRow,
     rowToCategory,
   )
@@ -232,15 +216,14 @@ export async function updateCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Category> {
   const result: t.Category = await updateEntityById<t.Category>(
     client,
     spreadsheetId,
     s.CATEGORIES_SHEET_ID,
     id,
-    fields,
-    validateCategoryFields,
+    {...fields},
     categoryToRow,
     rowToCategory,
   )
@@ -302,16 +285,6 @@ function categoryToRow(category: t.Category): t.GRowData {
   }
 }
 
-function validateCategoryFields(fields: any): t.ResErrors {
-  const errors = []
-
-  if (!fields.title || !f.isString(fields.title) || !fields.title.length) {
-    errors.push({text: 'Title must be non empty string'})
-  }
-
-  return errors
-}
-
 
 
 /**
@@ -336,7 +309,7 @@ export async function fetchPayee(
 export async function createPayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Payee> {
 
   const result: t.Payee = await createEntity<t.Payee>(
@@ -344,7 +317,6 @@ export async function createPayee(
     spreadsheetId,
     s.PAYEES_SHEET_ID,
     {...fields, id: uuid()},
-    validatePayeeFields,
     payeeToRow,
     rowToPayee,
   )
@@ -355,15 +327,14 @@ export async function updatePayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Payee> {
   const result: t.Payee = await updateEntityById<t.Payee>(
     client,
     spreadsheetId,
     s.PAYEES_SHEET_ID,
     id,
-    fields,
-    validatePayeeFields,
+    {...fields},
     payeeToRow,
     rowToPayee,
   )
@@ -425,16 +396,6 @@ function payeeToRow(payee: t.Payee): t.GRowData {
   }
 }
 
-function validatePayeeFields(fields: any): t.ResErrors {
-  const errors = []
-
-  if (!fields.title || !f.isString(fields.title) || !fields.title.length) {
-    errors.push({text: 'Title must be non empty string'})
-  }
-
-  return errors
-}
-
 
 
 /**
@@ -459,14 +420,13 @@ export async function fetchTransaction(
 export async function createTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Transaction> {
   const result: t.Transaction = await createEntity<t.Transaction>(
     client,
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
     {...fields, id: uuid()},
-    validateTransactionFields,
     transactionToRow,
     rowToTransaction,
   )
@@ -477,15 +437,14 @@ export async function updateTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : any,
+  fields       : t.JSONObject,
 ): Promise<t.Transaction> {
   const result: t.Transaction = await updateEntityById<t.Transaction>(
     client,
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
     id,
-    fields,
-    validateTransactionFields,
+    {...fields},
     transactionToRow,
     rowToTransaction,
   )
@@ -585,28 +544,6 @@ function filterTransactionsQuery(filter: t.TransactionsFilter): string {
   return query
 }
 
-function validateTransactionFields(fields: any): t.ResErrors {
-  const errors = []
-
-  if (!fields.date || !f.isValidDate(new Date(fields.date))) {
-    errors.push({text: 'Date must be non empty and valid'})
-  }
-
-  if (!fields.outcomeAccountId && !fields.incomeAccountId) {
-    errors.push({text: 'Outcome/Income account required'})
-  }
-
-  if (fields.outcomeAccountId && !f.isNumber(fields.outcomeAmount)) {
-    errors.push({text: 'Outcome amount must be a valid number'})
-  }
-
-  if (fields.incomeAccountId && !f.isNumber(fields.incomeAmount)) {
-    errors.push({text: 'Income amount must be a valid number'})
-  }
-
-  return errors
-}
-
 
 
 /**
@@ -660,7 +597,7 @@ async function queryEntityById<T>(
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T | void> {
   if (!id) {
-    throw new u.PublicError('Entity id is required')
+    throw new u.PublicError('Entity id required')
   }
 
   const query: string = `select * where A = '${id}'`
@@ -698,17 +635,10 @@ async function createEntity<T>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
   sheetId       : number,
-  fields        : any,
-  validateFields: (fields: any) => t.ResErrors,
+  entity        : T,
   entityToRow   : (entity: T) => t.GRowData,
   rowToEntity   : (row: t.GQueryRow) => T,
 ): Promise<T> {
-  const errors: t.ResErrors = validateFields(fields)
-  if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
-  }
-
-  const entity: T = fields
   await appendRow(client, spreadsheetId, sheetId, entityToRow(entity))
 
   const created: T | void = await queryEntityById<T>(
@@ -735,7 +665,7 @@ async function deleteEntityById<T>(
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T> {
   if (!id) {
-    throw new u.PublicError('Entity id is required')
+    throw new u.PublicError('Entity id required')
   }
 
   const toDelete: T | void = await queryEntityById<T>(
@@ -766,18 +696,12 @@ async function updateEntityById<T>(
   spreadsheetId : string,
   sheetId       : number,
   id            : string,
-  fields        : any,
-  validateFields: (fields: any) => t.ResErrors,
+  entity        : T,
   entityToRow   : (entity: T) => t.GRowData,
   rowToEntity   : (row: t.GQueryRow) => T,
 ): Promise<T> {
   if (!id) {
-    throw new u.PublicError('Entity id is required')
-  }
-
-  const errors: t.ResErrors = validateFields(fields)
-  if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
+    throw new u.PublicError('Entity id required')
   }
 
   const toUpdate: T | void = await queryEntityById<T>(
@@ -797,7 +721,6 @@ async function updateEntityById<T>(
     throw new u.PublicError('Row number not found')
   }
 
-  const entity: T = fields
   await updateRow(client, spreadsheetId, sheetId, rowNumber, entityToRow(entity))
 
   const updated: T | void = await queryEntityById<T>(

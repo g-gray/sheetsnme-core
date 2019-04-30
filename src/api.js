@@ -237,9 +237,16 @@ export async function getAccount(ctx: t.Context): Promise<void> {
 }
 
 export async function createAccount(ctx: t.Context): Promise<void> {
+  const errors: t.ResErrors = validateAccountFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const account: t.Account = await n.createAccount(client, gSpreadsheetId, ctx.request.body)
+
   ctx.body = account
 }
 
@@ -254,9 +261,16 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
     ctx.throw(400, 'You can not change this account')
   }
 
+  const errors: t.ResErrors = validateAccountFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const account: t.Account = await n.updateAccount(client, gSpreadsheetId, id, ctx.request.body)
+
   ctx.body = account
 }
 
@@ -281,6 +295,17 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
 
   const account: t.Account = await n.deleteAccount(client, gSpreadsheetId, id)
   ctx.body = account
+}
+
+
+function validateAccountFields(fields: Object): t.ResErrors {
+  const errors: t.ResErrors = []
+
+  if (!f.isString(fields.title) || !fields.title.length) {
+    errors.push({text: 'Title must be non empty string'})
+  }
+
+  return errors
 }
 
 
@@ -315,9 +340,16 @@ export async function getCategory(ctx: t.Context): Promise<void> {
 }
 
 export async function createCategory(ctx: t.Context): Promise<void> {
+  const errors: t.ResErrors = validateCategoryFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const category: t.Category = await n.createCategory(client, gSpreadsheetId, ctx.request.body)
+
   ctx.body = category
 }
 
@@ -328,9 +360,16 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
     return
   }
 
+  const errors: t.ResErrors = validateCategoryFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const category: t.Category = await n.updateCategory(client, gSpreadsheetId, id, ctx.request.body)
+
   ctx.body = category
 }
 
@@ -351,6 +390,17 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
 
   const category: t.Category = await n.deleteCategory(client, gSpreadsheetId, id)
   ctx.body = category
+}
+
+
+function validateCategoryFields(fields: Object): t.ResErrors {
+  const errors: t.ResErrors = []
+
+  if (!f.isString(fields.title) || !fields.title.length) {
+    errors.push({text: 'Title must be non empty string'})
+  }
+
+  return errors
 }
 
 
@@ -385,9 +435,16 @@ export async function getPayee(ctx: t.Context): Promise<void> {
 }
 
 export async function createPayee(ctx: t.Context): Promise<void> {
+  const errors: t.ResErrors = validatePayeeFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const payee: t.Payee = await n.createPayee(client, gSpreadsheetId, ctx.request.body)
+
   ctx.body = payee
 }
 
@@ -398,9 +455,16 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
     return
   }
 
+  const errors: t.ResErrors = validatePayeeFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const payee: t.Payee = await n.updatePayee(client, gSpreadsheetId, id, ctx.request.body)
+
   ctx.body = payee
 }
 
@@ -424,17 +488,40 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
 }
 
 
+function validatePayeeFields(fields: Object): t.ResErrors {
+  const errors: t.ResErrors = []
+
+  if (!f.isString(fields.title) || !fields.title.length) {
+    errors.push({text: 'Title must be non empty string'})
+  }
+
+  return errors
+}
+
+
 
 /**
  * Transactions
  */
+
+const OUTCOME  = 'OUTCOME'
+const INCOME   = 'INCOME'
+const TRANSFER = 'TRANSFER'
+const LOAN     = 'LOAN'
+const BORROW   = 'BORROW'
+
+const TRANSACTON_TYPES: Array<t.TransactionType> = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
 
 export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const filter: t.TransactionsFilter = ctx.query
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
-  ctx.body = transactions
+
+  ctx.body = f.map(
+    transactions,
+    transaction => ({...transaction, type: defTransactionType(transaction)})
+  )
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {
@@ -452,13 +539,33 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  ctx.body = transaction
+  ctx.body = {...transaction, type: defTransactionType(transaction)}
 }
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
+  const errors: t.ResErrors = validateTransactionFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
+  let fields: Object = ctx.request.body
+
+  if (fields.type === LOAN) {
+    fields = {...fields, incomeAccountId: s.DEBT_ACCOUNT_ID, incomeAmount: fields.outcomeAmount}
+  }
+
+  if (fields.type === BORROW) {
+    fields = {...fields, outcomeAccountId: s.DEBT_ACCOUNT_ID, outcomeAmount: fields.incomeAmount}
+  }
+
+  fields = pickTransactionFields(fields)
+
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction = await n.createTransaction(client, gSpreadsheetId, ctx.request.body)
+
+  const transaction: t.Transaction = await n.createTransaction(client, gSpreadsheetId, fields)
+
   ctx.body = transaction
 }
 
@@ -469,9 +576,28 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const errors: t.ResErrors = validateTransactionFields(ctx.request.body)
+  if (errors.length) {
+    ctx.throw(400, 'Validation error', {errors})
+    return
+  }
+
+  let fields: t.JSONObject = ctx.request.body
+
+  if (fields.type === LOAN) {
+    fields = {...fields, incomeAccountId: s.DEBT_ACCOUNT_ID, incomeAmount: fields.outcomeAmount}
+  }
+
+  if (fields.type === BORROW) {
+    fields = {...fields, outcomeAccountId: s.DEBT_ACCOUNT_ID, outcomeAmount: fields.incomeAmount}
+  }
+
+  fields = pickTransactionFields(fields)
+
   const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction = await n.updateTransaction(client, gSpreadsheetId, id, ctx.request.body)
+  const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transaction: t.Transaction = await n.updateTransaction(client, gSpreadsheetId, id, fields)
+
   ctx.body = transaction
 }
 
@@ -486,4 +612,75 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const transaction: t.Transaction = await n.deleteTransaction(client, gSpreadsheetId, id)
   ctx.body = transaction
+}
+
+
+function validateTransactionFields(fields: Object): t.ResErrors {
+  const errors: t.ResErrors = []
+  const transactionTypes: Array<t.TransactionType> = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
+  const {type, date, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount, payeeId} = fields
+
+  if (!f.includes(transactionTypes, type)) {
+    errors.push({text: `Type must be one of [${transactionTypes.join(', ')}]`})
+  }
+
+  if (!date || !f.isValidDate(new Date(date))) {
+    errors.push({text: 'Date must be non empty and valid'})
+  }
+
+  if (f.includes([OUTCOME, TRANSFER, LOAN], type)) {
+    if (!outcomeAccountId) {
+      errors.push({text: 'Outcome account required'})
+    }
+
+    if (!f.isNumber(outcomeAmount)) {
+      errors.push({text: 'Outcome amount must be a valid number'})
+    }
+  }
+
+  if (f.includes([INCOME, TRANSFER, BORROW], type)) {
+    if (!incomeAccountId) {
+      errors.push({text: 'Income account required'})
+    }
+
+    if (!f.isNumber(incomeAmount)) {
+      errors.push({text: 'Income amount must be a valid number'})
+    }
+  }
+
+  if (f.includes([LOAN, BORROW], type) && !payeeId) {
+    errors.push({text: 'Payee required'})
+  }
+
+  return errors
+}
+
+function defTransactionType(transaction: t.Transaction): t.TransactionType | void {
+  const {outcomeAccountId, incomeAccountId} = transaction
+  return outcomeAccountId && !incomeAccountId
+    ? OUTCOME
+    : outcomeAccountId && incomeAccountId === s.DEBT_ACCOUNT_ID
+    ? LOAN
+    : incomeAccountId && !outcomeAccountId
+    ? INCOME
+    : incomeAccountId && outcomeAccountId === s.DEBT_ACCOUNT_ID
+    ? BORROW
+    : outcomeAccountId && incomeAccountId
+    ? TRANSFER
+    : undefined
+}
+
+function pickTransactionFields(fields: Object): Object {
+  const {id, type, date, categoryId, payeeId, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount, comment, createdAt, updatedAt} = fields
+  const whitlistedFields: Object = {id, date, comment, createdAt, updatedAt}
+
+  return type === OUTCOME
+    ? {...whitlistedFields, categoryId, payeeId, outcomeAccountId, outcomeAmount}
+    : type === INCOME
+    ? {...whitlistedFields, categoryId, payeeId, incomeAccountId, incomeAmount}
+    : f.includes([LOAN, BORROW], type)
+    ? {...whitlistedFields, payeeId, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount}
+    : type === TRANSFER
+    ? {...whitlistedFields, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount}
+    : {}
 }

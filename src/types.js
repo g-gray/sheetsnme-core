@@ -218,6 +218,8 @@ export type Payees = Array<Payee>
  * Transacation
  */
 
+export type TransactionType = 'OUTCOME' | 'INCOME' | 'TRANSFER' | 'LOAN' | 'BORROW'
+
 export type Transaction = {|
   id              : string,
   date            : string,
