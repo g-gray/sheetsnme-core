@@ -5,7 +5,7 @@
     "db:repopulate": "node src/db-repopulate.js"
   },
   "engines": {
-    "node": "10.x"
+    "node": "11.x"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
