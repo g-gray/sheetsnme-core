@@ -239,8 +239,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
 export async function createAccount(ctx: t.Context): Promise<void> {
   const errors: t.ResErrors = validateAccountFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -263,8 +262,7 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
 
   const errors: t.ResErrors = validateAccountFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -342,8 +340,7 @@ export async function getCategory(ctx: t.Context): Promise<void> {
 export async function createCategory(ctx: t.Context): Promise<void> {
   const errors: t.ResErrors = validateCategoryFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -362,8 +359,7 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
 
   const errors: t.ResErrors = validateCategoryFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -437,8 +433,7 @@ export async function getPayee(ctx: t.Context): Promise<void> {
 export async function createPayee(ctx: t.Context): Promise<void> {
   const errors: t.ResErrors = validatePayeeFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -457,8 +452,7 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
 
   const errors: t.ResErrors = validatePayeeFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -545,8 +539,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 export async function createTransaction(ctx: t.Context): Promise<void> {
   const errors: t.ResErrors = validateTransactionFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   let fields: Object = ctx.request.body
@@ -578,8 +571,7 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
 
   const errors: t.ResErrors = validateTransactionFields(ctx.request.body)
   if (errors.length) {
-    ctx.throw(400, 'Validation error', {errors})
-    return
+    throw new u.PublicError('Validation error', {errors})
   }
 
   let fields: t.JSONObject = ctx.request.body
