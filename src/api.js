@@ -74,7 +74,7 @@ export async function spreadsheetIdRequired(ctx: t.Context, next: () => Promise<
   const sessionId: string = ctx.sessionId
   // const spreadsheetId: string | void = ctx.query.spreadsheetId
   // if (!spreadsheetId) {
-  //   ctx.throw(400, 'Spreadsheet id is required')
+  //   ctx.throw(400, 'Spreadsheet id required')
   //   return
   // }
 
@@ -119,7 +119,7 @@ export async function authLogout(ctx: t.Context): Promise<void> {
   const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
   if (!sessionId) {
-    ctx.throw(400, 'Session id is required')
+    ctx.throw(400, 'Session id required')
     return
   }
 
@@ -138,7 +138,7 @@ export async function authLogout(ctx: t.Context): Promise<void> {
 export async function authCode (ctx: t.Context): Promise<void>  {
   const code: string | void = ctx.query.code
   if (!code) {
-    ctx.throw(400, 'Code is required')
+    ctx.throw(400, 'Code required')
     return
   }
 
@@ -233,7 +233,7 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
 export async function getAccount(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Account id is required')
+    ctx.throw(400, 'Account id required')
     return
   }
 
@@ -269,7 +269,7 @@ export async function createAccount(ctx: t.Context): Promise<void> {
 export async function updateAccount(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Account id is required')
+    ctx.throw(400, 'Account id required')
     return
   }
 
@@ -292,7 +292,7 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
 export async function deleteAccount(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Account id is required')
+    ctx.throw(400, 'Account id required')
     return
   }
 
@@ -339,7 +339,7 @@ export async function getCategories(ctx: t.Context): Promise<void> {
 export async function getCategory(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Category id is required')
+    ctx.throw(400, 'Category id required')
     return
   }
 
@@ -370,7 +370,7 @@ export async function createCategory(ctx: t.Context): Promise<void> {
 export async function updateCategory(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Category id is required')
+    ctx.throw(400, 'Category id required')
     return
   }
 
@@ -389,7 +389,7 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
 export async function deleteCategory(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Category id is required')
+    ctx.throw(400, 'Category id required')
     return
   }
 
@@ -432,7 +432,7 @@ export async function getPayees(ctx: t.Context): Promise<void> {
 export async function getPayee(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Payee id is required')
+    ctx.throw(400, 'Payee id required')
     return
   }
 
@@ -463,7 +463,7 @@ export async function createPayee(ctx: t.Context): Promise<void> {
 export async function updatePayee(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Payee id is required')
+    ctx.throw(400, 'Payee id required')
     return
   }
 
@@ -482,7 +482,7 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
 export async function deletePayee(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Payee id is required')
+    ctx.throw(400, 'Payee id required')
     return
   }
 
@@ -538,7 +538,7 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
 export async function getTransaction(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Transaction id is required')
+    ctx.throw(400, 'Transaction id required')
     return
   }
 
@@ -582,7 +582,7 @@ export async function createTransaction(ctx: t.Context): Promise<void> {
 export async function updateTransaction(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Transaction id is required')
+    ctx.throw(400, 'Transaction id required')
     return
   }
 
@@ -613,7 +613,7 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
 export async function deleteTransaction(ctx: t.Context): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Transaction id is required')
+    ctx.throw(400, 'Transaction id required')
     return
   }
 
