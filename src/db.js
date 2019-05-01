@@ -26,92 +26,8 @@ export function query(text: string, values: Array<mixed> | void): Promise<t.Resu
 
 
 /**
- * Auth
+ * Sessions
  */
-
-export async function login(user: t.User, token: string): Promise<t.Session> {
-  const q: string = `
-  with
-    ur as (select id from roles where sym='user'),
-    u as (
-      insert into users
-        (
-          external_id,
-          picture_url,
-          email,
-          email_verified,
-          first_name,
-          last_name,
-          role_id
-        )
-      values
-        ($1, $2, $3, $4, $5, $6, (select id from ur))
-      on conflict (external_id) do update set
-        picture_url    = $2,
-        email          = $3,
-        email_verified = $4,
-        first_name     = $5,
-        last_name      = $6,
-        updated_at     = current_timestamp
-      returning id
-    )
-  insert into sessions
-    (user_id, external_token)
-  values
-    ((select id from u), $7)
-  returning *
-  `
-  const v: Array<mixed> = [
-    user.externalId,
-    user.pictureUrl,
-    user.email,
-    user.emailVerified,
-    user.firstName,
-    user.lastName,
-    token,
-  ]
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row = result.rows[0]
-  const session: t.Session = rowToSession(row)
-
-  await deleteExpiredSessions(session.userId)
-
-  return session
-}
-
-export async function logout(id: string): Promise<t.Session | void> {
-  const q: string = `
-  delete
-  from sessions
-  where id = $1
-  returning *
-  `
-  const v: Array<mixed> = [id]
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row = result.rows[0]
-  if (!row) {
-    return undefined
-  }
-
-  const userId = ((row.user_id: any): string)
-  await deleteExpiredSessions(userId)
-
-  const session: t.Session = rowToSession(row)
-  return session
-}
-
-async function deleteExpiredSessions(userId: string): Promise<void> {
-  const q: string = `
-  delete
-  from sessions
-  where
-    user_id = $1
-    and (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
-  `
-  const v: Array<mixed> = [userId, u.DAY]
-
-  await query(q, v)
-}
 
 export async function sessionById(id: string): Promise<t.Session | void> {
   const q: string = `
@@ -131,22 +47,65 @@ export async function sessionById(id: string): Promise<t.Session | void> {
 }
 
 export async function upsertSession(session: t.Session): Promise<t.Session> {
-  const q: string = `
+  let q: string = `
   insert into sessions
-    (id, user_id, external_token)
+    (user_id, external_token)
   values
-    ($1, $2, $3)
-  on conflict (id) do update set
-    user_id        = $2,
-    external_token = $3,
-    updated_at     = current_timestamp
+    ($1, $2)
   returning *
   `
-  const v: Array<mixed> = [session.id, session.userId, session.externalToken]
+  let v: Array<mixed> = [session.userId, session.externalToken]
+
+  if (session.id) {
+    q = `
+    insert into sessions
+      (id, user_id, external_token)
+    values
+      ($1, $2, $3)
+    on conflict (id) do update set
+      user_id        = $2,
+      external_token = $3,
+      updated_at     = current_timestamp
+    returning *
+    `
+    v = [session.id, session.userId, session.externalToken]
+  }
+
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
   const upsertedSession: t.Session = rowToSession(row)
   return upsertedSession
+}
+
+export async function deleteSessionById(id: string): Promise<t.Session | void> {
+  const q: string = `
+  delete
+  from sessions
+  where id = $1
+  returning *
+  `
+  const v: Array<mixed> = [id]
+  const result: t.ResultSet = await query(q, v)
+  const row: t.Row = result.rows[0]
+  if (!row) {
+    return undefined
+  }
+
+  const session: t.Session = rowToSession(row)
+  return session
+}
+
+export async function deleteExpiredSessions(userId: string): Promise<void> {
+  const q: string = `
+  delete
+  from sessions
+  where
+    user_id = $1
+    and (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
+  `
+  const v: Array<mixed> = [userId, u.DAY]
+
+  await query(q, v)
 }
 
 
@@ -165,6 +124,45 @@ function rowToSession(row: t.Row): t.Session {
 /**
  * User
  */
+
+export async function upsertUser(user: t.User): Promise<t.User> {
+  const q: string = `
+  with
+    ur as (select id from roles where sym='user')
+  insert into users
+    (
+      external_id,
+      picture_url,
+      email,
+      email_verified,
+      first_name,
+      last_name,
+      role_id
+    )
+  values
+    ($1, $2, $3, $4, $5, $6, (select id from ur))
+  on conflict (external_id) do update set
+    picture_url    = $2,
+    email          = $3,
+    email_verified = $4,
+    first_name     = $5,
+    last_name      = $6,
+    updated_at     = current_timestamp
+  returning *
+  `
+  const v: Array<mixed> = [
+    user.externalId,
+    user.pictureUrl,
+    user.email,
+    user.emailVerified,
+    user.firstName,
+    user.lastName,
+  ]
+  const result: t.ResultSet = await query(q, v)
+  const row: t.Row = result.rows[0]
+  const upsertedUser: t.User = rowToUser(row)
+  return upsertedUser
+}
 
 export async function userBySessionId(sessionId: string): Promise<t.User | void> {
   const q: string = `

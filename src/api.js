@@ -115,17 +115,21 @@ export function authLogin(ctx: t.Context): void {
 }
 
 export async function authLogout(ctx: t.Context): Promise<void> {
-  const sessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
+  const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
+  const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
+  const sessionId: string | void = headerSessionId || cookieSessionId
   if (!sessionId) {
     ctx.throw(400, 'Session id is required')
     return
   }
 
-  const session: t.Session | void = await db.logout(sessionId)
+  const session: t.Session | void = await db.deleteSessionById(sessionId)
   if (!session) {
-    ctx.throw(404, 'Session not found')
+    ctx.throw(400, 'Session not found')
     return
   }
+
+  await db.deleteExpiredSessions(session.userId)
 
   a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
   ctx.body = 'Success'
@@ -146,14 +150,14 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     return
   }
 
-  const user: t.User = {
+  const user: t.User = await db.upsertUser({
     externalId   : gUser.id,
     pictureUrl   : gUser.picture,
     email        : gUser.email,
     emailVerified: gUser.verified_email,
     firstName    : gUser.given_name,
     lastName     : gUser.family_name,
-  }
+  })
 
   const encryptedToken: string = u.encrypt(
     CRYPTO_ALGORITHM,
@@ -163,8 +167,12 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     JSON.stringify(token)
   )
 
-  const session: t.Session = await db.login(user, encryptedToken)
+  // $FlowFixMe
+  const session: t.Session = await db.upsertSession({userId: user.id, externalToken: encryptedToken})
 
+  await db.deleteExpiredSessions(session.userId)
+
+  // $FlowFixMe
   a.setCookie(ctx, SESSION_COOKIE_NAME, session.id)
 
   const redirectTo: string | void = ctx.query.state

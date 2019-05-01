@@ -103,11 +103,11 @@ export type GOAuth2Client = {|
 |}
 
 export type Session = {|
-  id           : string,
+  id?          : string,
   userId       : string,
   externalToken: string,
-  createdAt    : Date,
-  updatedAt    : Date,
+  createdAt?   : Date,
+  updatedAt?   : Date,
 |}
 
 
