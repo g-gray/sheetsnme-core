@@ -25,18 +25,14 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
   const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
   const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
-  const session: t.Session | void = sessionId
-    ? await db.sessionById(sessionId)
-    : undefined
-
-  if (!session) {
-    ctx.throw(401, 'Unauthorized')
+  if (!sessionId) {
+    ctx.throw(401, 'Session id required')
     return
   }
 
-  const encryptedToken: string | void = session.externalToken
-  if (!encryptedToken) {
-    ctx.throw(400, 'Token is required')
+  const session: t.Session | void = await db.sessionById(sessionId)
+  if (!session) {
+    ctx.throw(401, 'Unauthorized')
     return
   }
 
@@ -45,18 +41,31 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     CRYPTO_PASSWORD,
     CRYPTO_SALT,
     CRYPTO_KEYLENGTH,
-    encryptedToken
+    session.externalToken
   )
-
   const token: t.GAuthToken = JSON.parse(decryptedToken)
 
-  if (token.expiry_date - Date.now() <= 0) {
-    ctx.throw(401, 'Unauthorized')
+  const diff: number = token.expiry_date - Date.now()
+  if (diff > 0) {
+    ctx.client = a.createOAuth2Client(token)
+    ctx.sessionId = session.id
+
+    await next()
     return
   }
 
-  ctx.client = a.createOAuth2Client(token)
-  ctx.sessionId = session.id
+  const newToken: t.GAuthToken = await a.refreshToken(token)
+  const encryptedNewToken: string = u.encrypt(
+    CRYPTO_ALGORITHM,
+    CRYPTO_PASSWORD,
+    CRYPTO_SALT,
+    CRYPTO_KEYLENGTH,
+    JSON.stringify(newToken),
+  )
+
+  const updatedSession: t.Session = await db.upsertSession({...session, externalToken: encryptedNewToken})
+  ctx.client = a.createOAuth2Client(newToken)
+  ctx.sessionId = updatedSession.id
 
   await next()
 }
@@ -129,12 +138,7 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     return
   }
 
-  const token: t.GAuthToken | void = await a.exchangeCodeForToken(code)
-  if (!token) {
-    ctx.throw(400, 'Token is required')
-    return
-  }
-
+  const token: t.GAuthToken = await a.exchangeCodeForToken(code)
   const client: t.GOAuth2Client = a.createOAuth2Client(token)
   const gUser: t.GUser | void = await n.fetchUserInfo(client)
   if (!gUser) {

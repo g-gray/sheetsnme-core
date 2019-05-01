@@ -130,6 +130,26 @@ export async function sessionById(id: string): Promise<t.Session | void> {
   return session
 }
 
+export async function upsertSession(session: t.Session): Promise<t.Session> {
+  const q: string = `
+  insert into sessions
+    (id, user_id, external_token)
+  values
+    ($1, $2, $3)
+  on conflict (id) do update set
+    user_id        = $2,
+    external_token = $3,
+    updated_at     = current_timestamp
+  returning *
+  `
+  const v: Array<mixed> = [session.id, session.userId, session.externalToken]
+  const result: t.ResultSet = await query(q, v)
+  const row: t.Row = result.rows[0]
+  const upsertedSession: t.Session = rowToSession(row)
+  return upsertedSession
+}
+
+
 function rowToSession(row: t.Row): t.Session {
   return {
     id            : ((row.id            : any): string),

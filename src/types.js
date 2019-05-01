@@ -99,14 +99,15 @@ export type GOAuth2Client = {|
   generateAuthUrl            : ({access_type: string, scope: Array<string>}) => string,
   getToken                   : (string, (Error, GAuthToken) => void) => void,
   getToken                   : (string) => Promise<{tokens: GAuthToken}>,
+  refreshAccessToken         : () => Promise<{credentials: GAuthToken}>,
 |}
 
 export type Session = {|
-  id            : string,
-  userId        : string,
-  externalToken?: string,
-  createdAt?    : Date,
-  updatedAt?    : Date,
+  id           : string,
+  userId       : string,
+  externalToken: string,
+  createdAt    : Date,
+  updatedAt    : Date,
 |}
 
 
