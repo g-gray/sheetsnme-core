@@ -48,7 +48,12 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     encryptedToken
   )
 
-  const token: t.GAuthToken | void = JSON.parse(decryptedToken)
+  const token: t.GAuthToken = JSON.parse(decryptedToken)
+
+  if (token.expiry_date - Date.now() <= 0) {
+    ctx.throw(401, 'Unauthorized')
+    return
+  }
 
   ctx.client = a.createOAuth2Client(token)
   ctx.sessionId = session.id
@@ -130,8 +135,8 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     return
   }
 
-  const oAuth2Client = a.createOAuth2Client(token)
-  const gUser: t.GUser | void = await n.fetchUserInfo(oAuth2Client)
+  const client: t.GOAuth2Client = a.createOAuth2Client(token)
+  const gUser: t.GUser | void = await n.fetchUserInfo(client)
   if (!gUser) {
     ctx.throw(400, 'User not found')
     return
