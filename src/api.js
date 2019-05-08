@@ -26,7 +26,7 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
   const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
   if (!sessionId) {
-    ctx.throw(401, 'Session id required')
+    ctx.throw(401, 'Unauthorized')
     return
   }
 
