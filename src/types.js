@@ -35,6 +35,7 @@ export type Env = {|
 export type EnvProperties = {|
   HOST               : string,
   PORT               : number,
+  LOGOUT_URL         : string,
   CLIENT_ID          : string,
   CLIENT_SECRET      : string,
   REDIRECT_URL       : string,

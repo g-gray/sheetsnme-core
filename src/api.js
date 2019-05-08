@@ -9,6 +9,7 @@ import * as s from './sheets'
 import * as db from './db'
 
 const {
+  LOGOUT_URL,
   SESSION_HEADER_NAME,
   SESSION_COOKIE_NAME,
   CRYPTO_ALGORITHM,
@@ -132,7 +133,7 @@ export async function authLogout(ctx: t.Context): Promise<void> {
   await db.deleteExpiredSessions(session.userId)
 
   a.setCookieExpired(ctx, SESSION_COOKIE_NAME)
-  ctx.body = 'Success'
+  ctx.redirect(LOGOUT_URL || '/')
 }
 
 export async function authCode (ctx: t.Context): Promise<void>  {

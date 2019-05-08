@@ -7,6 +7,7 @@ dotenv.config({path: '.env.properties'})
 export const properties: t.EnvProperties = {
   HOST                : process.env.HOST                     || '',
   PORT                : Number(process.env.PORT)             || 0,
+  LOGOUT_URL          : process.env.LOGOUT_URL               || '',
   CLIENT_ID           : process.env.CLIENT_ID                || '',
   CLIENT_SECRET       : process.env.CLIENT_SECRET            || '',
   REDIRECT_URL        : process.env.REDIRECT_URL             || '',
