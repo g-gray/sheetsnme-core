@@ -41,7 +41,7 @@ export function setCookie(ctx: t.Context, name: string, value: string) {
   ctx.cookies.set(name, value, {
     httpOnly: true,
     // sameSite: 'strict',
-    maxAge: u.DAY, // Expires in a day
+    maxAge: u.WEEK, // Expires in a week
   })
 }
 
