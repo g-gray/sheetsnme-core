@@ -20,6 +20,15 @@ apiRouter
   .use(api.lang)
   .use(api.jsonOnly)
   .use(api.authRequired)
+
+
+
+apiRouter
+  .get('/api/user',                       api.getUser)
+
+
+
+apiRouter
   .use(api.spreadsheetIdRequired)
 
 /**
@@ -27,8 +36,6 @@ apiRouter
  */
 
 apiRouter
-  .get('/api/user',                       api.getUser)
-
   .get('/api/accounts',                   api.getAccounts)
   .get('/api/accounts/:id',               api.getAccount)
 
