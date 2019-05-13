@@ -7,6 +7,7 @@ import * as n from './net'
 import * as a from './auth'
 import * as s from './sheets'
 import * as db from './db'
+import * as tr from './translations'
 
 const {
   LOGOUT_URL,
@@ -267,7 +268,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
 }
 
 export async function createAccount(ctx: t.Context): Promise<void> {
-  const errors: t.ResErrors = validateAccountFields(ctx.request.body)
+  const errors: t.ResErrors = validateAccountFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -290,7 +291,7 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
     ctx.throw(400, 'You can not change this account')
   }
 
-  const errors: t.ResErrors = validateAccountFields(ctx.request.body)
+  const errors: t.ResErrors = validateAccountFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -326,11 +327,11 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
 }
 
 
-function validateAccountFields(fields: Object): t.ResErrors {
+function validateAccountFields(fields: Object, lang: string): t.ResErrors {
   const errors: t.ResErrors = []
 
   if (!f.isString(fields.title) || !fields.title.length) {
-    errors.push({text: 'Title must be non empty string'})
+    errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
   return errors
@@ -368,7 +369,7 @@ export async function getCategory(ctx: t.Context): Promise<void> {
 }
 
 export async function createCategory(ctx: t.Context): Promise<void> {
-  const errors: t.ResErrors = validateCategoryFields(ctx.request.body)
+  const errors: t.ResErrors = validateCategoryFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -387,7 +388,7 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
     return
   }
 
-  const errors: t.ResErrors = validateCategoryFields(ctx.request.body)
+  const errors: t.ResErrors = validateCategoryFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -419,11 +420,11 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
 }
 
 
-function validateCategoryFields(fields: Object): t.ResErrors {
+function validateCategoryFields(fields: Object, lang: string): t.ResErrors {
   const errors: t.ResErrors = []
 
   if (!f.isString(fields.title) || !fields.title.length) {
-    errors.push({text: 'Title must be non empty string'})
+    errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
   return errors
@@ -461,7 +462,7 @@ export async function getPayee(ctx: t.Context): Promise<void> {
 }
 
 export async function createPayee(ctx: t.Context): Promise<void> {
-  const errors: t.ResErrors = validatePayeeFields(ctx.request.body)
+  const errors: t.ResErrors = validatePayeeFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -480,7 +481,7 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
     return
   }
 
-  const errors: t.ResErrors = validatePayeeFields(ctx.request.body)
+  const errors: t.ResErrors = validatePayeeFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -512,11 +513,11 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
 }
 
 
-function validatePayeeFields(fields: Object): t.ResErrors {
+function validatePayeeFields(fields: Object, lang: string): t.ResErrors {
   const errors: t.ResErrors = []
 
   if (!f.isString(fields.title) || !fields.title.length) {
-    errors.push({text: 'Title must be non empty string'})
+    errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
   return errors
@@ -567,7 +568,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
 }
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
-  const errors: t.ResErrors = validateTransactionFields(ctx.request.body)
+  const errors: t.ResErrors = validateTransactionFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -599,7 +600,7 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
     return
   }
 
-  const errors: t.ResErrors = validateTransactionFields(ctx.request.body)
+  const errors: t.ResErrors = validateTransactionFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
   }
@@ -637,41 +638,41 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
 }
 
 
-function validateTransactionFields(fields: Object): t.ResErrors {
+function validateTransactionFields(fields: Object, lang: string): t.ResErrors {
   const errors: t.ResErrors = []
   const transactionTypes: Array<t.TransactionType> = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
   const {type, date, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount, payeeId} = fields
 
   if (!f.includes(transactionTypes, type)) {
-    errors.push({text: `Type must be one of [${transactionTypes.join(', ')}]`})
+    errors.push({text: `${u.xln(lang, tr.TYPE_MUST_BE_ONE_OF)}: [${transactionTypes.join(', ')}]`})
   }
 
   if (!date || !f.isValidDate(new Date(date))) {
-    errors.push({text: 'Date must be non empty and valid'})
+    errors.push({text: u.xln(lang, tr.DATE_MUST_BE_NON_EMPTY_AND_VALID)})
   }
 
   if (f.includes([OUTCOME, TRANSFER, LOAN], type)) {
     if (!outcomeAccountId) {
-      errors.push({text: 'Outcome account required'})
+      errors.push({text: u.xln(lang, tr.OUTCOME_ACCOUNT_REQUIRED)})
     }
 
     if (!f.isNumber(outcomeAmount)) {
-      errors.push({text: 'Outcome amount must be a valid number'})
+      errors.push({text: u.xln(lang, tr.OUTCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
     }
   }
 
   if (f.includes([INCOME, TRANSFER, BORROW], type)) {
     if (!incomeAccountId) {
-      errors.push({text: 'Income account required'})
+      errors.push({text: u.xln(lang, tr.INCOME_ACCOUNT_REQUIRED)})
     }
 
     if (!f.isNumber(incomeAmount)) {
-      errors.push({text: 'Income amount must be a valid number'})
+      errors.push({text: u.xln(lang, tr.INCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
     }
   }
 
   if (f.includes([LOAN, BORROW], type) && !payeeId) {
-    errors.push({text: 'Payee required'})
+    errors.push({text: u.xln(lang, tr.PAYEE_REQUIRED)})
   }
 
   return errors
