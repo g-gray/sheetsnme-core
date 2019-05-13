@@ -17,8 +17,10 @@ export const authAllowedMethods = authRouter.allowedMethods()
 const apiRouter: t.Router = new Router()
 
 apiRouter
+  .use(api.lang)
   .use(api.jsonOnly)
   .use(api.authRequired)
+  .use(api.spreadsheetIdRequired)
 
 /**
  * GET
@@ -27,47 +29,47 @@ apiRouter
 apiRouter
   .get('/api/user',                       api.getUser)
 
-  .get('/api/accounts',                   api.spreadsheetIdRequired, api.getAccounts)
-  .get('/api/accounts/:id',               api.spreadsheetIdRequired, api.getAccount)
+  .get('/api/accounts',                   api.getAccounts)
+  .get('/api/accounts/:id',               api.getAccount)
 
-  .get('/api/categories',                 api.spreadsheetIdRequired, api.getCategories)
-  .get('/api/categories/:id',             api.spreadsheetIdRequired, api.getCategory)
+  .get('/api/categories',                 api.getCategories)
+  .get('/api/categories/:id',             api.getCategory)
 
-  .get('/api/payees',                     api.spreadsheetIdRequired, api.getPayees)
-  .get('/api/payees/:id',                 api.spreadsheetIdRequired, api.getPayee)
+  .get('/api/payees',                     api.getPayees)
+  .get('/api/payees/:id',                 api.getPayee)
 
-  .get('/api/transactions',               api.spreadsheetIdRequired, api.getTransactions)
-  .get('/api/transactions/:id',           api.spreadsheetIdRequired, api.getTransaction)
+  .get('/api/transactions',               api.getTransactions)
+  .get('/api/transactions/:id',           api.getTransaction)
 
 /**
  * POST
  */
 
 apiRouter
-  .post('/api/transactions',              api.spreadsheetIdRequired, api.createTransaction)
-  .post('/api/transactions/:id',          api.spreadsheetIdRequired, api.updateTransaction)
+  .post('/api/transactions',              api.createTransaction)
+  .post('/api/transactions/:id',          api.updateTransaction)
 
-  .post('/api/accounts',                  api.spreadsheetIdRequired, api.createAccount)
-  .post('/api/accounts/:id',              api.spreadsheetIdRequired, api.updateAccount)
+  .post('/api/accounts',                  api.createAccount)
+  .post('/api/accounts/:id',              api.updateAccount)
 
-  .post('/api/categories',                api.spreadsheetIdRequired, api.createCategory)
-  .post('/api/categories/:id',            api.spreadsheetIdRequired, api.updateCategory)
+  .post('/api/categories',                api.createCategory)
+  .post('/api/categories/:id',            api.updateCategory)
 
-  .post('/api/payees',                    api.spreadsheetIdRequired, api.createPayee)
-  .post('/api/payees/:id',                api.spreadsheetIdRequired, api.updatePayee)
+  .post('/api/payees',                    api.createPayee)
+  .post('/api/payees/:id',                api.updatePayee)
 
 /**
  * DEL
  */
 
 apiRouter
-  .del('/api/accounts/:id',               api.spreadsheetIdRequired, api.deleteAccount)
+  .del('/api/accounts/:id',               api.deleteAccount)
 
-  .del('/api/categories/:id',             api.spreadsheetIdRequired, api.deleteCategory)
+  .del('/api/categories/:id',             api.deleteCategory)
 
-  .del('/api/payees/:id',                 api.spreadsheetIdRequired, api.deletePayee)
+  .del('/api/payees/:id',                 api.deletePayee)
 
-  .del('/api/transactions/:id',           api.spreadsheetIdRequired, api.deleteTransaction)
+  .del('/api/transactions/:id',           api.deleteTransaction)
 
 export const apiRoutes = apiRouter.routes()
 export const apiAllowedMethods = apiRouter.allowedMethods()

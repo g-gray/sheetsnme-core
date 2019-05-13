@@ -10,11 +10,9 @@ export const HOUR  : number = MINUTE * 60
 export const DAY   : number = HOUR * 24
 export const WEEK  : number = DAY * 7
 
-export function wait(time: number): Promise<void> {
-  return new Promise((resolve: () => void): void => {
-    setTimeout(resolve, time)
-  })
-}
+/**
+ * Format
+ */
 
 export function dateIsoString(value: any): string {
   const date = f.isDate(value) ? value : new Date(value)
@@ -31,6 +29,11 @@ export function formatDateTime(value: any): string {
   return match ? `${match[1]} ${match[2]}` : ''
 }
 
+
+/**
+ * Errors
+ */
+
 export class PublicError extends Error {
   body: any
 
@@ -43,6 +46,12 @@ export class PublicError extends Error {
   }
 }
 
+
+
+/**
+ * Net
+ */
+
 export function fetch(params: t.XHttpParams): Promise<t.XHttpResponse> {
   return new Promise((resolve, reject) => {
     xhttp.jsonRequest(params, (err, response) => {
@@ -51,6 +60,12 @@ export function fetch(params: t.XHttpParams): Promise<t.XHttpResponse> {
     })
   })
 }
+
+
+
+/**
+ * Crypto
+ */
 
 export function encrypt(
   algorythm: string,
@@ -84,4 +99,48 @@ export function decrypt(
   decrypted += decipher.final('utf8')
 
   return decrypted
+}
+
+
+
+/**
+ * i18n
+ */
+
+export const AVAILABLE_LANGS: Array<string> = ['en', 'ru']
+
+export function xln(lang: string, translations: t.Translations, args?: Array<mixed>): string {
+
+  if (translations == null) return ''
+
+  let translation: void | string | (...Array<mixed>) => string
+  if (translations[lang]) {
+    translation = translations[lang]
+  }
+  else {
+    for (const lang: string in translations) {
+      if (translations[lang]) {
+        translation = translations[lang]
+        break
+      }
+    }
+  }
+
+  if (typeof translation === 'function') {
+    return translation.apply(undefined, args)
+  }
+
+  return (translation || '')
+}
+
+
+
+/**
+ * Misc
+ */
+
+export function wait(time: number): Promise<void> {
+  return new Promise((resolve: () => void): void => {
+    setTimeout(resolve, time)
+  })
 }

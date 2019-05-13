@@ -12,6 +12,7 @@ const {
   LOGOUT_URL,
   SESSION_HEADER_NAME,
   SESSION_COOKIE_NAME,
+  LANG_HEADER_NAME,
   CRYPTO_ALGORITHM,
   CRYPTO_PASSWORD,
   CRYPTO_SALT,
@@ -96,6 +97,17 @@ export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promi
   if (!ctx.accepts('application/json')) {
     ctx.throw(406, 'Not acceptable')
     return
+  }
+
+  await next()
+}
+
+export async function lang(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+  const lang: string | void = ctx.headers[LANG_HEADER_NAME]
+
+  ctx.lang = u.AVAILABLE_LANGS[0]
+  if (f.includes(u.AVAILABLE_LANGS), lang) {
+    ctx.lang = lang
   }
 
   await next()

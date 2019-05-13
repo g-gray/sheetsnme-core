@@ -47,6 +47,7 @@ export type EnvProperties = {|
   PGSCRIPT_DB_URL    : string,
   SESSION_COOKIE_NAME: string,
   SESSION_HEADER_NAME: string,
+  LANG_HEADER_NAME   : string,
   CRYPTO_ALGORITHM   : string,
   CRYPTO_PASSWORD    : string,
   CRYPTO_SALT        : string,
@@ -62,6 +63,7 @@ export type EnvProperties = {|
 
 export type Context = {|
   ...Context,
+  lang         : string,
   sessionId    : string,
   client       : GOAuth2Client,
   spreadsheetId: string,
@@ -374,7 +376,7 @@ export type GQueryRes = {
 }
 
 /**
- * XHttp
+ * Net
  */
 
 export type XHttpParams = {|
@@ -404,3 +406,14 @@ export type ResError = {|
 |}
 
 export type ResErrors = Array<ResError>
+
+
+
+/**
+ * i18n
+ */
+
+export type Translations = {|
+  en: string,
+  ru: string,
+|}
