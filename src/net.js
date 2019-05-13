@@ -567,7 +567,7 @@ export async function createAppSpreadsheet(client: t.GOAuth2Client): Promise<t.G
   })
 
   if (!spreadsheet) {
-    throw new u.PublicError('Spreadsheet not found')
+    throw new Error('Spreadsheet not found')
   }
 
   // TODO Check return value
@@ -597,7 +597,7 @@ async function queryEntityById<T>(
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T | void> {
   if (!id) {
-    throw new u.PublicError('Entity id required')
+    throw new Error('Entity id required')
   }
 
   const query: string = `select * where A = '${id}'`
@@ -650,7 +650,7 @@ async function createEntity<T>(
     rowToEntity,
   )
   if (!created) {
-    throw new u.PublicError('Entity was not created')
+    throw new Error('Entity was not created')
   }
 
   return created
@@ -665,7 +665,7 @@ async function deleteEntityById<T>(
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T> {
   if (!id) {
-    throw new u.PublicError('Entity id required')
+    throw new Error('Entity id required')
   }
 
   const toDelete: T | void = await queryEntityById<T>(
@@ -676,13 +676,13 @@ async function deleteEntityById<T>(
     rowToEntity,
   )
   if (!toDelete) {
-    throw new u.PublicError('Entity not found')
+    throw new Error('Entity not found')
   }
 
   // $FlowFixMe
   const rowNumber: number = toDelete.row
   if (!rowNumber) {
-    throw new u.PublicError('Row number not found')
+    throw new Error('Row number not found')
   }
 
   await deleteRow(client, spreadsheetId, sheetId, rowNumber)
@@ -701,7 +701,7 @@ async function updateEntityById<T>(
   rowToEntity   : (row: t.GQueryRow) => T,
 ): Promise<T> {
   if (!id) {
-    throw new u.PublicError('Entity id required')
+    throw new Error('Entity id required')
   }
 
   const toUpdate: T | void = await queryEntityById<T>(
@@ -712,13 +712,13 @@ async function updateEntityById<T>(
     rowToEntity,
   )
   if (!toUpdate) {
-    throw new u.PublicError('Entity not found')
+    throw new Error('Entity not found')
   }
 
   // $FlowFixMe
   const rowNumber: number = toUpdate.row
   if (!rowNumber) {
-    throw new u.PublicError('Row number not found')
+    throw new Error('Row number not found')
   }
 
   await updateRow(client, spreadsheetId, sheetId, rowNumber, entityToRow(entity))
@@ -732,7 +732,7 @@ async function updateEntityById<T>(
     rowToEntity,
   )
   if (!updated) {
-    throw new u.PublicError('Entity was not updated')
+    throw new Error('Entity was not updated')
   }
 
   return updated
