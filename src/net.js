@@ -807,14 +807,13 @@ async function deleteRow(
   })
 }
 
-// TODO It is unused currently. Candidate to be deleted
 export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
-  return new Promise(resolve => {
-    google.sheets({version: 'v4', auth: client}).spreadsheets.get(options, (err, res) => {
-      if (err) throw Error(err)
-      resolve(res.data)
+  return google.sheets({version: 'v4', auth: client}).spreadsheets.get(options)
+    .then(({data}) => data)
+    .catch(error => {
+      if (error.code === 404) return
+      throw error
     })
-  })
 }
 
 export function createSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {

@@ -214,13 +214,29 @@ export async function getUser(ctx: t.Context) {
 
   const spreadsheets: t.Spreadsheets = await db.spreadsheetsBySessionId(sessionId)
   let spreadsheet: t.Spreadsheet | void = spreadsheets[0]
+  let gSpreadsheet: t.GSpreadsheet | void
 
-  if (!spreadsheet) {
-    const client: t.GOAuth2Client = ctx.client
-    const gSpreadsheet: t.GSpreadsheet = await n.createAppSpreadsheet(client)
+  const client: t.GOAuth2Client = ctx.client
+
+  if (spreadsheet) {
+    try {
+      gSpreadsheet = await n.fetchSpreadsheet(client, {spreadsheetId: spreadsheet.externalId})
+    }
+    catch (error) {
+      if (error.code === 401) {
+        ctx.throw(401, 'Unauthorized')
+        return
+      }
+      throw error
+    }
+  }
+
+  if (!gSpreadsheet) {
+    gSpreadsheet = await n.createAppSpreadsheet(client)
     spreadsheet = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
   }
 
+  // $FlowFixMe
   ctx.body = {...user, spreadsheets: [{id: spreadsheet.id}]}
 }
 

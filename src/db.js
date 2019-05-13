@@ -207,6 +207,7 @@ export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spre
   from spreadsheets sh
   left join sessions s on s.user_id = sh.user_id
   where s.id = $1
+  order by created_at desc
   `
   const v: Array<mixed> = [sessionId]
   const result: t.ResultSet = await query(q, v)
