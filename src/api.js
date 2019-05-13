@@ -535,8 +535,6 @@ const TRANSFER = 'TRANSFER'
 const LOAN     = 'LOAN'
 const BORROW   = 'BORROW'
 
-const TRANSACTON_TYPES: Array<t.TransactionType> = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
-
 export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const filter: t.TransactionsFilter = ctx.query
