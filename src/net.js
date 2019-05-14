@@ -155,11 +155,17 @@ export async function fetchBalancesByAccountIds(
     const outcomeBalance: t.Balance | void = outcomeBalances[id]
     const income = incomeBalance ? incomeBalance.balance : 0
     const outcome = outcomeBalance ? outcomeBalance.balance : 0
+
+    /**
+     * TODO Probably we have to use libs like Bignumber: https://github.com/MikeMcl/bignumber.js/
+     * to solve problem related to floating numbers and precisions instead of
+     * Math.round((income - outcome) * 100) / 100,
+     */
     return {
       ...acc,
       [id]: {
         accountId: id,
-        balance: income - outcome,
+        balance: Math.round((income - outcome) * 100) / 100,
       },
     }
   })
