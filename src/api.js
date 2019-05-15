@@ -553,14 +553,21 @@ const BORROW   = 'BORROW'
 
 export async function getTransactions(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
+  // TODO Add validation of filter values
   const filter: t.TransactionsFilter = ctx.query
   const gSpreadsheetId: string = ctx.gSpreadsheetId
+  const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId)
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
 
-  ctx.body = f.map(
-    transactions,
-    transaction => ({...transaction, type: defTransactionType(transaction)})
-  )
+  ctx.body = {
+    limit: filter.limit || u.DEFAULT_LIMIT,
+    offset: filter.offset || 0,
+    total: transactionsNumber,
+    items: f.map(
+      transactions,
+      transaction => ({...transaction, type: defTransactionType(transaction)})
+    ),
+  }
 }
 
 export async function getTransaction(ctx: t.Context): Promise<void> {

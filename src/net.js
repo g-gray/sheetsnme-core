@@ -422,6 +422,18 @@ export async function fetchTransaction(
   return result
 }
 
+export async function fetchTransactionsNumber(
+  client       : t.GOAuth2Client,
+  spreadsheetId: string,
+): Promise<number> {
+  const result: number = await queryEntitiesNumber(
+    client,
+    spreadsheetId,
+    s.TRANSACTIONS_SHEET_ID,
+  )
+  return result
+}
+
 export async function createTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
@@ -476,7 +488,7 @@ export async function fetchTransactions(
   spreadsheetId: string,
   filter       : t.TransactionsFilter,
 ): Promise<t.Transactions> {
-  const query: string = filterTransactionsQuery(filter)
+  const query: string = transactionsQuery(filter)
   const result: t.Transactions = await queryEntities<t.Transaction>(
     client,
     spreadsheetId,
@@ -527,7 +539,7 @@ function transactionToRow(transaction: t.Transaction): t.GRowData {
   }
 }
 
-function filterTransactionsQuery(filter: t.TransactionsFilter): string {
+function transactionsQuery(filter: t.TransactionsFilter): string {
   const where = f.compact([
     `A != 'id'`,
     filter.id         ? `A = '${filter.id}'`                                       : undefined,
@@ -541,11 +553,17 @@ function filterTransactionsQuery(filter: t.TransactionsFilter): string {
     filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
   ]).join(' AND ')
 
-  const query: string = [
+  const limit: number = parseInt(filter.limit, 10) || u.DEFAULT_LIMIT
+  const offset: number = parseInt(filter.offset, 10)
+
+  const query: string = f.compact([
     `select *`,
     `where ${where}`,
     `order by B desc, J desc`,
-  ].join(' ')
+    limit  ? `limit ${limit}`   : undefined,
+    offset ? `offset ${offset}` : undefined,
+  ]).join(' ')
+
   return query
 }
 
@@ -636,6 +654,27 @@ async function queryEntities<T>(
    : []
 
   return entities
+}
+
+// TODO Probably replace generic by a common type for all key entities
+export async function queryEntitiesNumber(
+  client       : t.GOAuth2Client,
+  spreadsheetId: string,
+  sheetId      : number,
+): Promise<number> {
+  const table: t.GQueryTable | void = await querySheet(
+    spreadsheetId,
+    sheetId,
+    `select count(A) where A != 'id'`,
+  )
+
+  const rows: Array<t.GQueryRow> = table
+    ? table.rows
+    : []
+  const row: t.GQueryRow | void = f.first(rows)
+  const size: number = row && row.c[0] ? Number(row.c[0].v) : 0
+
+  return size
 }
 
 // TODO Probably replace generic by a common type for all key entities

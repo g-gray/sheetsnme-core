@@ -10,6 +10,8 @@ export const HOUR  : number = MINUTE * 60
 export const DAY   : number = HOUR * 24
 export const WEEK  : number = DAY * 7
 
+export const DEFAULT_LIMIT: number = 25
+
 /**
  * Format
  */
