@@ -20,6 +20,10 @@ export type * from 'uuid'
 import type UuidT from 'uuid'
 export type Uuid = UuidT
 
+export type * from 'query-string'
+import typeof QueryStringT from 'query-string'
+export type QueryString = QueryStringT
+
 export type * from 'dotenv'
 export type * from 'googleapis'
 export type * from 'fpx'
@@ -252,6 +256,8 @@ export type TransactionsFilter = {|
   accountId? : string,
   amountFrom?: string,
   amountTo?  : string,
+  limit?     : string,
+  offset?    : string,
 |}
 
 

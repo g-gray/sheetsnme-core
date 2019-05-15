@@ -2,6 +2,7 @@
 import {google} from 'googleapis'
 import * as f from 'fpx'
 import uuid from 'uuid/v4'
+import qs from 'query-string'
 import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
@@ -127,26 +128,24 @@ export async function fetchBalancesByAccountIds(
   accountIds: Array<string>,
 ): t.Balances {
   const outcomeIdsCond: string = f.map(accountIds, id => `F = '${id}'`).join(' OR ')
-  const outcomeTable: t.GQueryTable = await querySheet(
+  const outcomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
     `select F, sum(G) where ${outcomeIdsCond} group by F`,
   )
-  const outcomeBalances: t.Balances = f.keyBy(
-    f.map(outcomeTable && outcomeTable.rows, rowToBalance),
-    ({accountId}) => accountId
-  )
+  const outcomeBalances: t.Balances = outcomeTable
+   ? f.keyBy(f.map(outcomeTable.rows, rowToBalance), ({accountId}) => accountId)
+   : {}
 
   const incomeIdsCond: string = f.map(accountIds, id => `H = '${id}'`).join(' OR ')
-  const incomeTable: t.GQueryTable = await querySheet(
+  const incomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
     `select H, sum(I) where ${incomeIdsCond} group by H`,
   )
-  const incomeBalances: t.Balances = f.keyBy(
-    f.map(incomeTable && incomeTable.rows, rowToBalance),
-    ({accountId}) => accountId
-  )
+  const incomeBalances: t.Balances = incomeTable
+    ? f.keyBy(f.map(incomeTable.rows, rowToBalance), ({accountId}) => accountId)
+    : {}
 
   const ids = f.uniq(f.concat(f.keys(outcomeBalances), f.keys(incomeBalances)))
 
@@ -627,12 +626,15 @@ async function queryEntities<T>(
   rowToEntity  : (row: t.GQueryRow) => T,
   query?: string,
 ): Promise<Array<T>> {
-  const table: t.GQueryTable = await querySheet(
+  const table: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     sheetId,
     query || `select * where A != 'id'`,
   )
-  const entities: Array<T> = f.map(table.rows, row => rowToEntity(row))
+  const entities: Array<T> = table
+   ? f.map(table.rows, row => rowToEntity(row))
+   : []
+
   return entities
 }
 
@@ -850,10 +852,9 @@ export function addPermissions(client: t.GOAuth2Client, options: any): Promise<v
 }
 
 
-async function querySheet(spreadsheetId: string, sheetId: number, query?: string): Promise<t.GQueryTable> {
-  const encodedQuery: string = encodeURIComponent(query || '')
-  // TODO Use util to join query params instead of inline them
-  const url: string = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tq=${encodedQuery}&gid=${sheetId}`
+async function querySheet(spreadsheetId: string, sheetId: number, query?: string): Promise<t.GQueryTable | void> {
+  const queryString: string = qs.stringify({tq: query, gid: sheetId})
+  const url: string = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${queryString}`
 
   return await u.fetch({url}).then(({body}) => {
     const matches = body && body.match(/google\.visualization\.Query\.setResponse\((.*)\);$/)
