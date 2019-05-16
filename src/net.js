@@ -864,30 +864,17 @@ export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise
 }
 
 export function createSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
-  return new Promise(resolve => {
-    google.sheets({version: 'v4', auth: client}).spreadsheets.create(options, (err, res) => {
-      if (err) throw Error(err)
-      resolve(res.data)
-    })
-  })
+  return google.sheets({version: 'v4', auth: client}).spreadsheets.create(options)
+    .then(({data}) => data)
 }
 
 export function batchUpdateSpreadsheet(client: t.GOAuth2Client, options: any): Promise<any> {
-  return new Promise(resolve => {
-    google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options, (err, res) => {
-      if (err) throw Error(err)
-      resolve(res.data.replies)
-    })
-  })
+  return google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options)
+    .then(({data: {replies}}) => replies)
 }
 
 export function addPermissions(client: t.GOAuth2Client, options: any): Promise<void> {
-  return new Promise(resolve => {
-    google.drive({version: 'v3', auth: client}).permissions.create(options, err => {
-      if (err) throw Error(err)
-      resolve()
-    })
-  })
+  return google.drive({version: 'v3', auth: client}).permissions.create(options)
 }
 
 
@@ -913,10 +900,6 @@ async function querySheet(spreadsheetId: string, sheetId: number, query?: string
 
 
 export function fetchUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void> {
-  return new Promise(resolve => {
-    google.oauth2({version: 'v2', auth: client}).userinfo.get((err, res) => {
-      if (err) throw Error(err)
-      resolve(res.data)
-    })
-  })
+  return google.oauth2({version: 'v2', auth: client}).userinfo.get()
+    .then(({data}) => data)
 }
