@@ -559,9 +559,21 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
   const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId)
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
 
+  const limit: number = parseInt(filter.limit, 10)
+  if (filter.limit && (!f.isInteger(limit) || limit < 0)) {
+    ctx.throw(400, 'Limit must be a positive integer')
+    return
+  }
+
+  const offset: number = parseInt(filter.offset, 10)
+  if (filter.offset && (!f.isInteger(offset) || offset < 0)) {
+    ctx.throw(400, 'Offset must be a positive integer')
+    return
+  }
+
   ctx.body = {
-    limit: filter.limit || u.DEFAULT_LIMIT,
-    offset: filter.offset || 0,
+    limit: limit || u.DEFAULT_LIMIT,
+    offset: offset || 0,
     total: transactionsNumber,
     items: f.map(
       transactions,
