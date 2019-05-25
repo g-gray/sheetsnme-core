@@ -556,7 +556,7 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
   // TODO Add validation of filter values
   const filter: t.TransactionsFilter = ctx.query
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId)
+  const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId, filter)
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
 
   const limit: number = parseInt(filter.limit, 10)

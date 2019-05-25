@@ -422,18 +422,6 @@ export async function fetchTransaction(
   return result
 }
 
-export async function fetchTransactionsNumber(
-  client       : t.GOAuth2Client,
-  spreadsheetId: string,
-): Promise<number> {
-  const result: number = await queryEntitiesNumber(
-    client,
-    spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
-  )
-  return result
-}
-
 export async function createTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
@@ -499,6 +487,21 @@ export async function fetchTransactions(
   return result
 }
 
+export async function fetchTransactionsNumber(
+  client       : t.GOAuth2Client,
+  spreadsheetId: string,
+  filter       : t.TransactionsFilter,
+): Promise<number> {
+  const query: string = transactionsNumberQuery(filter)
+  const result: number = await queryEntitiesNumber(
+    client,
+    spreadsheetId,
+    s.TRANSACTIONS_SHEET_ID,
+    query,
+  )
+  return result
+}
+
 
 function rowToTransaction(row: t.GQueryRow): t.Transaction {
   return {
@@ -540,18 +543,7 @@ function transactionToRow(transaction: t.Transaction): t.GRowData {
 }
 
 function transactionsQuery(filter: t.TransactionsFilter): string {
-  const where = f.compact([
-    `A != 'id'`,
-    filter.id         ? `A = '${filter.id}'`                                       : undefined,
-    filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                           : undefined,
-    filter.dateTo     ? `B <= date '${filter.dateTo}'`                             : undefined,
-    filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
-    filter.payeeId    ? `lower(D) like lower('%${filter.payeeId}%')`               : undefined,
-    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
-    filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : undefined,
-    filter.amountFrom ? `G >= ${filter.amountFrom}`                                : undefined,
-    filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
-  ]).join(' AND ')
+  const where = transactionsWhere(filter)
 
   const limit: number = parseInt(filter.limit, 10) || u.DEFAULT_LIMIT
   const offset: number = parseInt(filter.offset, 10)
@@ -565,6 +557,32 @@ function transactionsQuery(filter: t.TransactionsFilter): string {
   ]).join(' ')
 
   return query
+}
+
+function transactionsNumberQuery(filter: t.TransactionsFilter): string {
+  const where = transactionsWhere(filter)
+
+  const query: string = f.compact([
+    `select count(A)`,
+    `where ${where}`,
+  ]).join(' ')
+
+  return query
+}
+
+function transactionsWhere(filter: t.TransactionsFilter): string {
+  return f.compact([
+    `A != 'id'`,
+    filter.id         ? `A = '${filter.id}'`                                       : undefined,
+    filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                           : undefined,
+    filter.dateTo     ? `B <= date '${filter.dateTo}'`                             : undefined,
+    filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
+    filter.payeeId    ? `D = '${filter.payeeId}'`                                  : undefined,
+    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
+    filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : undefined,
+    filter.amountFrom ? `G >= ${filter.amountFrom}`                                : undefined,
+    filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
+  ]).join(' AND ')
 }
 
 
@@ -661,11 +679,12 @@ export async function queryEntitiesNumber(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
+  query?: string,
 ): Promise<number> {
   const table: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     sheetId,
-    `select count(A) where A != 'id'`,
+    query || `select count(A) where A != 'id'`,
   )
 
   const rows: Array<t.GQueryRow> = table
