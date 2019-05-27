@@ -574,8 +574,8 @@ function transactionsWhere(filter: t.TransactionsFilter): string {
   return f.compact([
     `A != 'id'`,
     filter.id         ? `A = '${filter.id}'`                                       : undefined,
-    filter.dateFrom   ? `B >= date '${filter.dateFrom}'`                           : undefined,
-    filter.dateTo     ? `B <= date '${filter.dateTo}'`                             : undefined,
+    filter.dateFrom   ? `B >= '${filter.dateFrom}'`                           : undefined,
+    filter.dateTo     ? `B <= '${filter.dateTo}'`                             : undefined,
     filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
     filter.payeeId    ? `D = '${filter.payeeId}'`                                  : undefined,
     filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
