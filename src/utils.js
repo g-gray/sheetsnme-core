@@ -111,7 +111,7 @@ export function decrypt(
 
 export const AVAILABLE_LANGS: Array<string> = ['en', 'ru']
 
-export function xln(lang: string, translations: t.Translations, args?: Array<mixed>): string {
+export function xln(lang: string, translations: t.Translations, args?: Array<mixed> = []): string {
 
   if (translations == null) return ''
 
@@ -129,7 +129,7 @@ export function xln(lang: string, translations: t.Translations, args?: Array<mix
   }
 
   if (typeof translation === 'function') {
-    return translation.apply(undefined, args)
+    return translation(...args) || ''
   }
 
   return (translation || '')

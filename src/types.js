@@ -9,7 +9,7 @@ import type RouterT from 'koa-router'
 export type Router = RouterT
 
 export type * from 'koa-bodyparser'
-import type KoaBodyparserT from 'koa-bodyparser'
+import typeof KoaBodyparserT from 'koa-bodyparser'
 export type KoaBodyparser = KoaBodyparserT
 
 export type * from 'pg'
