@@ -232,7 +232,7 @@ export async function getUser(ctx: t.Context) {
   }
 
   if (!gSpreadsheet) {
-    gSpreadsheet = await n.createAppSpreadsheet(client)
+    gSpreadsheet = await n.createAppSpreadsheet(client, ctx.lang)
     spreadsheet = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
   }
 

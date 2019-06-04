@@ -2,6 +2,7 @@
 import uuid from 'uuid/v4'
 import * as t from './types'
 import * as u from './utils'
+import * as tr from './translations'
 
 export const TRANSACTIONS_SHEET_ID = 0
 export const ACCOUNTS_SHEET_ID     = 1
@@ -16,7 +17,7 @@ export const SALARY_CATEGORY_ID = '00000000-0000-0000-0002-000000000001'
 
 export const EMPLOYER_PAYEE_ID  = '00000000-0000-0000-0003-000000000001'
 
-export function createTransactionsSheet(): t.GSheet {
+export function createTransactionsSheet(lang: string): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
@@ -55,7 +56,7 @@ export function createTransactionsSheet(): t.GSheet {
               {userEnteredValue: {stringValue: u.formatDate(date)}},
               {userEnteredValue: {stringValue: SALARY_CATEGORY_ID}},
               {userEnteredValue: {stringValue: EMPLOYER_PAYEE_ID}},
-              {userEnteredValue: {stringValue: 'This is an initial transaction. Feel free to edit or delete it.'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.THIS_IS_YOUR_INITIAL_TRANSACTION)}},
               {userEnteredValue: {stringValue: ''}},
               {userEnteredValue: {numberValue: 0}},
               {userEnteredValue: {stringValue: CARD_ACCOUNT_ID}},
@@ -70,7 +71,7 @@ export function createTransactionsSheet(): t.GSheet {
   }
 }
 
-export function createAccountsSheet(): t.GSheet {
+export function createAccountsSheet(lang: string): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
@@ -109,7 +110,7 @@ export function createAccountsSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: CARD_ACCOUNT_ID}},
-              {userEnteredValue: {stringValue: 'Card'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.CARD)}},
               {userEnteredValue: {stringValue: 'RUB'}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
@@ -118,7 +119,7 @@ export function createAccountsSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Cash'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.CASH)}},
               {userEnteredValue: {stringValue: 'RUB'}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
@@ -127,7 +128,7 @@ export function createAccountsSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Deposit'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.DEPOSIT)}},
               {userEnteredValue: {stringValue: 'RUB'}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
@@ -139,7 +140,7 @@ export function createAccountsSheet(): t.GSheet {
   }
 }
 
-export function createCategoriesSheet(): t.GSheet {
+export function createCategoriesSheet(lang: string): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
@@ -168,7 +169,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: SALARY_CATEGORY_ID}},
-              {userEnteredValue: {stringValue: 'Salary'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.SALARY)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -176,7 +177,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Household'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.HOUSEHOLD)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -184,7 +185,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Healthcare'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.HEALTHCARE)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -192,7 +193,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Appearance'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.APPEARANCE)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -200,7 +201,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Education'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.EDUCATION)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -208,7 +209,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Taxes & Charges'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.TAXES_AND_CHARGES)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -216,7 +217,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Food'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.FOOD)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -224,7 +225,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Entertainment'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.ENTERTAINMENT)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -232,7 +233,7 @@ export function createCategoriesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Transport'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.TRANSPORT)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -243,7 +244,7 @@ export function createCategoriesSheet(): t.GSheet {
   }
 }
 
-export function createPayeesSheet(): t.GSheet {
+export function createPayeesSheet(lang: string): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
@@ -272,7 +273,7 @@ export function createPayeesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: EMPLOYER_PAYEE_ID}},
-              {userEnteredValue: {stringValue: 'Employer'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.EMPLOYER)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -280,7 +281,7 @@ export function createPayeesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Jack'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.PETER)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -288,7 +289,7 @@ export function createPayeesSheet(): t.GSheet {
           {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
-              {userEnteredValue: {stringValue: 'Sarah'}},
+              {userEnteredValue: {stringValue: u.xln(lang, tr.ALEXANDRA)}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],

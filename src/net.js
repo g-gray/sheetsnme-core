@@ -591,17 +591,17 @@ function transactionsWhere(filter: t.TransactionsFilter): string {
  * Spreadsheet
  */
 
-export async function createAppSpreadsheet(client: t.GOAuth2Client): Promise<t.GSpreadsheet> {
+export async function createAppSpreadsheet(client: t.GOAuth2Client, lang: string): Promise<t.GSpreadsheet> {
   const spreadsheet: t.GSpreadsheet | void = await createSpreadsheet(client, {
     resource: {
       properties: {
         title: SPREADSHEET_NAME,
       },
       sheets: [
-        s.createTransactionsSheet(),
-        s.createAccountsSheet(),
-        s.createCategoriesSheet(),
-        s.createPayeesSheet(),
+        s.createTransactionsSheet(lang),
+        s.createAccountsSheet(lang),
+        s.createCategoriesSheet(lang),
+        s.createPayeesSheet(lang),
         s.createVersionsSheet(),
       ],
     },

@@ -40,3 +40,83 @@ export const PAYEE_REQUIRED: t.Translations = {
   en: 'Payee required',
   ru: 'Выберите плательщика',
 }
+
+export const THIS_IS_YOUR_INITIAL_TRANSACTION: t.Translations = {
+  en: 'This is your initial transaction. Try to edit or delete it.',
+  ru: 'Это ваша первая транзакция. Попробуйте отредактировать или удалить ее.',
+}
+
+export const CARD: t.Translations = {
+  en: 'Card',
+  ru: 'Карта',
+}
+
+export const CASH: t.Translations = {
+  en: 'Cash',
+  ru: 'Наличные',
+}
+
+export const DEPOSIT: t.Translations = {
+  en: 'Deposit',
+  ru: 'Вклад',
+}
+
+export const SALARY: t.Translations = {
+  en: 'Salary',
+  ru: 'Зарплата',
+}
+
+export const HOUSEHOLD: t.Translations = {
+  en: 'Household',
+  ru: 'Жилье',
+}
+
+export const HEALTHCARE: t.Translations = {
+  en: 'Healthcare',
+  ru: 'Здоровье',
+}
+
+export const APPEARANCE: t.Translations = {
+  en: 'Appearance',
+  ru: 'Внешний вид',
+}
+
+export const EDUCATION: t.Translations = {
+  en: 'Education',
+  ru: 'Образование',
+}
+
+export const TAXES_AND_CHARGES: t.Translations = {
+  en: 'Taxes and Charges',
+  ru: 'Налоги и пошлины',
+}
+
+export const FOOD: t.Translations = {
+  en: 'Food',
+  ru: 'Питание',
+}
+
+export const ENTERTAINMENT: t.Translations = {
+  en: 'Entertainment',
+  ru: 'Развлечения',
+}
+
+export const TRANSPORT: t.Translations = {
+  en: 'Transport',
+  ru: 'Транспорт',
+}
+
+export const EMPLOYER: t.Translations = {
+  en: 'Employer',
+  ru: 'Работодатель',
+}
+
+export const PETER: t.Translations = {
+  en: 'Peter',
+  ru: 'Петр',
+}
+
+export const ALEXANDRA: t.Translations = {
+  en: 'Alexandra',
+  ru: 'Александра',
+}
