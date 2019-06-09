@@ -1,5 +1,4 @@
-const pt = require('path')
-const fs = require('fs')
+'use strict'
 const pg = require('pg')
 
 require('dotenv').config({path: '.env.properties'})
@@ -22,21 +21,4 @@ const config = properties.DATABASE_URL
     password: properties.POSTGRES_PASSWORD,
   }
 
-const pool = new pg.Pool(config)
-
-function query(text, values) {
-  return pool.query(text, values)
-}
-
-async function repopulate() {
-  console.info(`Repopulate: Started`)
-  const setup       = fs.readFileSync(pt.resolve(__dirname, '../sql/setup.pgsql')).toString()
-  const resetSchema = fs.readFileSync(pt.resolve(__dirname, '../sql/reset-schema.pgsql')).toString()
-  const seed        = fs.readFileSync(pt.resolve(__dirname, '../sql/seed.pgsql')).toString()
-  await query(setup)
-  await query(resetSchema)
-  await query(seed)
-  console.info(`Repopulate: Finished`)
-}
-
-repopulate()
+module.exports.pool = new pg.Pool(config)

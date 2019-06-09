@@ -10,5 +10,5 @@
 !/webpack.config.js
 !/yarn.lock
 !/flow-typed
-!/sql
+!/db
 !/src

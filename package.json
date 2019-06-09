@@ -2,7 +2,10 @@
   "scripts": {
     "start": "webpack --watch",
     "build": "webpack",
-    "db:repopulate": "node src/db-repopulate.js"
+    "db:repopulate": "node db/repopulate.js",
+    "db:migrate-up": "migrate up --migrations-dir ./db/migrations --store ./db/pg-state-store.js",
+    "db:migrate-down": "migrate down --migrations-dir ./db/migrations --store ./db/pg-state-store.js",
+    "db:migrate-create": "migrate create --migrations-dir ./db/migrations",
   },
   "engines": {
     "node": "11.x"
@@ -29,6 +32,7 @@
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
+    "migrate": "^1.6.2",
     "pg": "^7.11.0",
     "query-string": "^6.5.0",
     "uuid": "^3.3.2",
