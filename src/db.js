@@ -1,5 +1,4 @@
 // @flow
-
 import {Pool} from 'pg'
 import f from 'fpx'
 import * as t from './types'
@@ -49,26 +48,25 @@ export async function sessionById(id: string): Promise<t.Session | void> {
 export async function upsertSession(session: t.Session): Promise<t.Session> {
   let q: string = `
   insert into sessions
-    (user_id, external_token)
+    (user_id)
   values
-    ($1, $2)
+    ($1)
   returning *
   `
-  let v: Array<mixed> = [session.userId, session.externalToken]
+  let v: Array<mixed> = [session.userId]
 
   if (session.id) {
     q = `
     insert into sessions
-      (id, user_id, external_token)
+      (id, user_id)
     values
-      ($1, $2, $3)
+      ($1, $2)
     on conflict (id) do update set
       user_id        = $2,
-      external_token = $3,
       updated_at     = current_timestamp
     returning *
     `
-    v = [session.id, session.userId, session.externalToken]
+    v = [session.id, session.userId]
   }
 
   const result: t.ResultSet = await query(q, v)
@@ -111,11 +109,10 @@ export async function deleteExpiredSessions(userId: string): Promise<void> {
 
 function rowToSession(row: t.Row): t.Session {
   return {
-    id            : ((row.id            : any): string),
-    userId        : ((row.user_id       : any): string),
-    externalToken : ((row.external_token: any): string),
-    createdAt     : ((row.created_at    : any): Date),
-    updatedAt     : ((row.updated_at    : any): Date),
+    id       : ((row.id            : any): string),
+    userId   : ((row.user_id       : any): string),
+    createdAt: ((row.created_at    : any): Date),
+    updatedAt: ((row.updated_at    : any): Date),
   }
 }
 
@@ -127,8 +124,6 @@ function rowToSession(row: t.Row): t.Session {
 
 export async function upsertUser(user: t.User): Promise<t.User> {
   const q: string = `
-  with
-    ur as (select id from roles where sym='user')
   insert into users
     (
       external_id,
@@ -137,16 +132,17 @@ export async function upsertUser(user: t.User): Promise<t.User> {
       email_verified,
       first_name,
       last_name,
-      role_id
+      external_token
     )
   values
-    ($1, $2, $3, $4, $5, $6, (select id from ur))
+    ($1, $2, $3, $4, $5, $6, $7)
   on conflict (external_id) do update set
     picture_url    = $2,
     email          = $3,
     email_verified = $4,
     first_name     = $5,
     last_name      = $6,
+    external_token = $7,
     updated_at     = current_timestamp
   returning *
   `
@@ -157,6 +153,7 @@ export async function upsertUser(user: t.User): Promise<t.User> {
     user.emailVerified,
     user.firstName,
     user.lastName,
+    user.externalToken,
   ]
   const result: t.ResultSet = await query(q, v)
   const row: t.Row = result.rows[0]
@@ -184,16 +181,17 @@ export async function userBySessionId(sessionId: string): Promise<t.User | void>
 
 function rowToUser(row: t.Row): t.User {
   return {
-    id           :((row.id            : any): string),
-    externalId   :((row.external_id   : any): string),
-    pictureUrl   :((row.picture_url   : any): string),
-    email        :((row.email         : any): string),
-    emailVerified:((row.email_verified: any): boolean),
-    firstName    :((row.first_name    : any): string),
-    lastName     :((row.last_name     : any): string),
-    userRoleId   :((row.role_id       : any): string),
-    createdAt    :((row.created_at    : any): Date),
-    updatedAt    :((row.updated_at    : any): Date),
+    id           : ((row.id            : any): string),
+    externalId   : ((row.external_id   : any): string),
+    pictureUrl   : ((row.picture_url   : any): string),
+    email        : ((row.email         : any): string),
+    emailVerified: ((row.email_verified: any): boolean),
+    firstName    : ((row.first_name    : any): string),
+    lastName     : ((row.last_name     : any): string),
+    userRoleId   : ((row.role_id       : any): string),
+    externalToken: ((row.external_token: any): string),
+    createdAt    : ((row.created_at    : any): Date),
+    updatedAt    : ((row.updated_at    : any): Date),
   }
 }
 
@@ -236,10 +234,10 @@ export async function createSpreadsheet(sessionId: string, spreadsheetId: string
 
 function rowToSpreadsheet(row: t.Row): t.Spreadsheet {
   return {
-    id        :((row.id         : any): string),
-    userId    :((row.user_id    : any): string),
-    externalId:((row.external_id: any): string),
-    createdAt :((row.created_at : any): Date),
-    updatedAt :((row.updated_at : any): Date),
+    id        : ((row.id         : any): string),
+    userId    : ((row.user_id    : any): string),
+    externalId: ((row.external_id: any): string),
+    createdAt : ((row.created_at : any): Date),
+    updatedAt : ((row.updated_at : any): Date),
   }
 }

@@ -112,7 +112,6 @@ export type GOAuth2Client = {|
 export type Session = {|
   id?          : string,
   userId       : string,
-  externalToken: string,
   createdAt?   : Date,
   updatedAt?   : Date,
 |}
@@ -143,6 +142,7 @@ export type User = {|
   firstName    : string,
   lastName     : string,
   userRoleId?  : string,
+  externalToken: string,
   createdAt?   : Date,
   updatedAt?   : Date,
 |}

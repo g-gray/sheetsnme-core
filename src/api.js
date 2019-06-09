@@ -39,36 +39,41 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     return
   }
 
+  // $FlowFixMe
+  const user: t.User | void = await db.userBySessionId(session.id)
+  if (!user) {
+    ctx.throw(400, 'User not found')
+    return
+  }
+
   const decryptedToken: string = u.decrypt(
     CRYPTO_ALGORITHM,
     CRYPTO_PASSWORD,
     CRYPTO_SALT,
     CRYPTO_KEYLENGTH,
-    session.externalToken
+    user.externalToken,
   )
   const token: t.GAuthToken = JSON.parse(decryptedToken)
 
   const diff: number = token.expiry_date - Date.now()
   if (diff > 0) {
     ctx.client = a.createOAuth2Client(token)
-    ctx.sessionId = session.id
+  }
+  else {
+    const newToken: t.GAuthToken = await a.refreshToken(token)
+    const encryptedNewToken: string = u.encrypt(
+      CRYPTO_ALGORITHM,
+      CRYPTO_PASSWORD,
+      CRYPTO_SALT,
+      CRYPTO_KEYLENGTH,
+      JSON.stringify(newToken),
+    )
 
-    await next()
-    return
+    await db.upsertUser({...user, externalToken: encryptedNewToken})
+    ctx.client = a.createOAuth2Client(newToken)
   }
 
-  const newToken: t.GAuthToken = await a.refreshToken(token)
-  const encryptedNewToken: string = u.encrypt(
-    CRYPTO_ALGORITHM,
-    CRYPTO_PASSWORD,
-    CRYPTO_SALT,
-    CRYPTO_KEYLENGTH,
-    JSON.stringify(newToken),
-  )
-
-  const updatedSession: t.Session = await db.upsertSession({...session, externalToken: encryptedNewToken})
-  ctx.client = a.createOAuth2Client(newToken)
-  ctx.sessionId = updatedSession.id
+  ctx.sessionId = session.id
 
   await next()
 }
@@ -164,15 +169,6 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     return
   }
 
-  const user: t.User = await db.upsertUser({
-    externalId   : gUser.id,
-    pictureUrl   : gUser.picture,
-    email        : gUser.email,
-    emailVerified: gUser.verified_email,
-    firstName    : gUser.given_name,
-    lastName     : gUser.family_name,
-  })
-
   const encryptedToken: string = u.encrypt(
     CRYPTO_ALGORITHM,
     CRYPTO_PASSWORD,
@@ -181,8 +177,18 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     JSON.stringify(token)
   )
 
+  const user: t.User = await db.upsertUser({
+    externalId   : gUser.id,
+    pictureUrl   : gUser.picture,
+    email        : gUser.email,
+    emailVerified: gUser.verified_email,
+    firstName    : gUser.given_name,
+    lastName     : gUser.family_name,
+    externalToken: encryptedToken,
+  })
+
   // $FlowFixMe
-  const session: t.Session = await db.upsertSession({userId: user.id, externalToken: encryptedToken})
+  const session: t.Session = await db.upsertSession({userId: user.id})
 
   await db.deleteExpiredSessions(session.userId)
 
