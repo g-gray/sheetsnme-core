@@ -101,7 +101,7 @@ export async function deleteExpiredSessions(userId: string): Promise<void> {
     user_id = $1
     and (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
   `
-  const v: Array<mixed> = [userId, u.DAY]
+  const v: Array<mixed> = [userId, u.WEEK]
 
   await query(q, v)
 }
