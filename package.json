@@ -5,7 +5,7 @@
     "db:repopulate": "node db/repopulate.js",
     "db:migrate-up": "migrate up --migrations-dir ./db/migrations --store ./db/pg-state-store.js",
     "db:migrate-down": "migrate down --migrations-dir ./db/migrations --store ./db/pg-state-store.js",
-    "db:migrate-create": "migrate create --migrations-dir ./db/migrations",
+    "db:migrate-create": "migrate create --migrations-dir ./db/migrations"
   },
   "engines": {
     "node": "11.x"
