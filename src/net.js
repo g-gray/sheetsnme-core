@@ -126,7 +126,7 @@ export async function fetchBalancesByAccountIds(
   client: t.GOAuth2Client,
   spreadsheetId: string,
   accountIds: Array<string>,
-): t.BalancesById {
+): Promise<t.BalancesById> {
   const outcomeIdsCond: string = f.map(accountIds, id => `F = '${id}'`).join(' OR ')
   const outcomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
