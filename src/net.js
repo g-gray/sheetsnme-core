@@ -415,7 +415,6 @@ export async function fetchDebtsByPayeeIds(
   spreadsheetId: string,
   payeeIds: Array<string>,
 ): Promise<t.DebtsById> {
-  // TODO Probably unnecessary
   const payeeIdsCond: string = f.map(payeeIds, id => `D = '${id}'`).join(' OR ')
 
   const loansTable: t.GQueryTable | void = await querySheet(
@@ -441,7 +440,7 @@ export async function fetchDebtsByPayeeIds(
     `,
   )
   const borrowDebts: t.DebtsById = borrowsTable
-    ? f.keyBy(f.map(borrowsTable.rows, rowToBalance), ({payeeId}) => payeeId)
+    ? f.keyBy(f.map(borrowsTable.rows, rowToDebt), ({payeeId}) => payeeId)
     : {}
 
   const ids = f.uniq(f.concat(f.keys(loanDebts), f.keys(borrowDebts)))
