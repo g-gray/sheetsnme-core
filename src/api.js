@@ -487,7 +487,12 @@ export async function getPayee(ctx: t.Context): Promise<void> {
     return
   }
 
-  ctx.body = payee
+  const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, [payee.id])
+
+  ctx.body = {
+    ...payee,
+    debt: debts[payee.id] ? debts[payee.id].debt : 0,
+  }
 }
 
 export async function createPayee(ctx: t.Context): Promise<void> {
