@@ -461,7 +461,7 @@ export async function fetchDebtsByPayeeIds(
       ...acc,
       [id]: {
         payeeId: id,
-        debt: Math.round((borrowAmount - loanAmount) * 100) / 100,
+        debt: Math.round((loanAmount - borrowAmount) * 100) / 100,
       },
     }
   })
