@@ -462,7 +462,14 @@ export async function getPayees(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const payees: t.Payees = await n.fetchPayees(client, gSpreadsheetId)
-  ctx.body = payees
+
+  const payeeIds = f.map(payees, ({id}) => id)
+  const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, payeeIds)
+
+  ctx.body = f.map(payees, payee => ({
+    ...payee,
+    debt: debts[payee.id] ? debts[payee.id].debt : 0,
+  }))
 }
 
 export async function getPayee(ctx: t.Context): Promise<void> {

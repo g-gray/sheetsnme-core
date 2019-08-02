@@ -410,6 +410,74 @@ function payeeToRow(payee: t.Payee): t.GRowData {
 }
 
 
+export async function fetchDebtsByPayeeIds(
+  client: t.GOAuth2Client,
+  spreadsheetId: string,
+  payeeIds: Array<string>,
+): Promise<t.DebtsById> {
+  // TODO Probably unnecessary
+  const payeeIdsCond: string = f.map(payeeIds, id => `D = '${id}'`).join(' OR ')
+
+  const loansTable: t.GQueryTable | void = await querySheet(
+    spreadsheetId,
+    s.TRANSACTIONS_SHEET_ID,
+    `
+    select D, sum(G)
+    where F = '${s.DEBT_ACCOUNT_ID}' AND (${payeeIdsCond})
+    group by D
+    `,
+  )
+  const loanDebts: t.DebtsById = loansTable
+   ? f.keyBy(f.map(loansTable.rows, rowToDebt), ({payeeId}) => payeeId)
+   : {}
+
+  const borrowsTable: t.GQueryTable | void = await querySheet(
+    spreadsheetId,
+    s.TRANSACTIONS_SHEET_ID,
+    `
+    select D, sum(I)
+    where H = '${s.DEBT_ACCOUNT_ID}' AND (${payeeIdsCond})
+    group by D
+    `,
+  )
+  const borrowDebts: t.DebtsById = borrowsTable
+    ? f.keyBy(f.map(borrowsTable.rows, rowToBalance), ({payeeId}) => payeeId)
+    : {}
+
+  const ids = f.uniq(f.concat(f.keys(loanDebts), f.keys(borrowDebts)))
+
+  const result: t.DebtsById = f.fold(ids, {}, (acc, id) => {
+    const borrowDebt: t.Debt | void = borrowDebts[id]
+    const borrowAmount = borrowDebt ? borrowDebt.debt : 0
+
+    const loanDebt: t.Debt | void = loanDebts[id]
+    const loanAmount = loanDebt ? loanDebt.debt : 0
+
+    /**
+     * TODO Probably we have to use libs like Bignumber: https://github.com/MikeMcl/bignumber.js/
+     * to solve problem related to floating numbers and precisions instead of
+     * Math.round((borrowAmount - loanAmount) * 100) / 100,
+     */
+    return {
+      ...acc,
+      [id]: {
+        payeeId: id,
+        debt: Math.round((borrowAmount - loanAmount) * 100) / 100,
+      },
+    }
+  })
+
+  return result
+}
+
+function rowToDebt(row: t.GQueryRow): t.Debt {
+  return {
+    payeeId: row.c[0]  ? String(row.c[0].v)  : '',
+    debt   : row.c[1]  ? Number(row.c[1].v)  : 0,
+  }
+}
+
+
 
 /**
  * Transactions

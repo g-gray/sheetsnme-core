@@ -221,6 +221,18 @@ export type Payee = {|
 export type Payees = Array<Payee>
 
 
+/**
+ * Debt
+ */
+
+export type Debt = {|
+  payeeId: string,
+  debt: number,
+|}
+
+export type DebtsById = {[string]: Debt}
+
+
 
 /**
  * Transacation
