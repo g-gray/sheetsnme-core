@@ -258,7 +258,7 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
   const accounts: t.Accounts = await n.fetchAccounts(client, gSpreadsheetId)
 
   const accountIds = f.map(accounts, ({id}) => id)
-  const balances: t.Balances = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, accountIds)
+  const balances: t.BalancesById = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, accountIds)
 
   ctx.body = f.map(accounts, account => ({
     ...account,
@@ -281,7 +281,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
     return
   }
 
-  const balances: t.Balances = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, [account.id])
+  const balances: t.BalancesById = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, [account.id])
 
   ctx.body = {
     ...account,

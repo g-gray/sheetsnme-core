@@ -186,7 +186,7 @@ export type Balance = {|
   balance  : number,
 |}
 
-export type Balances = {[string]: Balance}
+export type BalancesById = {[string]: Balance}
 
 
 

@@ -126,14 +126,18 @@ export async function fetchBalancesByAccountIds(
   client: t.GOAuth2Client,
   spreadsheetId: string,
   accountIds: Array<string>,
-): t.Balances {
+): t.BalancesById {
   const outcomeIdsCond: string = f.map(accountIds, id => `F = '${id}'`).join(' OR ')
   const outcomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
-    `select F, sum(G) where ${outcomeIdsCond} group by F`,
+    `
+    select F, sum(G)
+    where ${outcomeIdsCond}
+    group by F
+    `,
   )
-  const outcomeBalances: t.Balances = outcomeTable
+  const outcomeBalances: t.BalancesById = outcomeTable
    ? f.keyBy(f.map(outcomeTable.rows, rowToBalance), ({accountId}) => accountId)
    : {}
 
@@ -141,15 +145,19 @@ export async function fetchBalancesByAccountIds(
   const incomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
-    `select H, sum(I) where ${incomeIdsCond} group by H`,
+    `
+    select H, sum(I)
+    where ${incomeIdsCond}
+    group by H
+    `,
   )
-  const incomeBalances: t.Balances = incomeTable
+  const incomeBalances: t.BalancesById = incomeTable
     ? f.keyBy(f.map(incomeTable.rows, rowToBalance), ({accountId}) => accountId)
     : {}
 
   const ids = f.uniq(f.concat(f.keys(outcomeBalances), f.keys(incomeBalances)))
 
-  const result: t.Balances = f.fold(ids, {}, (acc, id) => {
+  const result: t.BalancesById = f.fold(ids, {}, (acc, id) => {
     const incomeBalance: t.Balance | void = incomeBalances[id]
     const outcomeBalance: t.Balance | void = outcomeBalances[id]
     const income = incomeBalance ? incomeBalance.balance : 0
