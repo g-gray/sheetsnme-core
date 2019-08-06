@@ -87,7 +87,11 @@ export async function fetchAccounts(
     spreadsheetId,
     s.ACCOUNTS_SHEET_ID,
     rowToAccount,
-    `select * where A != 'id' AND A !='${s.DEBT_ACCOUNT_ID}' order by B`
+    `
+    select *
+    where A != 'id' and A !='${s.DEBT_ACCOUNT_ID}'
+    order by B
+    `
   )
   return result
 }
@@ -159,8 +163,8 @@ export async function fetchBalancesByAccountIds(
 
   const result: t.BalancesById = f.fold(ids, {}, (acc, id) => {
     const incomeBalance: t.Balance | void = incomeBalances[id]
-    const outcomeBalance: t.Balance | void = outcomeBalances[id]
     const income = incomeBalance ? incomeBalance.balance : 0
+    const outcomeBalance: t.Balance | void = outcomeBalances[id]
     const outcome = outcomeBalance ? outcomeBalance.balance : 0
 
     return {
@@ -417,7 +421,7 @@ export async function fetchDebtsByPayeeIds(
     s.TRANSACTIONS_SHEET_ID,
     `
     select D, sum(G)
-    where F = '${s.DEBT_ACCOUNT_ID}' AND (${payeeIdsCond})
+    where F = '${s.DEBT_ACCOUNT_ID}' and (${payeeIdsCond})
     group by D
     `,
   )
@@ -430,7 +434,7 @@ export async function fetchDebtsByPayeeIds(
     s.TRANSACTIONS_SHEET_ID,
     `
     select D, sum(I)
-    where H = '${s.DEBT_ACCOUNT_ID}' AND (${payeeIdsCond})
+    where H = '${s.DEBT_ACCOUNT_ID}' and (${payeeIdsCond})
     group by D
     `,
   )
@@ -552,22 +556,6 @@ export async function fetchTransactions(
   return result
 }
 
-export async function fetchTransactionsNumber(
-  client       : t.GOAuth2Client,
-  spreadsheetId: string,
-  filter       : t.TransactionsFilter,
-): Promise<number> {
-  const query: string = transactionsNumberQuery(filter)
-  const result: number = await queryEntitiesNumber(
-    client,
-    spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
-    query,
-  )
-  return result
-}
-
-
 function rowToTransaction(row: t.GQueryRow): t.Transaction {
   return {
     id              : row.c[0]  ? String(row.c[0].v)  : '',
@@ -622,6 +610,22 @@ function transactionsQuery(filter: t.TransactionsFilter): string {
   ]).join(' ')
 
   return query
+}
+
+
+export async function fetchTransactionsNumber(
+  client       : t.GOAuth2Client,
+  spreadsheetId: string,
+  filter       : t.TransactionsFilter,
+): Promise<number> {
+  const query: string = transactionsNumberQuery(filter)
+  const result: number = await queryEntitiesNumber(
+    client,
+    spreadsheetId,
+    s.TRANSACTIONS_SHEET_ID,
+    query,
+  )
+  return result
 }
 
 function transactionsNumberQuery(filter: t.TransactionsFilter): string {
@@ -680,15 +684,15 @@ function transactionsWhere(filter: t.TransactionsFilter): string {
   return f.compact([
     `A != 'id'`,
     filter.id         ? `A = '${filter.id}'`                                       : undefined,
-    filter.dateFrom   ? `B >= '${filter.dateFrom}'`                           : undefined,
-    filter.dateTo     ? `B <= '${filter.dateTo}'`                             : undefined,
+    filter.dateFrom   ? `B >= '${filter.dateFrom}'`                                : undefined,
+    filter.dateTo     ? `B <= '${filter.dateTo}'`                                  : undefined,
     filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
     filter.payeeId    ? `D = '${filter.payeeId}'`                                  : undefined,
     filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
     filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : undefined,
     filter.amountFrom ? `G >= ${filter.amountFrom}`                                : undefined,
     filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
-  ]).join(' AND ')
+  ]).join(' and ')
 }
 
 
