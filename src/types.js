@@ -257,6 +257,11 @@ export type Transaction = {|
 
 export type Transactions = Array<Transaction>
 
+export type TransactionsAmounts = {|
+  outcomeAmount: number,
+  incomeAmount: number,
+|}
+
 
 export type TransactionsFilter = {|
   id?        : string,

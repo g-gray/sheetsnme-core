@@ -575,6 +575,7 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
   const filter: t.TransactionsFilter = ctx.query
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId, filter)
+  const transactionsAmounts: t.TransactionsAmounts = await n.fetchTransactionsAmounts(client, gSpreadsheetId, filter)
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
 
   const limit: number = parseInt(filter.limit, 10)
@@ -597,6 +598,8 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
       transactions,
       transaction => ({...transaction, type: defTransactionType(transaction)})
     ),
+    outcomeAmount: transactionsAmounts.outcomeAmount,
+    incomeAmount: transactionsAmounts.incomeAmount,
   }
 }
 

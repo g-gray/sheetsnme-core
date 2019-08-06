@@ -635,6 +635,47 @@ function transactionsNumberQuery(filter: t.TransactionsFilter): string {
   return query
 }
 
+
+export async function fetchTransactionsAmounts(
+  client       : t.GOAuth2Client,
+  spreadsheetId: string,
+  filter       : t.TransactionsFilter,
+): Promise<t.TransactionsAmounts> {
+  const query: string = transactionsAmountsQuery(filter)
+
+  const table: t.GQueryTable | void = await querySheet(
+    spreadsheetId,
+    s.TRANSACTIONS_SHEET_ID,
+    query,
+  )
+
+  const rows: Array<t.GQueryRow> = table
+    ? table.rows
+    : []
+  const row: t.GQueryRow | void = f.first(rows)
+
+  const outcomeAmount: number = row && row.c[0] ? Number(row.c[0].v) : 0
+  const incomeAmount: number = row && row.c[1] ? Number(row.c[1].v) : 0
+
+  return {
+    outcomeAmount: u.round(outcomeAmount, 2),
+    incomeAmount: u.round(incomeAmount, 2),
+  }
+}
+
+function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
+  const where = transactionsWhere(filter)
+
+  const query: string = f.compact([
+    `select sum(G), sum(I)`,
+    `where F != '${s.DEBT_ACCOUNT_ID}' and H != '${s.DEBT_ACCOUNT_ID}' and ${where}`,
+  ]).join(' ')
+
+  return query
+}
+
+
+
 function transactionsWhere(filter: t.TransactionsFilter): string {
   return f.compact([
     `A != 'id'`,
