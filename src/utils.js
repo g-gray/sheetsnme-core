@@ -31,6 +31,15 @@ export function formatDateTime(value: any): string {
   return match ? `${match[1]} ${match[2]}` : ''
 }
 
+/**
+ * TODO Probably we have to use libs like Bignumber: https://github.com/MikeMcl/bignumber.js/
+ * to solve problem related to floating numbers and precisions instead of
+ * Math.round(value * 100) / 100,
+ */
+export function round(number: number, decimals: number = 0): number {
+  return Math.round(number * (decimals * 10)) / (decimals * 10)
+}
+
 
 /**
  * Errors

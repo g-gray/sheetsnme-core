@@ -163,16 +163,11 @@ export async function fetchBalancesByAccountIds(
     const income = incomeBalance ? incomeBalance.balance : 0
     const outcome = outcomeBalance ? outcomeBalance.balance : 0
 
-    /**
-     * TODO Probably we have to use libs like Bignumber: https://github.com/MikeMcl/bignumber.js/
-     * to solve problem related to floating numbers and precisions instead of
-     * Math.round((income - outcome) * 100) / 100,
-     */
     return {
       ...acc,
       [id]: {
         accountId: id,
-        balance: Math.round((income - outcome) * 100) / 100,
+        balance: u.round(income - outcome, 2),
       },
     }
   })
@@ -452,16 +447,11 @@ export async function fetchDebtsByPayeeIds(
     const loanDebt: t.Debt | void = loanDebts[id]
     const loanAmount = loanDebt ? loanDebt.debt : 0
 
-    /**
-     * TODO Probably we have to use libs like Bignumber: https://github.com/MikeMcl/bignumber.js/
-     * to solve problem related to floating numbers and precisions instead of
-     * Math.round((borrowAmount - loanAmount) * 100) / 100,
-     */
     return {
       ...acc,
       [id]: {
         payeeId: id,
-        debt: Math.round((loanAmount - borrowAmount) * 100) / 100,
+        debt: u.round(loanAmount - borrowAmount, 2),
       },
     }
   })
