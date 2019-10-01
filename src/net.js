@@ -672,7 +672,13 @@ function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
 
   const query: string = f.compact([
     `select sum(G), sum(I)`,
-    `where F != '${s.DEBT_ACCOUNT_ID}' and H != '${s.DEBT_ACCOUNT_ID}' and ${where}`,
+    `where ${[
+      // Ignore debts
+      `(F != '${s.DEBT_ACCOUNT_ID}' and H != '${s.DEBT_ACCOUNT_ID}')`,
+      // Ignore transfers
+      `((F != '' and H = '') or (F = '' and H != ''))`,
+      where,
+    ].join(' and ')}`,
   ]).join(' ')
 
   return query
