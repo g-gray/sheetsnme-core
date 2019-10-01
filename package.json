@@ -8,7 +8,7 @@
     "db:migrate-create": "migrate create --migrations-dir ./db/migrations"
   },
   "engines": {
-    "node": "11.x"
+    "node": "12.x"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
