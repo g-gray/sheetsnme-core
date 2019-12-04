@@ -90,7 +90,6 @@ export async function fetchAccounts(
     `
     select *
     where A != 'id' and A !='${s.DEBT_ACCOUNT_ID}'
-    order by B
     `
   )
   return result
