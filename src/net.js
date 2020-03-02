@@ -413,14 +413,12 @@ export async function fetchDebtsByPayeeIds(
   spreadsheetId: string,
   payeeIds: Array<string>,
 ): Promise<t.DebtsById> {
-  const payeeIdsCond: string = f.map(payeeIds, id => `D = '${id}'`).join(' OR ')
-
   const loansTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
     `
     select D, sum(G)
-    where F = '${s.DEBT_ACCOUNT_ID}' and (${payeeIdsCond})
+    where F = '${s.DEBT_ACCOUNT_ID}'
     group by D
     `,
   )
@@ -433,7 +431,7 @@ export async function fetchDebtsByPayeeIds(
     s.TRANSACTIONS_SHEET_ID,
     `
     select D, sum(I)
-    where H = '${s.DEBT_ACCOUNT_ID}' and (${payeeIdsCond})
+    where H = '${s.DEBT_ACCOUNT_ID}'
     group by D
     `,
   )
