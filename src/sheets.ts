@@ -1,5 +1,7 @@
-import uuid from 'uuid/v4'
 import * as t from './types'
+
+import uuid from 'uuid/v4'
+
 import * as u from './utils'
 import * as tr from './translations'
 

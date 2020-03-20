@@ -1,6 +1,8 @@
-import * as pg from 'pg'
-import * as f from 'fpx'
 import * as t from './types'
+
+import * as pg from 'pg'
+import * as fpx from 'fpx'
+
 import * as e from './env'
 import * as u from './utils'
 
@@ -210,7 +212,7 @@ export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spre
   const result: pg.QueryResult = await query(q, v)
   const rows: pg.QueryResultRow[] = result.rows
 
-  const spreadsheets = f.map(rows, rowToSpreadsheet)
+  const spreadsheets = fpx.map(rows, rowToSpreadsheet)
   return spreadsheets
 }
 

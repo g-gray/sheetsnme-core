@@ -1,6 +1,8 @@
+import * as t from './types'
+
 import Router from 'koa-router'
 import Koa from 'koa'
-import * as t from './types'
+
 import * as api from './api'
 
 const authRouter: Router<Koa.DefaultState, Koa.Context> = new Router<Koa.DefaultState, Koa.Context>()

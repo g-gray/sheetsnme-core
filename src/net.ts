@@ -1,8 +1,10 @@
+import * as t from './types'
+
 import {google} from 'googleapis'
-import * as f from 'fpx'
+import * as fpx from 'fpx'
 import uuid from 'uuid/v4'
 import qs from 'query-string'
-import * as t from './types'
+
 import * as e from './env'
 import * as u from './utils'
 import * as s from './sheets'
@@ -129,7 +131,7 @@ export async function fetchBalancesByAccountIds(
   spreadsheetId: string,
   accountIds: string[],
 ): Promise<t.BalancesById> {
-  const outcomeIdsCond: string = f.map(accountIds, id => `F = '${id}'`).join(' OR ')
+  const outcomeIdsCond: string = fpx.map(accountIds, id => `F = '${id}'`).join(' OR ')
   const outcomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
@@ -140,10 +142,10 @@ export async function fetchBalancesByAccountIds(
     `,
   )
   const outcomeBalances: t.BalancesById = outcomeTable
-   ? f.keyBy(f.map(outcomeTable.rows, rowToBalance), ({accountId}) => accountId)
+   ? fpx.keyBy(fpx.map(outcomeTable.rows, rowToBalance), ({accountId}) => accountId)
    : {}
 
-  const incomeIdsCond: string = f.map(accountIds, id => `H = '${id}'`).join(' OR ')
+  const incomeIdsCond: string = fpx.map(accountIds, id => `H = '${id}'`).join(' OR ')
   const incomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
@@ -154,12 +156,12 @@ export async function fetchBalancesByAccountIds(
     `,
   )
   const incomeBalances: t.BalancesById = incomeTable
-    ? f.keyBy(f.map(incomeTable.rows, rowToBalance), ({accountId}) => accountId)
+    ? fpx.keyBy(fpx.map(incomeTable.rows, rowToBalance), ({accountId}) => accountId)
     : {}
 
-  const ids = f.uniq(f.concat(f.keys(outcomeBalances), f.keys(incomeBalances)))
+  const ids = fpx.uniq(fpx.concat(fpx.keys(outcomeBalances), fpx.keys(incomeBalances)))
 
-  const result: t.BalancesById = f.fold(ids, {}, (acc, id) => {
+  const result: t.BalancesById = fpx.fold(ids, {}, (acc, id) => {
     const incomeBalance: t.Balance | void = incomeBalances[id]
     const income = incomeBalance ? incomeBalance.balance : 0
     const outcomeBalance: t.Balance | void = outcomeBalances[id]
@@ -422,7 +424,7 @@ export async function fetchDebtsByPayeeIds(
     `,
   )
   const loanDebts: t.DebtsById = loansTable
-   ? f.keyBy(f.map(loansTable.rows, rowToDebt), ({payeeId}) => payeeId)
+   ? fpx.keyBy(fpx.map(loansTable.rows, rowToDebt), ({payeeId}) => payeeId)
    : {}
 
   const borrowsTable: t.GQueryTable | void = await querySheet(
@@ -435,12 +437,12 @@ export async function fetchDebtsByPayeeIds(
     `,
   )
   const borrowDebts: t.DebtsById = borrowsTable
-    ? f.keyBy(f.map(borrowsTable.rows, rowToDebt), ({payeeId}) => payeeId)
+    ? fpx.keyBy(fpx.map(borrowsTable.rows, rowToDebt), ({payeeId}) => payeeId)
     : {}
 
-  const ids = f.uniq(f.concat(f.keys(loanDebts), f.keys(borrowDebts)))
+  const ids = fpx.uniq(fpx.concat(fpx.keys(loanDebts), fpx.keys(borrowDebts)))
 
-  const result: t.DebtsById = f.fold(ids, {}, (acc, id) => {
+  const result: t.DebtsById = fpx.fold(ids, {}, (acc, id) => {
     const borrowDebt: t.Debt | void = borrowDebts[id]
     const borrowAmount = borrowDebt ? borrowDebt.debt : 0
 
@@ -597,7 +599,7 @@ function transactionsQuery(filter: t.TransactionsFilter): string {
   const limit: number = parseInt(filter.limit, 10) || u.DEFAULT_LIMIT
   const offset: number = parseInt(filter.offset, 10)
 
-  const query: string = f.compact([
+  const query: string = fpx.compact([
     `select *`,
     `where ${where}`,
     `order by B desc, J desc`,
@@ -627,7 +629,7 @@ export async function fetchTransactionsNumber(
 function transactionsNumberQuery(filter: t.TransactionsFilter): string {
   const where = transactionsWhere(filter)
 
-  const query: string = f.compact([
+  const query: string = fpx.compact([
     `select count(A)`,
     `where ${where}`,
   ]).join(' ')
@@ -652,7 +654,7 @@ export async function fetchTransactionsAmounts(
   const rows: t.GQueryRow[] = table
     ? table.rows
     : []
-  const row: t.GQueryRow | void = f.first(rows)
+  const row: t.GQueryRow | void = fpx.first(rows)
 
   const outcomeAmount: number = row && row.c[0] ? Number(row.c[0].v) : 0
   const incomeAmount: number = row && row.c[1] ? Number(row.c[1].v) : 0
@@ -666,7 +668,7 @@ export async function fetchTransactionsAmounts(
 function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
   const where = transactionsWhere(filter)
 
-  const query: string = f.compact([
+  const query: string = fpx.compact([
     `select sum(G), sum(I)`,
     `where ${[
       // Ignore debts
@@ -683,7 +685,7 @@ function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
 
 
 function transactionsWhere(filter: t.TransactionsFilter): string {
-  return f.compact([
+  return fpx.compact([
     `A != 'id'`,
     filter.id         ? `A = '${filter.id}'`                                       : undefined,
     filter.dateFrom   ? `B >= '${filter.dateFrom}'`                                : undefined,
@@ -761,7 +763,7 @@ async function queryEntityById<T>(
     rowToEntity,
     query,
   )
-  const entity: T | void = f.first(entities)
+  const entity: T | void = fpx.first(entities)
 
   return entity
 }
@@ -780,7 +782,7 @@ async function queryEntities<T>(
     query || `select * where A != 'id'`,
   )
   const entities: T[] = table
-   ? f.map(table.rows, row => rowToEntity(row))
+   ? fpx.map(table.rows, row => rowToEntity(row))
    : []
 
   return entities
@@ -802,7 +804,7 @@ export async function queryEntitiesNumber(
   const rows: t.GQueryRow[] = table
     ? table.rows
     : []
-  const row: t.GQueryRow | void = f.first(rows)
+  const row: t.GQueryRow | void = fpx.first(rows)
   const size: number = row && row.c[0] ? Number(row.c[0].v) : 0
 
   return size

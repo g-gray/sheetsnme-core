@@ -1,7 +1,8 @@
-import * as f from 'fpx'
+import * as t from './types'
+
+import * as fpx from 'fpx'
 import xhttp from 'xhttp/node'
 import crypto from 'crypto'
-import * as t from './types'
 
 export const SECOND: number = 1000
 export const MINUTE: number = SECOND * 60
@@ -16,8 +17,8 @@ export const DEFAULT_LIMIT: number = 25
  */
 
 export function dateIsoString(value: any): string {
-  const date = f.isDate(value) ? value : new Date(value)
-  return f.isValidDate(date) ? date.toISOString() : ''
+  const date = fpx.isDate(value) ? value : new Date(value)
+  return fpx.isValidDate(date) ? date.toISOString() : ''
 }
 
 export function formatDate(value: any): string {

@@ -1,5 +1,7 @@
-import * as f from 'fpx'
 import * as t from './types'
+
+import * as fpx from 'fpx'
+
 import * as e from './env'
 import * as u from './utils'
 import * as n from './net'
@@ -110,7 +112,7 @@ export async function setLang(ctx: t.Context, next: () => Promise<void>): Promis
   const lang: string | void = ctx.headers[LANG_HEADER_NAME]
 
   ctx.lang = u.AVAILABLE_LANGS[0]
-  if (f.includes(u.AVAILABLE_LANGS), lang) {
+  if (fpx.includes(u.AVAILABLE_LANGS), lang) {
     ctx.lang = lang
   }
 
@@ -255,10 +257,10 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const accounts: t.Accounts = await n.fetchAccounts(client, gSpreadsheetId)
 
-  const accountIds = f.map(accounts, ({id}) => id)
+  const accountIds = fpx.map(accounts, ({id}) => id)
   const balances: t.BalancesById = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, accountIds)
 
-  ctx.body = f.map(accounts, account => ({
+  ctx.body = fpx.map(accounts, account => ({
     ...account,
     balance: balances[account.id] ? balances[account.id].balance : 0,
   }))
@@ -350,7 +352,7 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
 function validateAccountFields(fields: object, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
 
-  if (!f.isString(fields.title) || !fields.title.length) {
+  if (!fpx.isString(fields.title) || !fields.title.length) {
     errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
@@ -443,7 +445,7 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
 function validateCategoryFields(fields: object, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
 
-  if (!f.isString(fields.title) || !fields.title.length) {
+  if (!fpx.isString(fields.title) || !fields.title.length) {
     errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
@@ -461,10 +463,10 @@ export async function getPayees(ctx: t.Context): Promise<void> {
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const payees: t.Payees = await n.fetchPayees(client, gSpreadsheetId)
 
-  const payeeIds = f.map(payees, ({id}) => id)
+  const payeeIds = fpx.map(payees, ({id}) => id)
   const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, payeeIds)
 
-  ctx.body = f.map(payees, payee => ({
+  ctx.body = fpx.map(payees, payee => ({
     ...payee,
     debt: debts[payee.id] ? debts[payee.id].debt : 0,
   }))
@@ -548,7 +550,7 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
 function validatePayeeFields(fields: object, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
 
-  if (!f.isString(fields.title) || !fields.title.length) {
+  if (!fpx.isString(fields.title) || !fields.title.length) {
     errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
@@ -577,13 +579,13 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
 
   const limit: number = parseInt(filter.limit, 10)
-  if (filter.limit && (!f.isInteger(limit) || limit < 0)) {
+  if (filter.limit && (!fpx.isInteger(limit) || limit < 0)) {
     ctx.throw(400, 'Limit must be a positive integer')
     return
   }
 
   const offset: number = parseInt(filter.offset, 10)
-  if (filter.offset && (!f.isInteger(offset) || offset < 0)) {
+  if (filter.offset && (!fpx.isInteger(offset) || offset < 0)) {
     ctx.throw(400, 'Offset must be a positive integer')
     return
   }
@@ -592,7 +594,7 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
     limit: limit || u.DEFAULT_LIMIT,
     offset: offset || 0,
     total: transactionsNumber,
-    items: f.map(
+    items: fpx.map(
       transactions,
       transaction => ({...transaction, type: defTransactionType(transaction)})
     ),
@@ -703,35 +705,35 @@ function validateTransactionFields(fields: object, lang: t.Lang): t.ResErrors {
     payeeId,
   } = fields
 
-  if (!f.includes(transactionTypes, type)) {
+  if (!fpx.includes(transactionTypes, type)) {
     errors.push({text: `${u.xln(lang, tr.TYPE_MUST_BE_ONE_OF)}: [${transactionTypes.join(', ')}]`})
   }
 
-  if (!date || !f.isValidDate(new Date(date))) {
+  if (!date || !fpx.isValidDate(new Date(date))) {
     errors.push({text: u.xln(lang, tr.DATE_MUST_BE_NON_EMPTY_AND_VALID)})
   }
 
-  if (f.includes([OUTCOME, TRANSFER, LOAN], type)) {
+  if (fpx.includes([OUTCOME, TRANSFER, LOAN], type)) {
     if (!outcomeAccountId) {
       errors.push({text: u.xln(lang, tr.OUTCOME_ACCOUNT_REQUIRED)})
     }
 
-    if (!f.isNumber(outcomeAmount)) {
+    if (!fpx.isNumber(outcomeAmount)) {
       errors.push({text: u.xln(lang, tr.OUTCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
     }
   }
 
-  if (f.includes([INCOME, TRANSFER, BORROW], type)) {
+  if (fpx.includes([INCOME, TRANSFER, BORROW], type)) {
     if (!incomeAccountId) {
       errors.push({text: u.xln(lang, tr.INCOME_ACCOUNT_REQUIRED)})
     }
 
-    if (!f.isNumber(incomeAmount)) {
+    if (!fpx.isNumber(incomeAmount)) {
       errors.push({text: u.xln(lang, tr.INCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
     }
   }
 
-  if (f.includes([LOAN, BORROW], type) && !payeeId) {
+  if (fpx.includes([LOAN, BORROW], type) && !payeeId) {
     errors.push({text: u.xln(lang, tr.PAYEE_REQUIRED)})
   }
 
@@ -774,7 +776,7 @@ function pickTransactionFields(fields: object): object {
     ? {...whitlistedFields, categoryId, payeeId, outcomeAccountId, outcomeAmount}
     : type === INCOME
     ? {...whitlistedFields, categoryId, payeeId, incomeAccountId, incomeAmount}
-    : f.includes([LOAN, BORROW], type)
+    : fpx.includes([LOAN, BORROW], type)
     ? {...whitlistedFields, payeeId, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount}
     : type === TRANSFER
     ? {...whitlistedFields, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount}
