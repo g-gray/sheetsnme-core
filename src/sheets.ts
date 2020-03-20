@@ -1,4 +1,3 @@
-// @flow
 import uuid from 'uuid/v4'
 import * as t from './types'
 import * as u from './utils'
@@ -17,7 +16,7 @@ export const SALARY_CATEGORY_ID = '00000000-0000-0000-0002-000000000001'
 
 export const EMPLOYER_PAYEE_ID  = '00000000-0000-0000-0003-000000000001'
 
-export function createTransactionsSheet(lang: string): t.GSheet {
+export function createTransactionsSheet(lang: t.Lang): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
@@ -71,7 +70,7 @@ export function createTransactionsSheet(lang: string): t.GSheet {
   }
 }
 
-export function createAccountsSheet(lang: string): t.GSheet {
+export function createAccountsSheet(lang: t.Lang): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
@@ -140,7 +139,7 @@ export function createAccountsSheet(lang: string): t.GSheet {
   }
 }
 
-export function createCategoriesSheet(lang: string): t.GSheet {
+export function createCategoriesSheet(lang: t.Lang): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {
@@ -244,7 +243,7 @@ export function createCategoriesSheet(lang: string): t.GSheet {
   }
 }
 
-export function createPayeesSheet(lang: string): t.GSheet {
+export function createPayeesSheet(lang: t.Lang): t.GSheet {
   const date: Date = new Date()
   return {
     properties: {

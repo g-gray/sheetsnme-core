@@ -1,10 +1,9 @@
-// @flow
 import {google} from 'googleapis'
 import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
 
-const SCOPES: Array<string> = [
+const SCOPES: string[] = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/drive.file',

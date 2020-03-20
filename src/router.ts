@@ -1,9 +1,9 @@
-// @flow
 import Router from 'koa-router'
+import Koa from 'koa'
 import * as t from './types'
 import * as api from './api'
 
-const authRouter: t.Router = new Router()
+const authRouter: Router<Koa.DefaultState, Koa.Context> = new Router<Koa.DefaultState, Koa.Context>()
 
 authRouter
   .get('/auth/login',                     api.authLogin)
@@ -14,10 +14,10 @@ export const authRoutes = authRouter.routes()
 export const authAllowedMethods = authRouter.allowedMethods()
 
 
-const apiRouter: t.Router = new Router()
+const apiRouter: Router = new Router()
 
 apiRouter
-  .use(api.lang)
+  .use(api.setLang)
   .use(api.jsonOnly)
   .use(api.authRequired)
 

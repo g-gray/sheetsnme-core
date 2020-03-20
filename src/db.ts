@@ -1,13 +1,12 @@
-// @flow
-import {Pool} from 'pg'
-import f from 'fpx'
+import * as pg from 'pg'
+import * as f from 'fpx'
 import * as t from './types'
 import * as e from './env'
 import * as u from './utils'
 
 const {DB_HOST, DB_NAME, POSTGRES_USER, POSTGRES_PASSWORD, DATABASE_URL} = e.properties
 
-const config: t.ClientConfig = DATABASE_URL
+const config: pg.ClientConfig = DATABASE_URL
   ? {connectionString: DATABASE_URL, ssl: true}
   : {
     host    : DB_HOST,
@@ -16,9 +15,9 @@ const config: t.ClientConfig = DATABASE_URL
     password: POSTGRES_PASSWORD,
   }
 
-const pool: t.Pool = new Pool(config)
+const pool: pg.Pool = new pg.Pool(config)
 
-export function query(text: string, values: Array<mixed> | void): Promise<t.ResultSet> {
+export function query(text: string, values?: any[]): Promise<pg.QueryResult> {
   return pool.query(text, values)
 }
 
@@ -34,9 +33,9 @@ export async function sessionById(id: string): Promise<t.Session | void> {
   from sessions
   where id = $1
   `
-  const v: Array<mixed> = [id]
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row | void = result.rows[0]
+  const v: any[] = [id]
+  const result: pg.QueryResult = await query(q, v)
+  const row: pg.QueryResultRow | void = result.rows[0]
   if (!row) {
     return undefined
   }
@@ -53,7 +52,7 @@ export async function upsertSession(session: t.Session): Promise<t.Session> {
     ($1)
   returning *
   `
-  let v: Array<mixed> = [session.userId]
+  let v: any[] = [session.userId]
 
   if (session.id) {
     q = `
@@ -69,8 +68,8 @@ export async function upsertSession(session: t.Session): Promise<t.Session> {
     v = [session.id, session.userId]
   }
 
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row = result.rows[0]
+  const result: pg.QueryResult = await query(q, v)
+  const row: pg.QueryResultRow = result.rows[0]
   const upsertedSession: t.Session = rowToSession(row)
   return upsertedSession
 }
@@ -82,9 +81,9 @@ export async function deleteSessionById(id: string): Promise<t.Session | void> {
   where id = $1
   returning *
   `
-  const v: Array<mixed> = [id]
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row = result.rows[0]
+  const v: any[] = [id]
+  const result: pg.QueryResult = await query(q, v)
+  const row: pg.QueryResultRow = result.rows[0]
   if (!row) {
     return undefined
   }
@@ -101,18 +100,18 @@ export async function deleteExpiredSessions(userId: string): Promise<void> {
     user_id = $1
     and (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
   `
-  const v: Array<mixed> = [userId, u.WEEK]
+  const v: any[] = [userId, u.WEEK]
 
   await query(q, v)
 }
 
 
-function rowToSession(row: t.Row): t.Session {
+function rowToSession(row: pg.QueryResultRow): t.Session {
   return {
-    id       : ((row.id            : any): string),
-    userId   : ((row.user_id       : any): string),
-    createdAt: ((row.created_at    : any): Date),
-    updatedAt: ((row.updated_at    : any): Date),
+    id       : row.id as string,
+    userId   : row.user_id as string,
+    createdAt: row.created_at as Date,
+    updatedAt: row.updated_at as Date,
   }
 }
 
@@ -146,7 +145,7 @@ export async function upsertUser(user: t.User): Promise<t.User> {
     updated_at     = current_timestamp
   returning *
   `
-  const v: Array<mixed> = [
+  const v: any[] = [
     user.externalId,
     user.pictureUrl,
     user.email,
@@ -155,8 +154,8 @@ export async function upsertUser(user: t.User): Promise<t.User> {
     user.lastName,
     user.externalToken,
   ]
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row = result.rows[0]
+  const result: pg.QueryResult = await query(q, v)
+  const row: pg.QueryResultRow = result.rows[0]
   const upsertedUser: t.User = rowToUser(row)
   return upsertedUser
 }
@@ -168,9 +167,9 @@ export async function userBySessionId(sessionId: string): Promise<t.User | void>
   left join sessions s on s.user_id = u.id
   where s.id = $1
   `
-  const v: Array<mixed> = [sessionId]
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row | void = result.rows[0]
+  const v: any[] = [sessionId]
+  const result: pg.QueryResult = await query(q, v)
+  const row: pg.QueryResultRow | void = result.rows[0]
   if (!row) {
     return undefined
   }
@@ -179,19 +178,19 @@ export async function userBySessionId(sessionId: string): Promise<t.User | void>
   return user
 }
 
-function rowToUser(row: t.Row): t.User {
+function rowToUser(row: pg.QueryResultRow): t.User {
   return {
-    id           : ((row.id            : any): string),
-    externalId   : ((row.external_id   : any): string),
-    pictureUrl   : ((row.picture_url   : any): string),
-    email        : ((row.email         : any): string),
-    emailVerified: ((row.email_verified: any): boolean),
-    firstName    : ((row.first_name    : any): string),
-    lastName     : ((row.last_name     : any): string),
-    userRoleId   : ((row.role_id       : any): string),
-    externalToken: ((row.external_token: any): string),
-    createdAt    : ((row.created_at    : any): Date),
-    updatedAt    : ((row.updated_at    : any): Date),
+    id           : row.id             as string,
+    externalId   : row.external_id    as string,
+    pictureUrl   : row.picture_url    as string,
+    email        : row.email          as string,
+    emailVerified: row.email_verified as boolean,
+    firstName    : row.first_name     as string,
+    lastName     : row.last_name      as string,
+    userRoleId   : row.role_id        as string,
+    externalToken: row.external_token as string,
+    createdAt    : row.created_at     as Date,
+    updatedAt    : row.updated_at     as Date,
   }
 }
 
@@ -207,9 +206,9 @@ export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spre
   where s.id = $1
   order by created_at desc
   `
-  const v: Array<mixed> = [sessionId]
-  const result: t.ResultSet = await query(q, v)
-  const rows: Array<t.Row> = result.rows
+  const v: any[] = [sessionId]
+  const result: pg.QueryResult = await query(q, v)
+  const rows: pg.QueryResultRow[] = result.rows
 
   const spreadsheets = f.map(rows, rowToSpreadsheet)
   return spreadsheets
@@ -225,19 +224,19 @@ export async function createSpreadsheet(sessionId: string, spreadsheetId: string
     ((select user_id from s), $2)
   returning *
   `
-  const v: Array<mixed> = [sessionId, spreadsheetId]
-  const result: t.ResultSet = await query(q, v)
-  const row: t.Row = result.rows[0]
+  const v: any[] = [sessionId, spreadsheetId]
+  const result: pg.QueryResult = await query(q, v)
+  const row: pg.QueryResultRow = result.rows[0]
   const spreadsheet: t.Spreadsheet = rowToSpreadsheet(row)
   return spreadsheet
 }
 
-function rowToSpreadsheet(row: t.Row): t.Spreadsheet {
+function rowToSpreadsheet(row: pg.QueryResultRow): t.Spreadsheet {
   return {
-    id        : ((row.id         : any): string),
-    userId    : ((row.user_id    : any): string),
-    externalId: ((row.external_id: any): string),
-    createdAt : ((row.created_at : any): Date),
-    updatedAt : ((row.updated_at : any): Date),
+    id        : row.id          as string,
+    userId    : row.user_id     as string,
+    externalId: row.external_id as string,
+    createdAt : row.created_at  as Date,
+    updatedAt : row.updated_at  as Date,
   }
 }

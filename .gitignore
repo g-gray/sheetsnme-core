@@ -1,14 +1,13 @@
 /*
-!/Procfile
 !/.env.properties.example
 !/.eslintrc
 !/.flowconfig
 !/.gitignore
 !/package.json
+!/Procfile
 !/yarn.lock
 !/readme.md
-!/webpack.config.js
+!/tsconfig.json
 !/yarn.lock
-!/flow-typed
 !/db
 !/src

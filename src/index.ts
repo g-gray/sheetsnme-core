@@ -1,4 +1,3 @@
-// @flow
 import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
 import * as t from './types'
@@ -6,12 +5,8 @@ import * as e from './env'
 import * as r from './router'
 import * as u from './utils'
 
-/**
- * App entry
- * @type {Koa}
- */
-
-const app: t.Koa = new Koa()
+// https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36161
+const app: Koa<Koa.DefaultState, t.CustomContext> = new Koa<Koa.DefaultState, t.CustomContext>()
 app
   .use(bodyParser())
   .use(handlePublicError)
@@ -23,6 +18,7 @@ app
 
 const {HOST, PORT} = e.properties
 app.listen(PORT, HOST, undefined, () => {
+  // tslint:disable-next-line:no-console
   console.log(`Server listening on ${HOST}:${PORT}`)
 })
 

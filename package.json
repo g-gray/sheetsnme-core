@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "start": "webpack --watch",
-    "build": "webpack",
+    "start": "ts-node-dev --respawn --transpileOnly ./src/index.ts",
+    "build": "tsc --build tsconfig.json",
+    "lint": "tslint --project .",
     "db:repopulate": "node db/repopulate.js",
     "db:migrate-up": "migrate up --migrations-dir ./db/migrations --store ./db/pg-state-store.js",
     "db:migrate-down": "migrate down --migrations-dir ./db/migrations --store ./db/pg-state-store.js",
@@ -11,31 +12,31 @@
     "node": "12.x"
   },
   "devDependencies": {
-    "@babel/core": "^7.6.2",
-    "@babel/preset-env": "^7.6.2",
-    "@babel/preset-flow": "^7.0.0",
-    "babel-eslint": "^10.0.3",
-    "babel-loader": "^8.0.6",
-    "eslint_d": "^8.0.0",
-    "flow-bin": "^0.108.0",
-    "flow-typed": "^2.6.1",
-    "flow-webpack-plugin": "^1.2.0",
-    "nodemon": "^1.19.3",
-    "nodemon-webpack-plugin": "^4.1.1",
-    "webpack": "^4.41.0",
-    "webpack-cli": "^3.3.9"
+    "@types/dotenv": "^8.2.0",
+    "@types/gapi": "^0.0.39",
+    "@types/koa": "^2.11.2",
+    "@types/koa-bodyparser": "^4.3.0",
+    "@types/koa-router": "^7.4.0",
+    "@types/node": "^13.9.2",
+    "@types/pg": "^7.14.3",
+    "@types/query-string": "^6.3.0",
+    "@types/uuid": "^7.0.2",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "tslint": "^6.1.0",
+    "typescript": "^3.8.3"
   },
   "dependencies": {
-    "dotenv": "^8.1.0",
-    "fpx": "^0.7.0",
-    "googleapis": "^43.0.0",
-    "koa": "^2.8.2",
+    "dotenv": "^8.2.0",
+    "fpx": "^0.7.2",
+    "googleapis": "^48.0.0",
+    "koa": "^2.11.0",
     "koa-bodyparser": "^4.2.1",
-    "koa-router": "^7.4.0",
+    "koa-router": "^8.0.8",
     "migrate": "^1.6.2",
-    "pg": "^7.12.1",
-    "query-string": "^6.8.3",
-    "uuid": "^3.3.3",
-    "xhttp": "^0.11.0"
+    "pg": "^7.18.2",
+    "pg-native": "^3.0.0",
+    "query-string": "^6.11.1",
+    "uuid": "^7.0.2",
+    "xhttp": "^0.12.0"
   }
 }

@@ -1,4 +1,3 @@
-// @flow
 import {google} from 'googleapis'
 import * as f from 'fpx'
 import uuid from 'uuid/v4'
@@ -128,7 +127,7 @@ function accountToRow(account: t.Account): t.GRowData {
 export async function fetchBalancesByAccountIds(
   client: t.GOAuth2Client,
   spreadsheetId: string,
-  accountIds: Array<string>,
+  accountIds: string[],
 ): Promise<t.BalancesById> {
   const outcomeIdsCond: string = f.map(accountIds, id => `F = '${id}'`).join(' OR ')
   const outcomeTable: t.GQueryTable | void = await querySheet(
@@ -411,7 +410,7 @@ function payeeToRow(payee: t.Payee): t.GRowData {
 export async function fetchDebtsByPayeeIds(
   client: t.GOAuth2Client,
   spreadsheetId: string,
-  payeeIds: Array<string>,
+  payeeIds: string[],
 ): Promise<t.DebtsById> {
   const loansTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
@@ -650,7 +649,7 @@ export async function fetchTransactionsAmounts(
     query,
   )
 
-  const rows: Array<t.GQueryRow> = table
+  const rows: t.GQueryRow[] = table
     ? table.rows
     : []
   const row: t.GQueryRow | void = f.first(rows)
@@ -704,7 +703,7 @@ function transactionsWhere(filter: t.TransactionsFilter): string {
  * Spreadsheet
  */
 
-export async function createAppSpreadsheet(client: t.GOAuth2Client, lang: string): Promise<t.GSpreadsheet> {
+export async function createAppSpreadsheet(client: t.GOAuth2Client, lang: t.Lang): Promise<t.GSpreadsheet> {
   const spreadsheet: t.GSpreadsheet | void = await createSpreadsheet(client, {
     resource: {
       properties: {
@@ -755,7 +754,7 @@ async function queryEntityById<T>(
   }
 
   const query: string = `select * where A = '${id}'`
-  const entities: Array<T> = await queryEntities<T>(
+  const entities: T[] = await queryEntities<T>(
     client,
     spreadsheetId,
     sheetId,
@@ -774,13 +773,13 @@ async function queryEntities<T>(
   sheetId      : number,
   rowToEntity  : (row: t.GQueryRow) => T,
   query?: string,
-): Promise<Array<T>> {
+): Promise<T[]> {
   const table: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     sheetId,
     query || `select * where A != 'id'`,
   )
-  const entities: Array<T> = table
+  const entities: T[] = table
    ? f.map(table.rows, row => rowToEntity(row))
    : []
 
@@ -800,7 +799,7 @@ export async function queryEntitiesNumber(
     query || `select count(A) where A != 'id'`,
   )
 
-  const rows: Array<t.GQueryRow> = table
+  const rows: t.GQueryRow[] = table
     ? table.rows
     : []
   const row: t.GQueryRow | void = f.first(rows)

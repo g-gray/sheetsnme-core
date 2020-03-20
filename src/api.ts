@@ -1,4 +1,3 @@
-// @flow
 import * as f from 'fpx'
 import * as t from './types'
 import * as e from './env'
@@ -39,7 +38,6 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
     return
   }
 
-  // $FlowFixMe
   const user: t.User | void = await db.userBySessionId(session.id)
   if (!user) {
     ctx.throw(400, 'User not found')
@@ -108,7 +106,7 @@ export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promi
   await next()
 }
 
-export async function lang(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+export async function setLang(ctx: t.Context, next: () => Promise<void>): Promise<void> {
   const lang: string | void = ctx.headers[LANG_HEADER_NAME]
 
   ctx.lang = u.AVAILABLE_LANGS[0]
@@ -125,7 +123,7 @@ export async function lang(ctx: t.Context, next: () => Promise<void>): Promise<v
  * Auth
  */
 
-export function authLogin(ctx: t.Context): void {
+export function authLogin(ctx: t.Context, next: () => Promise<void>): void {
   const redirectTo: string | void = ctx.query.redirectTo
     ? encodeURIComponent(ctx.query.redirectTo)
     : undefined
@@ -349,7 +347,7 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
 }
 
 
-function validateAccountFields(fields: Object, lang: string): t.ResErrors {
+function validateAccountFields(fields: object, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
 
   if (!f.isString(fields.title) || !fields.title.length) {
@@ -442,7 +440,7 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
 }
 
 
-function validateCategoryFields(fields: Object, lang: string): t.ResErrors {
+function validateCategoryFields(fields: object, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
 
   if (!f.isString(fields.title) || !fields.title.length) {
@@ -547,7 +545,7 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
 }
 
 
-function validatePayeeFields(fields: Object, lang: string): t.ResErrors {
+function validatePayeeFields(fields: object, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
 
   if (!f.isString(fields.title) || !fields.title.length) {
@@ -627,7 +625,7 @@ export async function createTransaction(ctx: t.Context): Promise<void> {
     throw new u.PublicError('Validation error', {errors})
   }
 
-  let fields: Object = ctx.request.body
+  let fields: object = ctx.request.body
 
   if (fields.type === LOAN) {
     fields = {...fields, incomeAccountId: s.DEBT_ACCOUNT_ID, incomeAmount: fields.outcomeAmount}
@@ -692,10 +690,18 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
 }
 
 
-function validateTransactionFields(fields: Object, lang: string): t.ResErrors {
+function validateTransactionFields(fields: object, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
-  const transactionTypes: Array<t.TransactionType> = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
-  const {type, date, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount, payeeId} = fields
+  const transactionTypes: t.TransactionType[] = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
+  const {
+    type,
+    date,
+    outcomeAccountId,
+    outcomeAmount,
+    incomeAccountId,
+    incomeAmount,
+    payeeId,
+  } = fields
 
   if (!f.includes(transactionTypes, type)) {
     errors.push({text: `${u.xln(lang, tr.TYPE_MUST_BE_ONE_OF)}: [${transactionTypes.join(', ')}]`})
@@ -747,9 +753,22 @@ function defTransactionType(transaction: t.Transaction): t.TransactionType | voi
     : undefined
 }
 
-function pickTransactionFields(fields: Object): Object {
-  const {id, type, date, categoryId, payeeId, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount, comment, createdAt, updatedAt} = fields
-  const whitlistedFields: Object = {id, date, comment, createdAt, updatedAt}
+function pickTransactionFields(fields: object): object {
+  const {
+    id,
+    type,
+    date,
+    categoryId,
+    payeeId,
+    outcomeAccountId,
+    outcomeAmount,
+    incomeAccountId,
+    incomeAmount,
+    comment,
+    createdAt,
+    updatedAt,
+  } = fields
+  const whitlistedFields: object = {id, date, comment, createdAt, updatedAt}
 
   return type === OUTCOME
     ? {...whitlistedFields, categoryId, payeeId, outcomeAccountId, outcomeAmount}

@@ -1,42 +1,10 @@
-// @flow
-
-export type * from 'koa'
-import type KoaT from 'koa'
-export type Koa = KoaT
-
-export type * from 'koa-router'
-import type RouterT from 'koa-router'
-export type Router = RouterT
-
-export type * from 'koa-bodyparser'
-import typeof KoaBodyparserT from 'koa-bodyparser'
-export type KoaBodyparser = KoaBodyparserT
-
-export type * from 'pg'
-import typeof PGT from 'pg'
-export type PG = PGT
-
-export type * from 'uuid'
-import type UuidT from 'uuid'
-export type Uuid = UuidT
-
-export type * from 'query-string'
-import typeof QueryStringT from 'query-string'
-export type QueryString = QueryStringT
-
-export type * from 'dotenv'
-export type * from 'googleapis'
-export type * from 'fpx'
+import * as Koa from 'koa'
 
 /**
  * Env
  */
 
-export type Env = {|
-  vars: EnvProperties
-|}
-
-export type EnvProperties = {|
+export type EnvProperties = {
   HOST               : string,
   PORT               : number,
   LOGOUT_URL         : string,
@@ -57,7 +25,7 @@ export type EnvProperties = {|
   CRYPTO_SALT        : string,
   CRYPTO_KEYLENGTH   : number,
   DATABASE_URL       : string,
-|}
+}
 
 
 
@@ -65,13 +33,20 @@ export type EnvProperties = {|
  * Context
  */
 
-export type Context = {|
-  ...Context,
-  lang         : string,
-  sessionId    : string,
-  client       : GOAuth2Client,
-  spreadsheetId: string,
-|}
+export type Context = Koa.Context
+
+export type CustomContext = {
+  lang          : Lang,
+  sessionId     : string,
+  client        : GOAuth2Client,
+  gSpreadsheetId: string,
+}
+
+/**
+ * Middleware
+ */
+
+export type Middleware = (ctx: Context, next: () => Promise<void>) => Promise<void>
 
 
 
@@ -79,42 +54,41 @@ export type Context = {|
  * Auth
  */
 
-export type GAuthToken = {|
+export type GAuthToken = {
   access_token : string,
   refresh_token: string,
   scope        : string,
   token_type   : string,
   expiry_date  : number,
-|}
+}
 
-export type GOAuth2Client = {|
-  _events                    : Array<any>,
+export type GOAuth2Client = {
+  _events                    : any[],
   _eventsCount               : number,
   _maxListeners              : number,
   transporter                : any,
   credentials                : any,
   certificateCache           : any,
   certificateExpiry          : any,
-  refreshTokenPromises       : Map<Promise<any>>,
+  refreshTokenPromises       : object,
   _clientId                  : string,
   _clientSecret              : string,
   redirectUri                : string | void,
   authBaseUrl                : string | void,
   tokenUrl                   : string | void,
   eagerRefreshThresholdMillis: number,
-  setCredentials             : (GAuthToken) => void,
-  generateAuthUrl            : ({access_type: string, scope: Array<string>}) => string,
-  getToken                   : (string, (Error, GAuthToken) => void) => void,
-  getToken                   : (string) => Promise<{tokens: GAuthToken}>,
+  setCredentials             : (token: GAuthToken) => void,
+  generateAuthUrl            : ({access_type: string, scope: string[]}) => string,
+  getToken                   : (code: string) => Promise<{tokens: GAuthToken}>,
   refreshAccessToken         : () => Promise<{credentials: GAuthToken}>,
-|}
+}
 
-export type Session = {|
-  id?          : string,
-  userId       : string,
-  createdAt?   : Date,
-  updatedAt?   : Date,
-|}
+export type Session = {
+  id        : string,
+  userId    : string,
+  createdAt?: Date,
+  updatedAt?: Date,
+}
 
 
 
@@ -122,7 +96,7 @@ export type Session = {|
  * User
  */
 
-export type GUser = {|
+export type GUser = {
   id            : string,
   email         : string,
   verified_email: true,
@@ -131,9 +105,9 @@ export type GUser = {|
   family_name   : string,
   picture       : string,
   locale        : string,
-|}
+}
 
-export type User = {|
+export type User = {
   id?          : string,
   externalId   : string,
   pictureUrl   : string,
@@ -145,7 +119,7 @@ export type User = {|
   externalToken: string,
   createdAt?   : Date,
   updatedAt?   : Date,
-|}
+}
 
 
 
@@ -153,15 +127,15 @@ export type User = {|
  * Spreadsheet
  */
 
-export type Spreadsheet = {|
+export type Spreadsheet = {
   id        : string,
   userId    : string,
   externalId: string,
   createdAt : Date,
   updatedAt : Date,
-|}
+}
 
-export type Spreadsheets = Array<Spreadsheet>
+export type Spreadsheets = Spreadsheet[]
 
 
 
@@ -169,24 +143,24 @@ export type Spreadsheets = Array<Spreadsheet>
  * Account
  */
 
-export type Account = {|
+export type Account = {
   id          : string,
   title       : string,
   currencyCode: string,
   createdAt   : string,
   updatedAt   : string,
   row?        : number,
-|}
+}
 
-export type Accounts = Array<Account>
+export type Accounts = Account[]
 
 
-export type Balance = {|
+export type Balance = {
   accountId: string,
   balance  : number,
-|}
+}
 
-export type BalancesById = {[string]: Balance}
+export type BalancesById = {[key: string]: Balance}
 
 
 
@@ -194,15 +168,15 @@ export type BalancesById = {[string]: Balance}
  * Category
  */
 
-export type Category = {|
+export type Category = {
   id       : string,
   title    : string,
   createdAt: string,
   updatedAt: string,
   row?     : number,
-|}
+}
 
-export type Categories = Array<Category>
+export type Categories = Category[]
 
 
 
@@ -210,27 +184,27 @@ export type Categories = Array<Category>
  * Payee
  */
 
-export type Payee = {|
+export type Payee = {
   id       : string,
   title    : string,
   createdAt: string,
   updatedAt: string,
   row?     : number,
-|}
+}
 
-export type Payees = Array<Payee>
+export type Payees = Payee[]
 
 
 /**
  * Debt
  */
 
-export type Debt = {|
+export type Debt = {
   payeeId: string,
   debt: number,
-|}
+}
 
-export type DebtsById = {[string]: Debt}
+export type DebtsById = {[key: string]: Debt}
 
 
 
@@ -240,7 +214,7 @@ export type DebtsById = {[string]: Debt}
 
 export type TransactionType = 'OUTCOME' | 'INCOME' | 'TRANSFER' | 'LOAN' | 'BORROW'
 
-export type Transaction = {|
+export type Transaction = {
   id              : string,
   date            : string,
   categoryId      : string,
@@ -253,17 +227,17 @@ export type Transaction = {|
   createdAt       : string,
   updatedAt       : string,
   row?            : number,
-|}
+}
 
-export type Transactions = Array<Transaction>
+export type Transactions = Transaction[]
 
-export type TransactionsAmounts = {|
+export type TransactionsAmounts = {
   outcomeAmount: number,
   incomeAmount: number,
-|}
+}
 
 
-export type TransactionsFilter = {|
+export type TransactionsFilter = {
   id?        : string,
   dateFrom?  : string,
   dateTo?    : string,
@@ -275,7 +249,7 @@ export type TransactionsFilter = {|
   amountTo?  : string,
   limit?     : string,
   offset?    : string,
-|}
+}
 
 
 /**
@@ -285,7 +259,7 @@ export type TransactionsFilter = {|
 export type GErrorType = 'ERROR_TYPE_UNSPECIFIED' | 'ERROR' | 'NULL_VALUE' | 'DIVIDE_BY_ZERO' | 'VALUE' | 'REF' | 'NAME' | 'NUM' | 'N_A' | 'LOADING'
 
 export type GErrorValue = {
-  type: GErrorType,
+  type   : GErrorType,
   message: string
 }
 
@@ -302,13 +276,13 @@ export type GCellData = {
 }
 
 export type GRowData = {
-  values: Array<GCellData>,
+  values: GCellData[],
 }
 
 export type GGridData = {
   startRow: number,
   startColumn: number,
-  rowData: Array<GRowData>,
+  rowData: GRowData[],
 }
 
 export type GGridProperties = {
@@ -335,8 +309,8 @@ export type GGridRange = {
 }
 
 export type GEditor = {
-  users             : Array<string>,
-  groups            : Array<string>,
+  users             : string[],
+  groups            : string[],
   domainUsersCanEdit: boolean
 }
 
@@ -347,14 +321,14 @@ export type GSheetProtectedRange = {
   description?          : string,
   warningOnly?          : boolean,
   requestingUserCanEdit?: boolean,
-  unprotectedRanges?    : Array<GGridRange>,
-  editors?              : Array<GEditor>
+  unprotectedRanges?    : GGridRange[],
+  editors?              : GEditor[]
 }
 
 export type GSheet = {
   properties      : GSheetProperties,
-  protectedRanges?: Array<GSheetProtectedRange>,
-  data            : Array<GGridData>,
+  protectedRanges?: GSheetProtectedRange[],
+  data            : GGridData[],
 }
 
 export type GSpreadsheetProperties = {
@@ -368,7 +342,7 @@ export type GSpreadsheetProperties = {
 export type GSpreadsheet = {
   spreadsheetId : string,
   properties    : GSpreadsheetProperties,
-  sheets        : Array<GSheet>,
+  sheets        : GSheet[],
   spreadsheetUrl: string,
 }
 
@@ -385,12 +359,12 @@ export type GQueryCell = {
 }
 
 export type GQueryRow = {
-  c: Array<GQueryCell | null>
+  c: (GQueryCell| null)[]
 }
 
 export type GQueryTable = {
-  cols: Array<GQueryCol>,
-  rows: Array<GQueryRow>,
+  cols: GQueryCol[],
+  rows: GQueryRow[],
   parsedNumHeaders: number,
 }
 
@@ -402,33 +376,33 @@ export type GQueryRes = {
  * Net
  */
 
-export type XHttpParams = {|
+export type XHttpParams = {
   url     : string,
   method? : string,
-  headers?: {[string]: string},
+  headers?: {[key: string]: string},
   timeout?: number,
-  body?   : (Object | string),
-|}
+  body?   : (object | string),
+}
 
-export type XHttpResponse = {|
+export type XHttpResponse = {
   ok        : boolean,
   status    : string,
   statusText: string,
   reason    : string,
-  headers   : {[string]: string},
-  body      : (Object | string),
+  headers   : {[key: string]: string},
+  body      : (object | string),
   params    : XHttpParams,
-|}
+}
 
 /**
  * Errors
  */
 
-export type ResError = {|
+export type ResError = {
   text: string,
-|}
+}
 
-export type ResErrors = Array<ResError>
+export type ResErrors = ResError[]
 
 
 
@@ -436,7 +410,9 @@ export type ResErrors = Array<ResError>
  * i18n
  */
 
-export type Translations = {|
+export type Lang = 'en' | 'ru'
+
+export type Translations = {
   en: string,
   ru: string,
-|}
+}

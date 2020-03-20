@@ -1,4 +1,3 @@
-// @flow
 import * as f from 'fpx'
 import xhttp from 'xhttp/node'
 import crypto from 'crypto'
@@ -36,8 +35,8 @@ export function formatDateTime(value: any): string {
  * to solve problem related to floating numbers and precisions instead of
  * Math.round(value * 100) / 100,
  */
-export function round(number: number, decimals: number = 0): number {
-  return Math.round(number * (decimals * 10)) / (decimals * 10)
+export function round(num: number, decimals: number = 0): number {
+  return Math.round(num * (decimals * 10)) / (decimals * 10)
 }
 
 
@@ -65,7 +64,7 @@ export class PublicError extends Error {
 
 export function fetch(params: t.XHttpParams): Promise<t.XHttpResponse> {
   return new Promise((resolve, reject) => {
-    xhttp.jsonRequest(params, (err, response) => {
+    xhttp.jsonRequest(params, (err: any, response: t.XHttpResponse) => {
       if (response.ok) resolve(response)
       else reject(response)
     })
@@ -118,20 +117,21 @@ export function decrypt(
  * i18n
  */
 
-export const AVAILABLE_LANGS: Array<string> = ['en', 'ru']
+export const AVAILABLE_LANGS: t.Lang[] = ['en', 'ru']
 
-export function xln(lang: string, translations: t.Translations, args?: Array<mixed> = []): string {
+export function xln(lang: t.Lang, translations: t.Translations, args: any[] = []): string {
 
   if (translations == null) return ''
 
-  let translation: void | string | (...Array<mixed>) => string
+  let translation: void | string | ((...args: any[]) => string)
   if (translations[lang]) {
     translation = translations[lang]
   }
   else {
-    for (const lang: string in translations) {
-      if (translations[lang]) {
-        translation = translations[lang]
+    let _lang: t.Lang
+    for (_lang in translations) {
+      if (translations[_lang]) {
+        translation = translations[_lang]
         break
       }
     }

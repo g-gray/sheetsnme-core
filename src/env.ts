@@ -1,5 +1,3 @@
-// @flow
-
 import * as t from './types'
 import dotenv from 'dotenv'
 dotenv.config({path: '.env.properties'})
