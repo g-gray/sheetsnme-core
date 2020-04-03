@@ -21,4 +21,16 @@ const config = properties.DATABASE_URL
     password: properties.POSTGRES_PASSWORD,
   }
 
-module.exports.pool = new pg.Pool(config)
+const pool = new pg.Pool(config)
+module.exports.pool = pool
+
+module.exports.runMigration = async (query) => {
+  const client = await pool.connect()
+  try {
+    await client.query(query)
+  } catch (e) {
+    await client.query(`ROLLBACK`)
+    throw e
+  }
+  client.release()
+}
