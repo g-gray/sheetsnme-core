@@ -187,12 +187,10 @@ export async function authCode (ctx: t.Context): Promise<void>  {
     externalToken: encryptedToken,
   })
 
-  // $FlowFixMe
   const session: t.Session = await db.upsertSession({userId: user.id})
 
   await db.deleteExpiredSessions(session.userId)
 
-  // $FlowFixMe
   a.setCookie(ctx, SESSION_COOKIE_NAME, session.id)
 
   const redirectTo: string | void = ctx.query.state
@@ -242,7 +240,6 @@ export async function getUser(ctx: t.Context) {
     spreadsheet = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
   }
 
-  // $FlowFixMe
   ctx.body = {...user, spreadsheets: [{id: spreadsheet.id}]}
 }
 
