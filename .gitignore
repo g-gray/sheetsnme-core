@@ -1,7 +1,6 @@
 /*
 !/.env.properties.example
 !/.eslintrc
-!/.flowconfig
 !/.gitignore
 !/package.json
 !/Procfile
