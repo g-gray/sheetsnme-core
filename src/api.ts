@@ -25,7 +25,7 @@ const {
  * Middlewares
  */
 
-export async function authRequired(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+export async function authRequired(ctx: t.Context, next: t.Next): Promise<void>{
   const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
   const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
@@ -89,7 +89,7 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
   await next()
 }
 
-export async function spreadsheetIdRequired(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+export async function spreadsheetIdRequired(ctx: t.Context, next: t.Next): Promise<void> {
   const sessionId: string = ctx.sessionId
   // const spreadsheetId: string | void = ctx.query.spreadsheetId
   // if (!spreadsheetId) {
@@ -110,7 +110,7 @@ export async function spreadsheetIdRequired(ctx: t.Context, next: () => Promise<
   await next()
 }
 
-export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+export async function jsonOnly(ctx: t.Context, next: t.Next): Promise<void> {
   if (!ctx.accepts('application/json')) {
     ctx.throw(406, 'Not acceptable')
     return
@@ -119,7 +119,7 @@ export async function jsonOnly(ctx: t.Context, next: () => Promise<void>): Promi
   await next()
 }
 
-export async function setLang(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+export async function setLang(ctx: t.Context, next: t.Next): Promise<void> {
   const lang: string | void = ctx.headers[LANG_HEADER_NAME]
 
   ctx.lang = u.AVAILABLE_LANGS[0]
@@ -136,7 +136,7 @@ export async function setLang(ctx: t.Context, next: () => Promise<void>): Promis
  * Auth
  */
 
-export function authLogin(ctx: t.Context, next: () => Promise<void>): void {
+export function authLogin(ctx: t.Context, next: t.Next): void {
   // TODO Add a CSRF token generation here and pass within ctx.state to check in
   // exchangeCodeForToken function later
   const redirectTo: string = ctx.query.redirectTo

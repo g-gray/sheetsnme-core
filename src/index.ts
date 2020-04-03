@@ -24,7 +24,7 @@ app.listen(PORT, HOST, undefined, () => {
   console.log(`Server listening on ${HOST}:${PORT}`)
 })
 
-export async function handlePublicError(ctx: t.Context, next: () => Promise<void>): Promise<void> {
+export async function handlePublicError(ctx: t.Context, next: t.Next): Promise<void> {
   try {
     await next()
   }
