@@ -5,7 +5,7 @@ import {google} from 'googleapis'
 import * as e from './env'
 import * as u from './utils'
 
-const SCOPES: string[] = [
+export const SCOPES: string[] = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/drive.file',
@@ -13,9 +13,14 @@ const SCOPES: string[] = [
 
 const {REDIRECT_URL, CLIENT_ID, CLIENT_SECRET} = e.properties
 
-export function generateAuthUrl(state: string | void): string {
+export function generateAuthUrl(state?: string): string {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client()
-  return oAuth2Client.generateAuthUrl({access_type: 'offline', prompt: 'consent', scope: SCOPES, state})
+  return oAuth2Client.generateAuthUrl({
+    access_type: 'offline',
+    // prompt: 'consent',
+    scope: SCOPES,
+    state,
+  })
 }
 
 export async function exchangeCodeForToken(code: string): Promise<t.GAuthToken> {
@@ -30,11 +35,17 @@ export async function refreshToken(token: t.GAuthToken): Promise<t.GAuthToken> {
   return newToken
 }
 
-export function createOAuth2Client(token: t.GAuthToken | void): t.GOAuth2Client {
-  const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL)
+export function createOAuth2Client(token?: t.GAuthToken): t.GOAuth2Client {
+  const oAuth2Client: t.GOAuth2Client = new google.auth.OAuth2(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    REDIRECT_URL
+  )
+
   if (token) {
     oAuth2Client.setCredentials(token)
   }
+
   return oAuth2Client
 }
 

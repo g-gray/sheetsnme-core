@@ -162,6 +162,23 @@ export async function upsertUser(user: t.User): Promise<t.User> {
   return upsertedUser
 }
 
+export async function userByExternalId(externalId: string): Promise<t.User | void> {
+  const q: string = `
+  select *
+  from users
+  where external_id = $1
+  `
+  const v: any[] = [externalId]
+  const result: pg.QueryResult = await query(q, v)
+  const row: pg.QueryResultRow | void = result.rows[0]
+  if (!row) {
+    return undefined
+  }
+
+  const user: t.User = rowToUser(row)
+  return user
+}
+
 export async function userBySessionId(sessionId: string): Promise<t.User | void> {
   const q: string = `
   select *

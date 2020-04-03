@@ -55,11 +55,19 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
   )
   const token: t.GAuthToken = JSON.parse(decryptedToken)
 
-  const diff: number = token.expiry_date - Date.now()
-  if (diff > 0) {
-    ctx.client = a.createOAuth2Client(token)
+  const scopes: string[] = token.scope.split(' ')
+  const isScopesDifferent: boolean = !fpx.every(
+    a.SCOPES,
+    (scope: string) => fpx.includes(scopes, scope)
+  )
+
+  if (isScopesDifferent) {
+    ctx.throw(401, 'Unauthorized')
+    return
   }
-  else {
+
+  const isExpired: boolean = token.expiry_date - Date.now() <= 0
+  if (isExpired) {
     const newToken: t.GAuthToken = await a.refreshToken(token)
     const encryptedNewToken: string = u.encrypt(
       CRYPTO_ALGORITHM,
@@ -71,6 +79,9 @@ export async function authRequired(ctx: t.Context, next: () => Promise<void>): P
 
     await db.upsertUser({...user, externalToken: encryptedNewToken})
     ctx.client = a.createOAuth2Client(newToken)
+  }
+  else {
+    ctx.client = a.createOAuth2Client(token)
   }
 
   ctx.sessionId = session.id
@@ -126,9 +137,11 @@ export async function setLang(ctx: t.Context, next: () => Promise<void>): Promis
  */
 
 export function authLogin(ctx: t.Context, next: () => Promise<void>): void {
-  const redirectTo: string | void = ctx.query.redirectTo
+  // TODO Add a CSRF token generation here and pass within ctx.state to check in
+  // exchangeCodeForToken function later
+  const redirectTo: string = ctx.query.redirectTo
     ? encodeURIComponent(ctx.query.redirectTo)
-    : undefined
+    : ''
   const authUrl: string = a.generateAuthUrl(redirectTo)
   ctx.redirect(authUrl)
 }
@@ -154,40 +167,55 @@ export async function authLogout(ctx: t.Context): Promise<void> {
   ctx.redirect(LOGOUT_URL || '/')
 }
 
-export async function authCode (ctx: t.Context): Promise<void>  {
+export async function authCode (ctx: t.Context): Promise<void> {
+  // TODO Add checking of a CSRF token here got from ctx.state
   const code: string | void = ctx.query.code
   if (!code) {
     ctx.throw(400, 'Code required')
     return
   }
 
-  const token: t.GAuthToken = await a.exchangeCodeForToken(code)
-  const client: t.GOAuth2Client = a.createOAuth2Client(token)
+  let newToken: t.GAuthToken = await a.exchangeCodeForToken(code)
+  const client: t.GOAuth2Client = a.createOAuth2Client(newToken)
   const gUser: t.GUser | void = await n.fetchUserInfo(client)
   if (!gUser) {
     ctx.throw(400, 'User not found')
     return
   }
 
-  const encryptedToken: string = u.encrypt(
+  const externalId: string = gUser.id
+  const user: void | t.User = await db.userByExternalId(externalId)
+  if (user) {
+    const decryptedToken: string = u.decrypt(
+      CRYPTO_ALGORITHM,
+      CRYPTO_PASSWORD,
+      CRYPTO_SALT,
+      CRYPTO_KEYLENGTH,
+      user.externalToken,
+    )
+    const token: t.GAuthToken = JSON.parse(decryptedToken)
+    newToken = {...token, ...newToken}
+  }
+
+  const encryptedNewToken: string = u.encrypt(
     CRYPTO_ALGORITHM,
     CRYPTO_PASSWORD,
     CRYPTO_SALT,
     CRYPTO_KEYLENGTH,
-    JSON.stringify(token)
+    JSON.stringify(newToken)
   )
 
-  const user: t.User = await db.upsertUser({
-    externalId   : gUser.id,
+  const upsertedUser: t.User = await db.upsertUser({
+    externalId,
     pictureUrl   : gUser.picture,
     email        : gUser.email,
     emailVerified: gUser.verified_email,
     firstName    : gUser.given_name,
     lastName     : gUser.family_name,
-    externalToken: encryptedToken,
+    externalToken: encryptedNewToken,
   })
 
-  const session: t.Session = await db.upsertSession({userId: user.id})
+  const session: t.Session = await db.upsertSession({userId: upsertedUser.id})
 
   await db.deleteExpiredSessions(session.userId)
 
