@@ -1,6 +1,7 @@
 import * as t from './types'
 
 import {google} from 'googleapis'
+// @ts-ignore
 import * as fpx from 'fpx'
 import uuid from 'uuid/v4'
 import qs from 'query-string'
@@ -148,7 +149,7 @@ export async function fetchBalancesByAccountIds(
       fpx.map(outcomeTable.rows, rowToBalance),
       (balance: t.Balance) => balance.accountId
     )
-   : {}
+    : {}
 
   const incomeIdsCond: string = fpx.map(
     accountIds,
@@ -175,18 +176,18 @@ export async function fetchBalancesByAccountIds(
     ids,
     {},
     (acc: t.BalancesById, id: string) => {
-    const incomeBalance: t.Balance | void = incomeBalances[id]
-    const income = incomeBalance ? incomeBalance.balance : 0
-    const outcomeBalance: t.Balance | void = outcomeBalances[id]
-    const outcome = outcomeBalance ? outcomeBalance.balance : 0
+      const incomeBalance: t.Balance | void = incomeBalances[id]
+      const income = incomeBalance ? incomeBalance.balance : 0
+      const outcomeBalance: t.Balance | void = outcomeBalances[id]
+      const outcome = outcomeBalance ? outcomeBalance.balance : 0
 
-    return {
-      ...acc,
-      [id]: {
-        accountId: id,
-        balance: u.round(income - outcome, 2),
-      },
-    }
+      return {
+        ...acc,
+        [id]: {
+          accountId: id,
+          balance: u.round(income - outcome, 2),
+        },
+      }
   })
 
   return result
@@ -441,7 +442,7 @@ export async function fetchDebtsByPayeeIds(
         fpx.map(loansTable.rows, rowToDebt),
         (debt: t.Debt) => debt.payeeId
       )
-   : {}
+    : {}
 
   const borrowsTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
@@ -465,20 +466,20 @@ export async function fetchDebtsByPayeeIds(
     ids,
     {},
     (acc: t.DebtsById, id: string) => {
-    const borrowDebt: t.Debt | void = borrowDebts[id]
-    const borrowAmount = borrowDebt ? borrowDebt.debt : 0
+      const borrowDebt: t.Debt | void = borrowDebts[id]
+      const borrowAmount = borrowDebt ? borrowDebt.debt : 0
 
-    const loanDebt: t.Debt | void = loanDebts[id]
-    const loanAmount = loanDebt ? loanDebt.debt : 0
+      const loanDebt: t.Debt | void = loanDebts[id]
+      const loanAmount = loanDebt ? loanDebt.debt : 0
 
-    return {
-      ...acc,
-      [id]: {
-        payeeId: id,
-        debt: u.round(loanAmount - borrowAmount, 2),
-      },
-    }
-  })
+      return {
+        ...acc,
+        [id]: {
+          payeeId: id,
+          debt: u.round(loanAmount - borrowAmount, 2),
+        },
+      }
+    })
 
   return result
 }
@@ -808,7 +809,7 @@ async function queryEntities<T>(
       table.rows,
       (row: t.GQueryRow): T => rowToEntity(row)
     )
-   : []
+    : []
 
   return entities
 }

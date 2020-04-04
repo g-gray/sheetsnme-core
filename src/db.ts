@@ -1,6 +1,7 @@
 import * as t from './types'
 
 import * as pg from 'pg'
+// @ts-ignore
 import * as fpx from 'fpx'
 
 import * as e from './env'

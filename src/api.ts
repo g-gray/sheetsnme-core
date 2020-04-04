@@ -1,5 +1,6 @@
 import * as t from './types'
 
+// @ts-ignore
 import * as fpx from 'fpx'
 import uuid from 'uuid/v4'
 
@@ -772,7 +773,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
     ctx.throw(404, 'Transaction not found')
     return
   }
-  
+
   ctx.body = transactionToFields(transaction)
 }
 
