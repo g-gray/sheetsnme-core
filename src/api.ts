@@ -68,7 +68,17 @@ export async function authRequired(ctx: t.Context, next: t.Next): Promise<void>{
 
   const isExpired: boolean = token.expiry_date - Date.now() <= 0
   if (isExpired) {
-    const newToken: t.GAuthToken = await a.refreshToken(token)
+    let newToken: t.GAuthToken
+    try {
+      newToken = await a.refreshToken(token)
+    } catch (err) {
+      if (err.message === t.ERROR.INVALID_GRANT) {
+        ctx.throw(401, 'Unauthorized')
+        return
+      }
+
+      throw err
+    }
     const encryptedNewToken: string = u.encrypt(
       CRYPTO_ALGORITHM,
       CRYPTO_PASSWORD,

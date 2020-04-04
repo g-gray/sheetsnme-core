@@ -416,3 +416,12 @@ export type Translations = {
   en: string,
   ru: string,
 }
+
+
+/**
+ * Misc
+ */
+
+export enum ERROR {
+  INVALID_GRANT = 'invalid_grant',
+}
