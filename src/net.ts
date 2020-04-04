@@ -33,13 +33,13 @@ export async function fetchAccount(
 export async function createAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : t.JSONObject,
+  account      : t.Account,
 ): Promise<t.Account> {
   const result: t.Account = await createEntity<t.Account>(
     client,
     spreadsheetId,
     s.ACCOUNTS_SHEET_ID,
-    {...fields, id: uuid()},
+    account,
     accountToRow,
     rowToAccount,
   )
@@ -50,14 +50,14 @@ export async function updateAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : t.JSONObject,
+  account      : t.Account,
 ): Promise<t.Account> {
   const result: t.Account = await updateEntityById<t.Account>(
     client,
     spreadsheetId,
     s.ACCOUNTS_SHEET_ID,
     id,
-    {...fields},
+    account,
     accountToRow,
     rowToAccount,
   )
@@ -117,8 +117,7 @@ function accountToRow(account: t.Account): t.GRowData {
     values: [
       {userEnteredValue: {stringValue: account.id}},
       {userEnteredValue: {stringValue: account.title}},
-      // {userEnteredValue: {stringValue: account.currencyCode}},
-      {userEnteredValue: {stringValue: 'RUB'}},
+      {userEnteredValue: {stringValue: account.currencyCode}},
       {userEnteredValue: {stringValue: createdAt}},
       {userEnteredValue: {stringValue: date}},
     ],
@@ -131,7 +130,10 @@ export async function fetchBalancesByAccountIds(
   spreadsheetId: string,
   accountIds: string[],
 ): Promise<t.BalancesById> {
-  const outcomeIdsCond: string = fpx.map(accountIds, id => `F = '${id}'`).join(' OR ')
+  const outcomeIdsCond: string = fpx.map(
+    accountIds,
+    (id: string) => `F = '${id}'`
+  ).join(' OR ')
   const outcomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
@@ -142,10 +144,16 @@ export async function fetchBalancesByAccountIds(
     `,
   )
   const outcomeBalances: t.BalancesById = outcomeTable
-   ? fpx.keyBy(fpx.map(outcomeTable.rows, rowToBalance), ({accountId}) => accountId)
+    ? fpx.keyBy(
+      fpx.map(outcomeTable.rows, rowToBalance),
+      (balance: t.Balance) => balance.accountId
+    )
    : {}
 
-  const incomeIdsCond: string = fpx.map(accountIds, id => `H = '${id}'`).join(' OR ')
+  const incomeIdsCond: string = fpx.map(
+    accountIds,
+    (id: string) => `H = '${id}'`
+  ).join(' OR ')
   const incomeTable: t.GQueryTable | void = await querySheet(
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
@@ -156,12 +164,17 @@ export async function fetchBalancesByAccountIds(
     `,
   )
   const incomeBalances: t.BalancesById = incomeTable
-    ? fpx.keyBy(fpx.map(incomeTable.rows, rowToBalance), ({accountId}) => accountId)
+    ? fpx.keyBy(
+      fpx.map(incomeTable.rows, rowToBalance),
+      (balance: t.Balance) => balance.accountId)
     : {}
 
   const ids = fpx.uniq(fpx.concat(fpx.keys(outcomeBalances), fpx.keys(incomeBalances)))
 
-  const result: t.BalancesById = fpx.fold(ids, {}, (acc, id) => {
+  const result: t.BalancesById = fpx.fold(
+    ids,
+    {},
+    (acc: t.BalancesById, id: string) => {
     const incomeBalance: t.Balance | void = incomeBalances[id]
     const income = incomeBalance ? incomeBalance.balance : 0
     const outcomeBalance: t.Balance | void = outcomeBalances[id]
@@ -211,13 +224,13 @@ export async function fetchCategory(
 export async function createCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : t.JSONObject,
+  category     : t.Category,
 ): Promise<t.Category> {
   const result: t.Category = await createEntity<t.Category>(
     client,
     spreadsheetId,
     s.CATEGORIES_SHEET_ID,
-    {...fields, id: uuid()},
+    category,
     categoryToRow,
     rowToCategory,
   )
@@ -228,14 +241,14 @@ export async function updateCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : t.JSONObject,
+  category     : t.Category,
 ): Promise<t.Category> {
   const result: t.Category = await updateEntityById<t.Category>(
     client,
     spreadsheetId,
     s.CATEGORIES_SHEET_ID,
     id,
-    {...fields},
+    category,
     categoryToRow,
     rowToCategory,
   )
@@ -321,14 +334,14 @@ export async function fetchPayee(
 export async function createPayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : t.JSONObject,
+  payee        : t.Payee
 ): Promise<t.Payee> {
 
   const result: t.Payee = await createEntity<t.Payee>(
     client,
     spreadsheetId,
     s.PAYEES_SHEET_ID,
-    {...fields, id: uuid()},
+    payee,
     payeeToRow,
     rowToPayee,
   )
@@ -339,14 +352,14 @@ export async function updatePayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : t.JSONObject,
+  payee        : t.Payee
 ): Promise<t.Payee> {
   const result: t.Payee = await updateEntityById<t.Payee>(
     client,
     spreadsheetId,
     s.PAYEES_SHEET_ID,
     id,
-    {...fields},
+    payee,
     payeeToRow,
     rowToPayee,
   )
@@ -424,7 +437,10 @@ export async function fetchDebtsByPayeeIds(
     `,
   )
   const loanDebts: t.DebtsById = loansTable
-   ? fpx.keyBy(fpx.map(loansTable.rows, rowToDebt), ({payeeId}) => payeeId)
+    ? fpx.keyBy(
+        fpx.map(loansTable.rows, rowToDebt),
+        (debt: t.Debt) => debt.payeeId
+      )
    : {}
 
   const borrowsTable: t.GQueryTable | void = await querySheet(
@@ -437,12 +453,18 @@ export async function fetchDebtsByPayeeIds(
     `,
   )
   const borrowDebts: t.DebtsById = borrowsTable
-    ? fpx.keyBy(fpx.map(borrowsTable.rows, rowToDebt), ({payeeId}) => payeeId)
+    ? fpx.keyBy(
+        fpx.map(borrowsTable.rows, rowToDebt),
+        (debt: t.Debt) => debt.payeeId
+      )
     : {}
 
   const ids = fpx.uniq(fpx.concat(fpx.keys(loanDebts), fpx.keys(borrowDebts)))
 
-  const result: t.DebtsById = fpx.fold(ids, {}, (acc, id) => {
+  const result: t.DebtsById = fpx.fold(
+    ids,
+    {},
+    (acc: t.DebtsById, id: string) => {
     const borrowDebt: t.Debt | void = borrowDebts[id]
     const borrowAmount = borrowDebt ? borrowDebt.debt : 0
 
@@ -492,13 +514,13 @@ export async function fetchTransaction(
 export async function createTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  fields       : t.JSONObject,
+  transaction  : t.Transaction,
 ): Promise<t.Transaction> {
   const result: t.Transaction = await createEntity<t.Transaction>(
     client,
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
-    {...fields, id: uuid()},
+    transaction,
     transactionToRow,
     rowToTransaction,
   )
@@ -509,14 +531,14 @@ export async function updateTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  fields       : t.JSONObject,
+  transaction  : t.Transaction,
 ): Promise<t.Transaction> {
   const result: t.Transaction = await updateEntityById<t.Transaction>(
     client,
     spreadsheetId,
     s.TRANSACTIONS_SHEET_ID,
     id,
-    {...fields},
+    transaction,
     transactionToRow,
     rowToTransaction,
   )
@@ -596,8 +618,8 @@ function transactionToRow(transaction: t.Transaction): t.GRowData {
 function transactionsQuery(filter: t.TransactionsFilter): string {
   const where = transactionsWhere(filter)
 
-  const limit: number = parseInt(filter.limit, 10) || u.DEFAULT_LIMIT
-  const offset: number = parseInt(filter.offset, 10)
+  const limit: number = parseInt(filter.limit || '', 10) || u.DEFAULT_LIMIT
+  const offset: number = parseInt(filter.offset || '', 10)
 
   const query: string = fpx.compact([
     `select *`,
@@ -744,7 +766,7 @@ export async function createAppSpreadsheet(client: t.GOAuth2Client, lang: t.Lang
  */
 
 // TODO Probably replace generic by a common type for all key entities
-async function queryEntityById<T>(
+async function queryEntityById<T extends t.Entity>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
@@ -782,7 +804,10 @@ async function queryEntities<T>(
     query || `select * where A != 'id'`,
   )
   const entities: T[] = table
-   ? fpx.map(table.rows, row => rowToEntity(row))
+    ? fpx.map(
+      table.rows,
+      (row: t.GQueryRow): T => rowToEntity(row)
+    )
    : []
 
   return entities
@@ -811,7 +836,7 @@ export async function queryEntitiesNumber(
 }
 
 // TODO Probably replace generic by a common type for all key entities
-async function createEntity<T>(
+async function createEntity<T extends t.Entity>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
   sheetId       : number,
@@ -836,7 +861,7 @@ async function createEntity<T>(
 }
 
 // TODO Probably replace generic by a common type for all key entities
-async function deleteEntityById<T>(
+async function deleteEntityById<T extends t.Entity>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
@@ -858,7 +883,7 @@ async function deleteEntityById<T>(
     throw new Error('Entity not found')
   }
 
-  const rowNumber: number = toDelete.row
+  const rowNumber: number = toDelete.row || 0
   if (!rowNumber) {
     throw new Error('Row number not found')
   }
@@ -869,7 +894,7 @@ async function deleteEntityById<T>(
 }
 
 // TODO Probably replace generic by a common type for all key entities
-async function updateEntityById<T>(
+async function updateEntityById<T extends t.Entity>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
   sheetId       : number,
@@ -893,7 +918,7 @@ async function updateEntityById<T>(
     throw new Error('Entity not found')
   }
 
-  const rowNumber: number = toUpdate.row
+  const rowNumber: number = toUpdate.row || 0
   if (!rowNumber) {
     throw new Error('Row number not found')
   }

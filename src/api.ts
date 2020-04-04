@@ -1,6 +1,7 @@
 import * as t from './types'
 
 import * as fpx from 'fpx'
+import uuid from 'uuid/v4'
 
 import * as e from './env'
 import * as u from './utils'
@@ -25,7 +26,7 @@ const {
  * Middlewares
  */
 
-export async function authRequired(ctx: t.Context, next: t.Next): Promise<void>{
+export async function authRequired(ctx: t.Context, next: t.Next): Promise<void> {
   const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
   const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
@@ -292,11 +293,11 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const accounts: t.Accounts = await n.fetchAccounts(client, gSpreadsheetId)
 
-  const accountIds = fpx.map(accounts, ({id}) => id)
+  const accountIds = fpx.map(accounts, (account: t.Account) => account.id)
   const balances: t.BalancesById = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, accountIds)
 
-  ctx.body = fpx.map(accounts, account => ({
-    ...account,
+  ctx.body = fpx.map(accounts, (account: t.Account) => ({
+    ...accountToFields(account),
     balance: balances[account.id] ? balances[account.id].balance : 0,
   }))
 }
@@ -319,7 +320,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
   const balances: t.BalancesById = await n.fetchBalancesByAccountIds(client, gSpreadsheetId, [account.id])
 
   ctx.body = {
-    ...account,
+    ...accountToFields(account),
     balance: balances[account.id] ? balances[account.id].balance : 0,
   }
 }
@@ -332,9 +333,13 @@ export async function createAccount(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: t.Account = await n.createAccount(client, gSpreadsheetId, ctx.request.body)
+  const account: t.Account = await n.createAccount(
+    client,
+    gSpreadsheetId,
+    fieldsToAccount(ctx.request.body)
+  )
 
-  ctx.body = account
+  ctx.body = accountToFields(account)
 }
 
 export async function updateAccount(ctx: t.Context): Promise<void> {
@@ -355,9 +360,14 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: t.Account = await n.updateAccount(client, gSpreadsheetId, id, ctx.request.body)
+  const account: t.Account = await n.updateAccount(
+    client,
+    gSpreadsheetId,
+    id,
+    fieldsToAccount(ctx.request.body)
+  )
 
-  ctx.body = account
+  ctx.body = accountToFields(account)
 }
 
 export async function deleteAccount(ctx: t.Context): Promise<void> {
@@ -380,18 +390,55 @@ export async function deleteAccount(ctx: t.Context): Promise<void> {
   }
 
   const account: t.Account = await n.deleteAccount(client, gSpreadsheetId, id)
-  ctx.body = account
+  ctx.body = accountToFields(account)
 }
 
 
-function validateAccountFields(fields: object, lang: t.Lang): t.ResErrors {
+function validateAccountFields(fields: any, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
+  const {title} = fields
 
-  if (!fpx.isString(fields.title) || !fields.title.length) {
+  if (!fpx.isString(title) || !title.length) {
     errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
   return errors
+}
+
+function accountToFields(account: t.Account): t.AccountFields {
+  const {
+    id,
+    title,
+    currencyCode,
+    createdAt,
+    updatedAt,
+  } = account
+
+  return {
+    id,
+    title,
+    currencyCode,
+    createdAt,
+    updatedAt,
+  }
+}
+
+function fieldsToAccount(fields: t.AccountFields): t.Account {
+  const {
+    id,
+    title,
+    currencyCode,
+    createdAt,
+    updatedAt,
+  }: t.AccountFields = fields
+
+  return {
+    id          : id || uuid(),
+    title       : title || '',
+    currencyCode: currencyCode || '',
+    createdAt,
+    updatedAt,
+  }
 }
 
 
@@ -404,7 +451,7 @@ export async function getCategories(ctx: t.Context): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const categories: t.Categories = await n.fetchCategories(client, gSpreadsheetId)
-  ctx.body = categories
+  ctx.body = fpx.map(categories, categoryToFields)
 }
 
 export async function getCategory(ctx: t.Context): Promise<void> {
@@ -422,7 +469,7 @@ export async function getCategory(ctx: t.Context): Promise<void> {
     return
   }
 
-  ctx.body = category
+  ctx.body = categoryToFields(category)
 }
 
 export async function createCategory(ctx: t.Context): Promise<void> {
@@ -433,9 +480,13 @@ export async function createCategory(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const category: t.Category = await n.createCategory(client, gSpreadsheetId, ctx.request.body)
+  const category: t.Category = await n.createCategory(
+    client,
+    gSpreadsheetId,
+    fieldsToCategory(ctx.request.body)
+  )
 
-  ctx.body = category
+  ctx.body = categoryToFields(category)
 }
 
 export async function updateCategory(ctx: t.Context): Promise<void> {
@@ -452,9 +503,14 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const category: t.Category = await n.updateCategory(client, gSpreadsheetId, id, ctx.request.body)
+  const category: t.Category = await n.updateCategory(
+    client,
+    gSpreadsheetId,
+    id,
+    fieldsToCategory(ctx.request.body)
+  )
 
-  ctx.body = category
+  ctx.body = categoryToFields(category)
 }
 
 export async function deleteCategory(ctx: t.Context): Promise<void> {
@@ -473,18 +529,47 @@ export async function deleteCategory(ctx: t.Context): Promise<void> {
   }
 
   const category: t.Category = await n.deleteCategory(client, gSpreadsheetId, id)
-  ctx.body = category
+  ctx.body = categoryToFields(category)
 }
 
 
-function validateCategoryFields(fields: object, lang: t.Lang): t.ResErrors {
+function validateCategoryFields(fields: any, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
+  const {title} = fields
 
-  if (!fpx.isString(fields.title) || !fields.title.length) {
+  if (!fpx.isString(title) || !title.length) {
     errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
   return errors
+}
+
+function categoryToFields(category: t.Category): t.CategoryFields {
+  const {
+    id,
+    title,
+    createdAt,
+    updatedAt,
+  } = category
+
+  return {
+    id,
+    title,
+    createdAt,
+    updatedAt,
+  }
+}
+
+function fieldsToCategory(fields: t.CategoryFields): t.Category {
+  const {
+    id,
+    title,
+  }: t.CategoryFields = fields
+
+  return {
+    id   : id || uuid(),
+    title: title || '',
+  }
 }
 
 
@@ -498,11 +583,11 @@ export async function getPayees(ctx: t.Context): Promise<void> {
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const payees: t.Payees = await n.fetchPayees(client, gSpreadsheetId)
 
-  const payeeIds = fpx.map(payees, ({id}) => id)
+  const payeeIds = fpx.map(payees, (payee: t.Payee) => payee.id)
   const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, payeeIds)
 
-  ctx.body = fpx.map(payees, payee => ({
-    ...payee,
+  ctx.body = fpx.map(payees, (payee: t.Payee) => ({
+    ...payeeToFields(payee),
     debt: debts[payee.id] ? debts[payee.id].debt : 0,
   }))
 }
@@ -525,7 +610,7 @@ export async function getPayee(ctx: t.Context): Promise<void> {
   const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, [payee.id])
 
   ctx.body = {
-    ...payee,
+    ...payeeToFields(payee),
     debt: debts[payee.id] ? debts[payee.id].debt : 0,
   }
 }
@@ -538,9 +623,13 @@ export async function createPayee(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee = await n.createPayee(client, gSpreadsheetId, ctx.request.body)
+  const payee: t.Payee = await n.createPayee(
+    client,
+    gSpreadsheetId,
+    fieldsToPayee(ctx.request.body)
+  )
 
-  ctx.body = payee
+  ctx.body = payeeToFields(payee)
 }
 
 export async function updatePayee(ctx: t.Context): Promise<void> {
@@ -557,9 +646,14 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee = await n.updatePayee(client, gSpreadsheetId, id, ctx.request.body)
+  const payee: t.Payee = await n.updatePayee(
+    client,
+    gSpreadsheetId,
+    id,
+    fieldsToPayee(ctx.request.body)
+  )
 
-  ctx.body = payee
+  ctx.body = payeeToFields(payee)
 }
 
 export async function deletePayee(ctx: t.Context): Promise<void> {
@@ -582,14 +676,43 @@ export async function deletePayee(ctx: t.Context): Promise<void> {
 }
 
 
-function validatePayeeFields(fields: object, lang: t.Lang): t.ResErrors {
+function validatePayeeFields(fields: any, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
+  const {title} = fields
 
-  if (!fpx.isString(fields.title) || !fields.title.length) {
+  if (!fpx.isString(title) || !title.length) {
     errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
   return errors
+}
+
+function payeeToFields(payee: t.Payee): t.PayeeFields {
+  const {
+    id,
+    title,
+    createdAt,
+    updatedAt,
+  } = payee
+
+  return {
+    id,
+    title,
+    createdAt,
+    updatedAt,
+  }
+}
+
+function fieldsToPayee(fields: t.PayeeFields): t.Payee {
+  const {
+    id,
+    title,
+  }: t.PayeeFields = fields
+
+  return {
+    id   : id || uuid(),
+    title: title || '',
+  }
 }
 
 
@@ -613,13 +736,13 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
   const transactionsAmounts: t.TransactionsAmounts = await n.fetchTransactionsAmounts(client, gSpreadsheetId, filter)
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
 
-  const limit: number = parseInt(filter.limit, 10)
+  const limit: number = parseInt(filter.limit || '', 10)
   if (filter.limit && (!fpx.isInteger(limit) || limit < 0)) {
     ctx.throw(400, 'Limit must be a positive integer')
     return
   }
 
-  const offset: number = parseInt(filter.offset, 10)
+  const offset: number = parseInt(filter.offset || '', 10)
   if (filter.offset && (!fpx.isInteger(offset) || offset < 0)) {
     ctx.throw(400, 'Offset must be a positive integer')
     return
@@ -629,10 +752,7 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
     limit: limit || u.DEFAULT_LIMIT,
     offset: offset || 0,
     total: transactionsNumber,
-    items: fpx.map(
-      transactions,
-      transaction => ({...transaction, type: defTransactionType(transaction)})
-    ),
+    items: fpx.map(transactions, transactionToFields),
     outcomeAmount: transactionsAmounts.outcomeAmount,
     incomeAmount: transactionsAmounts.incomeAmount,
   }
@@ -652,8 +772,8 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
     ctx.throw(404, 'Transaction not found')
     return
   }
-
-  ctx.body = {...transaction, type: defTransactionType(transaction)}
+  
+  ctx.body = transactionToFields(transaction)
 }
 
 export async function createTransaction(ctx: t.Context): Promise<void> {
@@ -662,24 +782,16 @@ export async function createTransaction(ctx: t.Context): Promise<void> {
     throw new u.PublicError('Validation error', {errors})
   }
 
-  let fields: object = ctx.request.body
-
-  if (fields.type === LOAN) {
-    fields = {...fields, incomeAccountId: s.DEBT_ACCOUNT_ID, incomeAmount: fields.outcomeAmount}
-  }
-
-  if (fields.type === BORROW) {
-    fields = {...fields, outcomeAccountId: s.DEBT_ACCOUNT_ID, outcomeAmount: fields.incomeAmount}
-  }
-
-  fields = pickTransactionFields(fields)
-
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
 
-  const transaction: t.Transaction = await n.createTransaction(client, gSpreadsheetId, fields)
+  const transaction: t.Transaction = await n.createTransaction(
+    client,
+    gSpreadsheetId,
+    fieldsToTransaction(ctx.request.body)
+  )
 
-  ctx.body = transaction
+  ctx.body = transactionToFields(transaction)
 }
 
 export async function updateTransaction(ctx: t.Context): Promise<void> {
@@ -694,23 +806,16 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
     throw new u.PublicError('Validation error', {errors})
   }
 
-  let fields: t.JSONObject = ctx.request.body
-
-  if (fields.type === LOAN) {
-    fields = {...fields, incomeAccountId: s.DEBT_ACCOUNT_ID, incomeAmount: fields.outcomeAmount}
-  }
-
-  if (fields.type === BORROW) {
-    fields = {...fields, outcomeAccountId: s.DEBT_ACCOUNT_ID, outcomeAmount: fields.incomeAmount}
-  }
-
-  fields = pickTransactionFields(fields)
-
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction = await n.updateTransaction(client, gSpreadsheetId, id, fields)
+  const transaction: t.Transaction = await n.updateTransaction(
+    client,
+    gSpreadsheetId,
+    id,
+    fieldsToTransaction(ctx.request.body)
+  )
 
-  ctx.body = transaction
+  ctx.body = transactionToFields(transaction)
 }
 
 export async function deleteTransaction(ctx: t.Context): Promise<void> {
@@ -727,7 +832,7 @@ export async function deleteTransaction(ctx: t.Context): Promise<void> {
 }
 
 
-function validateTransactionFields(fields: object, lang: t.Lang): t.ResErrors {
+function validateTransactionFields(fields: any, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
   const transactionTypes: t.TransactionType[] = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
   const {
@@ -775,7 +880,7 @@ function validateTransactionFields(fields: object, lang: t.Lang): t.ResErrors {
   return errors
 }
 
-function defTransactionType(transaction: t.Transaction): t.TransactionType | void {
+function defTransactionType(transaction: t.Transaction): t.TransactionType {
   const {outcomeAccountId, incomeAccountId} = transaction
   return outcomeAccountId && !incomeAccountId
     ? OUTCOME
@@ -787,10 +892,41 @@ function defTransactionType(transaction: t.Transaction): t.TransactionType | voi
     ? BORROW
     : outcomeAccountId && incomeAccountId
     ? TRANSFER
-    : undefined
+    : OUTCOME
 }
 
-function pickTransactionFields(fields: object): object {
+function transactionToFields(transaction: t.Transaction): t.TransactionFields {
+  const {
+    id,
+    date,
+    categoryId,
+    payeeId,
+    comment,
+    outcomeAccountId,
+    outcomeAmount,
+    incomeAccountId,
+    incomeAmount,
+    createdAt,
+    updatedAt,
+  } = transaction
+
+  return {
+    id,
+    type: defTransactionType(transaction),
+    date,
+    categoryId,
+    payeeId,
+    comment,
+    outcomeAccountId,
+    outcomeAmount,
+    incomeAccountId,
+    incomeAmount,
+    createdAt,
+    updatedAt,
+  }
+}
+
+function fieldsToTransaction(fields: t.TransactionFields): t.Transaction {
   const {
     id,
     type,
@@ -804,16 +940,99 @@ function pickTransactionFields(fields: object): object {
     comment,
     createdAt,
     updatedAt,
-  } = fields
-  const whitlistedFields: object = {id, date, comment, createdAt, updatedAt}
+  }: t.TransactionFields = fields
 
-  return type === OUTCOME
-    ? {...whitlistedFields, categoryId, payeeId, outcomeAccountId, outcomeAmount}
-    : type === INCOME
-    ? {...whitlistedFields, categoryId, payeeId, incomeAccountId, incomeAmount}
-    : fpx.includes([LOAN, BORROW], type)
-    ? {...whitlistedFields, payeeId, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount}
-    : type === TRANSFER
-    ? {...whitlistedFields, outcomeAccountId, outcomeAmount, incomeAccountId, incomeAmount}
-    : {}
+  // TODO Think how to split t.Transaction on t.IncomeTransaction, t.OutcomeTransaction, etc.
+  if (type === INCOME) {
+    return {
+      id              : id || uuid(),
+      date            : date || '',
+
+      categoryId      : categoryId || '',
+      payeeId         : payeeId || '',
+
+      outcomeAccountId : '',
+      outcomeAmount    : 0,
+      incomeAccountId : incomeAccountId || '',
+      incomeAmount    : incomeAmount || 0,
+
+      comment         : comment || '',
+      createdAt       : createdAt || '',
+      updatedAt       : updatedAt || '',
+    }
+  }
+
+  if (type === LOAN) {
+    return {
+      id              : id || uuid(),
+      date            : date || '',
+
+      categoryId      : '',
+      payeeId         : payeeId || '',
+
+      outcomeAccountId: outcomeAccountId || '',
+      outcomeAmount   : outcomeAmount || 0,
+      incomeAccountId : s.DEBT_ACCOUNT_ID,
+      incomeAmount    : outcomeAmount || 0,
+
+      comment         : comment || '',
+      createdAt       : createdAt || '',
+      updatedAt       : updatedAt || '',
+    }
+  }
+
+  if (type === BORROW) {
+    return {
+      id              : id || uuid(),
+      date            : date || '',
+
+      categoryId      : '',
+      payeeId         : payeeId || '',
+
+      outcomeAccountId: s.DEBT_ACCOUNT_ID,
+      outcomeAmount   : incomeAmount || 0,
+      incomeAccountId : '',
+      incomeAmount    : incomeAmount || 0,
+
+      comment         : comment || '',
+      createdAt       : createdAt || '',
+      updatedAt       : updatedAt || '',
+    }
+  }
+
+  if (type === TRANSFER) {
+    return {
+      id              : id || uuid(),
+      date            : date || '',
+
+      categoryId      : '',
+      payeeId         : '',
+
+      outcomeAccountId: outcomeAccountId || '',
+      outcomeAmount   : incomeAmount || 0,
+      incomeAccountId : incomeAccountId || '',
+      incomeAmount    : incomeAmount || 0,
+
+      comment         : comment || '',
+      createdAt       : createdAt || '',
+      updatedAt       : updatedAt || '',
+    }
+  }
+
+  return {
+    id              : id || uuid(),
+    date            : date || '',
+
+    categoryId      : categoryId || '',
+    payeeId         : payeeId || '',
+
+    outcomeAccountId: outcomeAccountId || '',
+    outcomeAmount   : outcomeAmount || 0,
+    incomeAccountId : '',
+    incomeAmount    : 0,
+
+    comment         : comment || '',
+    createdAt       : createdAt || '',
+    updatedAt       : updatedAt || '',
+  }
 }

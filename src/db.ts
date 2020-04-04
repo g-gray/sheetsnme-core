@@ -46,7 +46,7 @@ export async function sessionById(id: string): Promise<t.Session | void> {
   return session
 }
 
-export async function upsertSession(session: t.Session): Promise<t.Session> {
+export async function upsertSession(session: t.SessionQueryFeilds): Promise<t.Session> {
   let q: string = `
   insert into sessions
     (user_id)
@@ -123,7 +123,7 @@ function rowToSession(row: pg.QueryResultRow): t.Session {
  * User
  */
 
-export async function upsertUser(user: t.User): Promise<t.User> {
+export async function upsertUser(user: t.UserQueryFields): Promise<t.User> {
   const q: string = `
   insert into users
     (
@@ -206,7 +206,6 @@ function rowToUser(row: pg.QueryResultRow): t.User {
     emailVerified: row.email_verified as boolean,
     firstName    : row.first_name     as string,
     lastName     : row.last_name      as string,
-    userRoleId   : row.role_id        as string,
     externalToken: row.external_token as string,
     createdAt    : row.created_at     as Date,
     updatedAt    : row.updated_at     as Date,

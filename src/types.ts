@@ -78,13 +78,20 @@ export type GOAuth2Client = {
   tokenUrl                   : string | void,
   eagerRefreshThresholdMillis: number,
   setCredentials             : (token: GAuthToken) => void,
-  generateAuthUrl            : ({access_type: string, scope: string[]}) => string,
+  generateAuthUrl            : (params: {access_type: string, scope: string[], state?: any}) => string,
   getToken                   : (code: string) => Promise<{tokens: GAuthToken}>,
   refreshAccessToken         : () => Promise<{credentials: GAuthToken}>,
 }
 
 export type Session = {
   id        : string,
+  userId    : string,
+  createdAt?: Date,
+  updatedAt?: Date,
+}
+
+export type SessionQueryFeilds = {
+  id?       : string,
   userId    : string,
   createdAt?: Date,
   updatedAt?: Date,
@@ -108,14 +115,25 @@ export type GUser = {
 }
 
 export type User = {
-  id?          : string,
+  id           : string,
   externalId   : string,
   pictureUrl   : string,
   email        : string,
   emailVerified: boolean,
   firstName    : string,
   lastName     : string,
-  userRoleId?  : string,
+  externalToken: string,
+  createdAt    : Date,
+  updatedAt    : Date,
+}
+
+export type UserQueryFields = {
+  externalId   : string,
+  pictureUrl   : string,
+  email        : string,
+  emailVerified: boolean,
+  firstName    : string,
+  lastName     : string,
   externalToken: string,
   createdAt?   : Date,
   updatedAt?   : Date,
@@ -140,6 +158,15 @@ export type Spreadsheets = Spreadsheet[]
 
 
 /**
+ * Entity
+ */
+
+export type Entity = {
+  id  : string,
+  row?: number,
+}
+
+/**
  * Account
  */
 
@@ -147,12 +174,20 @@ export type Account = {
   id          : string,
   title       : string,
   currencyCode: string,
-  createdAt   : string,
-  updatedAt   : string,
+  createdAt?  : string,
+  updatedAt?  : string,
   row?        : number,
 }
 
 export type Accounts = Account[]
+
+export type AccountFields = {
+  id?          : string,
+  title        : string,
+  currencyCode?: string,
+  createdAt?   : string,
+  updatedAt?   : string,
+}
 
 
 export type Balance = {
@@ -169,14 +204,21 @@ export type BalancesById = {[key: string]: Balance}
  */
 
 export type Category = {
-  id       : string,
-  title    : string,
-  createdAt: string,
-  updatedAt: string,
-  row?     : number,
+  id        : string,
+  title     : string,
+  createdAt?: string,
+  updatedAt?: string,
+  row?      : number,
 }
 
 export type Categories = Category[]
+
+export type CategoryFields = {
+  id        : string,
+  title     : string,
+  createdAt?: string,
+  updatedAt?: string,
+}
 
 
 
@@ -185,14 +227,21 @@ export type Categories = Category[]
  */
 
 export type Payee = {
-  id       : string,
-  title    : string,
-  createdAt: string,
-  updatedAt: string,
-  row?     : number,
+  id        : string,
+  title     : string,
+  createdAt?: string,
+  updatedAt?: string,
+  row?      : number,
 }
 
 export type Payees = Payee[]
+
+export type PayeeFields = {
+  id?       : string,
+  title     : string,
+  createdAt?: string,
+  updatedAt?: string,
+}
 
 
 /**
@@ -230,6 +279,21 @@ export type Transaction = {
 }
 
 export type Transactions = Transaction[]
+
+export type TransactionFields = {
+  id?              : string,
+  type             : TransactionType,
+  date             : string,
+  categoryId?      : string,
+  payeeId?         : string,
+  outcomeAccountId?: string,
+  outcomeAmount?   : number,
+  incomeAccountId? : string,
+  incomeAmount?    : number,
+  comment?         : string,
+  createdAt?       : string,
+  updatedAt?       : string,
+}
 
 export type TransactionsAmounts = {
   outcomeAmount: number,
@@ -421,6 +485,7 @@ export type Translations = {
 /**
  * Misc
  */
+export type JSONObject = {[key: string]: JSON}
 
 export enum ERROR {
   INVALID_GRANT = 'invalid_grant',
