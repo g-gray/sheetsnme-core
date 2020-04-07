@@ -1,6 +1,7 @@
 import * as t from './types'
-
+// @ts-ignore
 import * as fpx from 'fpx'
+// @ts-ignore
 import xhttp from 'xhttp/node'
 import crypto from 'crypto'
 
