@@ -26,7 +26,10 @@ const config: pg.ClientConfig = DATABASE_URL
 
 const pool: pg.Pool = new pg.Pool(config)
 
-export function query(text: string, values?: any[]): Promise<pg.QueryResult> {
+export function query(
+  text: string,
+  values?: any[]
+): Promise<pg.QueryResult> {
   return pool.query(text, values)
 }
 
@@ -36,7 +39,9 @@ export function query(text: string, values?: any[]): Promise<pg.QueryResult> {
  * Sessions
  */
 
-export async function sessionById(id: string): Promise<t.Session | void> {
+export async function sessionById(
+  id: string
+): Promise<t.Session | void> {
   const q: string = `
   select *
   from sessions
@@ -53,7 +58,9 @@ export async function sessionById(id: string): Promise<t.Session | void> {
   return session
 }
 
-export async function upsertSession(session: t.SessionQueryFeilds): Promise<t.Session> {
+export async function upsertSession(
+  session: t.SessionQueryFields
+): Promise<t.Session> {
   let q: string = `
   insert into sessions
     (user_id)
@@ -70,8 +77,8 @@ export async function upsertSession(session: t.SessionQueryFeilds): Promise<t.Se
     values
       ($1, $2)
     on conflict (id) do update set
-      user_id        = $2,
-      updated_at     = current_timestamp
+      user_id    = $2,
+      updated_at = current_timestamp
     returning *
     `
     v = [session.id, session.userId]
@@ -83,7 +90,9 @@ export async function upsertSession(session: t.SessionQueryFeilds): Promise<t.Se
   return upsertedSession
 }
 
-export async function deleteSessionById(id: string): Promise<t.Session | void> {
+export async function deleteSessionById(
+  id: string
+): Promise<t.Session | void> {
   const q: string = `
   delete
   from sessions
@@ -101,7 +110,9 @@ export async function deleteSessionById(id: string): Promise<t.Session | void> {
   return session
 }
 
-export async function deleteExpiredSessions(userId: string): Promise<void> {
+export async function deleteExpiredSessions(
+  userId: string
+): Promise<void> {
   const q: string = `
   delete
   from sessions
@@ -130,7 +141,9 @@ function rowToSession(row: pg.QueryResultRow): t.Session {
  * User
  */
 
-export async function upsertUser(user: t.UserQueryFields): Promise<t.User> {
+export async function upsertUser(
+  user: t.UserQueryFields
+): Promise<t.User> {
   const q: string = `
   insert into users
     (
@@ -169,7 +182,9 @@ export async function upsertUser(user: t.UserQueryFields): Promise<t.User> {
   return upsertedUser
 }
 
-export async function userByExternalId(externalId: string): Promise<t.User | void> {
+export async function userByExternalId(
+  externalId: string
+): Promise<t.User | void> {
   const q: string = `
   select *
   from users
@@ -186,7 +201,9 @@ export async function userByExternalId(externalId: string): Promise<t.User | voi
   return user
 }
 
-export async function userBySessionId(sessionId: string): Promise<t.User | void> {
+export async function userBySessionId(
+  sessionId: string
+): Promise<t.User | void> {
   const q: string = `
   select *
   from users u
@@ -223,7 +240,9 @@ function rowToUser(row: pg.QueryResultRow): t.User {
  * Sheets
  */
 
-export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spreadsheets> {
+export async function spreadsheetsBySessionId(
+  sessionId: string
+): Promise<t.Spreadsheets> {
   const q: string = `
   select sh.*
   from spreadsheets sh
@@ -239,7 +258,10 @@ export async function spreadsheetsBySessionId(sessionId: string): Promise<t.Spre
   return spreadsheets
 }
 
-export async function createSpreadsheet(sessionId: string, spreadsheetId: string): Promise<t.Spreadsheet> {
+export async function createSpreadsheet(
+  sessionId: string,
+  spreadsheetId: string
+): Promise<t.Spreadsheet> {
   const q: string = `
   with
     s as (select user_id from sessions where id = $1)

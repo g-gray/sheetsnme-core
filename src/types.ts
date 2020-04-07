@@ -63,7 +63,7 @@ export type Session = {
   updatedAt?: Date,
 }
 
-export type SessionQueryFeilds = {
+export type SessionQueryFields = {
   id?       : string,
   userId    : string,
   createdAt?: Date,
