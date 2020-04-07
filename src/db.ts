@@ -7,7 +7,13 @@ import * as fpx from 'fpx'
 import * as e from './env'
 import * as u from './utils'
 
-const {DB_HOST, DB_NAME, POSTGRES_USER, POSTGRES_PASSWORD, DATABASE_URL} = e.properties
+const {
+  DB_HOST,
+  DB_NAME,
+  POSTGRES_USER,
+  POSTGRES_PASSWORD,
+  DATABASE_URL,
+} = e.properties
 
 const config: pg.ClientConfig = DATABASE_URL
   ? {connectionString: DATABASE_URL, ssl: true}

@@ -1,4 +1,6 @@
 import * as Koa from 'koa'
+import {oauth2_v2, drive_v3, sheets_v4} from 'googleapis'
+import {OAuth2Client, Credentials} from 'google-auth-library';
 
 /**
  * Env
@@ -54,35 +56,6 @@ export type Next = Koa.Next
  * Auth
  */
 
-export type GAuthToken = {
-  access_token : string,
-  refresh_token: string,
-  scope        : string,
-  token_type   : string,
-  expiry_date  : number,
-}
-
-export type GOAuth2Client = {
-  _events                    : any[],
-  _eventsCount               : number,
-  _maxListeners              : number,
-  transporter                : any,
-  credentials                : any,
-  certificateCache           : any,
-  certificateExpiry          : any,
-  refreshTokenPromises       : object,
-  _clientId                  : string,
-  _clientSecret              : string,
-  redirectUri                : string | void,
-  authBaseUrl                : string | void,
-  tokenUrl                   : string | void,
-  eagerRefreshThresholdMillis: number,
-  setCredentials             : (token: GAuthToken) => void,
-  generateAuthUrl            : (params: {access_type: string, scope: string[], state?: any}) => string,
-  getToken                   : (code: string) => Promise<{tokens: GAuthToken}>,
-  refreshAccessToken         : () => Promise<{credentials: GAuthToken}>,
-}
-
 export type Session = {
   id        : string,
   userId    : string,
@@ -102,17 +75,6 @@ export type SessionQueryFeilds = {
 /**
  * User
  */
-
-export type GUser = {
-  id            : string,
-  email         : string,
-  verified_email: true,
-  name          : string,
-  given_name    : string,
-  family_name   : string,
-  picture       : string,
-  locale        : string,
-}
 
 export type User = {
   id           : string,
@@ -189,6 +151,10 @@ export type AccountFields = {
   updatedAt?   : string,
 }
 
+
+/**
+ * Balance
+ */
 
 export type Balance = {
   accountId: string,
@@ -320,95 +286,32 @@ export type TransactionsFilter = {
  * Google
  */
 
-export type GErrorType = 'ERROR_TYPE_UNSPECIFIED' | 'ERROR' | 'NULL_VALUE' | 'DIVIDE_BY_ZERO' | 'VALUE' | 'REF' | 'NAME' | 'NUM' | 'N_A' | 'LOADING'
-
-export type GErrorValue = {
-  type   : GErrorType,
-  message: string
+export interface GAuthToken extends Credentials {
+  scope?: string,
 }
 
-export type GExtendedValue = {
-  numberValue? : number,
-  stringValue? : string,
-  boolValue?   : boolean,
-  formulaValue?: string,
-  errorValue?  : GErrorValue
-}
-
-export type GCellData = {
-  userEnteredValue: GExtendedValue,
-}
-
-export type GRowData = {
-  values: GCellData[],
-}
-
-export type GGridData = {
-  startRow: number,
-  startColumn: number,
-  rowData: GRowData[],
-}
-
-export type GGridProperties = {
-  rowCount      : number,
-  columnCount   : number,
-  frozenRowCount: number,
-}
+export type GOAuth2Client = OAuth2Client
 
 
-export type GSheetProperties = {
-  sheetId       : number,
-  title         : string,
-  index?        : number,
-  sheetType?    : 'GRID',
-  gridProperties: GGridProperties,
-}
+export type GUserRes = oauth2_v2.Schema$Userinfoplus
 
-export type GGridRange = {
-  sheetId          : number,
-  startRowIndex?   : number,
-  endRowIndex?     : number,
-  startColumnIndex?: number,
-  endColumnIndex?  : number,
-}
 
-export type GEditor = {
-  users             : string[],
-  groups            : string[],
-  domainUsersCanEdit: boolean
-}
+export type GPermissionsCreateReq = drive_v3.Params$Resource$Permissions$Create
+export type GPermissionsRes = drive_v3.Schema$Permission
 
-export type GSheetProtectedRange = {
-  protectedRangeId?     : number,
-  range                 : GGridRange,
-  namedRangeId?         : string,
-  description?          : string,
-  warningOnly?          : boolean,
-  requestingUserCanEdit?: boolean,
-  unprotectedRanges?    : GGridRange[],
-  editors?              : GEditor[]
-}
 
-export type GSheet = {
-  properties      : GSheetProperties,
-  protectedRanges?: GSheetProtectedRange[],
-  data            : GGridData[],
-}
+export type GSheet = sheets_v4.Schema$Sheet
 
-export type GSpreadsheetProperties = {
-  title        : string,
-  locale       : string,
-  autoRecalc   : 'ON_CHANGE',
-  timeZone     : string,
-  defaultFormat: any
-}
+export type GSpreadsheetRes = sheets_v4.Schema$Spreadsheet
 
-export type GSpreadsheet = {
-  spreadsheetId : string,
-  properties    : GSpreadsheetProperties,
-  sheets        : GSheet[],
-  spreadsheetUrl: string,
-}
+export type GSpreadsheetsGetReq = sheets_v4.Params$Resource$Spreadsheets$Get
+export type GSpreadsheetsCreateReq = sheets_v4.Params$Resource$Spreadsheets$Create
+
+export type GSpreadsheetsBatchUpdateReq = sheets_v4.Params$Resource$Spreadsheets$Batchupdate
+export type GSpreadsheetsBatchUpdateRes = sheets_v4.Schema$BatchUpdateSpreadsheetResponse
+
+export type GRowData = sheets_v4.Schema$RowData
+
 
 export type GQueryCol = {
   id     : string,
@@ -436,6 +339,8 @@ export type GQueryRes = {
   table: GQueryTable,
 }
 
+
+
 /**
  * Net
  */
@@ -457,6 +362,8 @@ export type XHttpResponse = {
   body      : (object | string),
   params    : XHttpParams,
 }
+
+
 
 /**
  * Errors
@@ -482,10 +389,10 @@ export type Translations = {
 }
 
 
+
 /**
  * Misc
  */
-export type JSONObject = {[key: string]: JSON}
 
 export enum ERROR {
   INVALID_GRANT = 'invalid_grant',

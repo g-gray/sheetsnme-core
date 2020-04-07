@@ -728,9 +728,12 @@ function transactionsWhere(filter: t.TransactionsFilter): string {
  * Spreadsheet
  */
 
-export async function createAppSpreadsheet(client: t.GOAuth2Client, lang: t.Lang): Promise<t.GSpreadsheet> {
-  const spreadsheet: t.GSpreadsheet | void = await createSpreadsheet(client, {
-    resource: {
+export async function createAppSpreadsheet(
+  client: t.GOAuth2Client,
+  lang: t.Lang
+): Promise<t.GSpreadsheetRes> {
+  const spreadsheet: t.GSpreadsheetRes = await createSpreadsheet(client, {
+    requestBody: {
       properties: {
         title: SPREADSHEET_NAME,
       },
@@ -744,14 +747,10 @@ export async function createAppSpreadsheet(client: t.GOAuth2Client, lang: t.Lang
     },
   })
 
-  if (!spreadsheet) {
-    throw new Error('Spreadsheet not found')
-  }
-
   // TODO Check return value
   await addPermissions(client, {
-    fileId: spreadsheet.spreadsheetId,
-    resource: {
+    fileId: spreadsheet.spreadsheetId || undefined,
+    requestBody: {
       type: 'anyone',
       role: 'reader',
     },
@@ -949,7 +948,7 @@ async function appendRow(
 ): Promise<void> {
   await batchUpdateSpreadsheet(client, {
     spreadsheetId,
-    resource: {
+    requestBody: {
       requests: [{
         appendCells: {
           sheetId,
@@ -970,7 +969,7 @@ async function updateRow(
 ): Promise<void> {
   await batchUpdateSpreadsheet(client, {
     spreadsheetId,
-    resource: {
+    requestBody: {
       requests: [{
         updateCells: {
           rows: [row],
@@ -994,7 +993,7 @@ async function deleteRow(
 ): Promise<void> {
   await batchUpdateSpreadsheet(client, {
     spreadsheetId,
-    resource: {
+    requestBody: {
       requests: [{
         deleteDimension: {
           range: {
@@ -1009,8 +1008,14 @@ async function deleteRow(
   })
 }
 
-export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
-  return google.sheets({version: 'v4', auth: client}).spreadsheets.get(options)
+export function fetchSpreadsheet(
+  client: t.GOAuth2Client,
+  options: t.GSpreadsheetsGetReq
+): Promise<t.GSpreadsheetRes | void> {
+  return google
+    .sheets({version: 'v4', auth: client})
+    .spreadsheets
+    .get(options)
     .then(({data}) => data)
     .catch(error => {
       if (error.code === 404) return
@@ -1018,27 +1023,40 @@ export function fetchSpreadsheet(client: t.GOAuth2Client, options: any): Promise
     })
 }
 
-export function createSpreadsheet(client: t.GOAuth2Client, options: any): Promise<t.GSpreadsheet | void> {
-  return google.sheets({version: 'v4', auth: client}).spreadsheets.create(options)
+export function createSpreadsheet(
+  client: t.GOAuth2Client,
+  options: t.GSpreadsheetsCreateReq
+): Promise<t.GSpreadsheetRes> {
+  return google
+    .sheets({version: 'v4', auth: client})
+    .spreadsheets
+    .create(options)
     .then(({data}) => data)
 }
 
-export function batchUpdateSpreadsheet(client: t.GOAuth2Client, options: any): Promise<any> {
-  return google.sheets({version: 'v4', auth: client}).spreadsheets.batchUpdate(options)
-    .then(({data: {replies}}) => replies)
+export function batchUpdateSpreadsheet(
+  client: t.GOAuth2Client,
+  options: t.GSpreadsheetsBatchUpdateReq
+): Promise<t.GSpreadsheetsBatchUpdateRes> {
+  return google
+    .sheets({version: 'v4', auth: client})
+    .spreadsheets
+    .batchUpdate(options)
+    .then(({data}) => data)
 }
 
-export function addPermissions(client: t.GOAuth2Client, options: any): Promise<void> {
-  return google.drive({version: 'v3', auth: client}).permissions.create(options)
-}
-
-
-async function querySheet(spreadsheetId: string, sheetId: number, query?: string): Promise<t.GQueryTable | void> {
+async function querySheet(
+  spreadsheetId: string,
+  sheetId: number,
+  query?: string
+): Promise<t.GQueryTable | void> {
   const queryString: string = qs.stringify({tq: query, gid: sheetId})
   const url: string = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${queryString}`
 
+  // TODO Find a better solution to query sheets
   return await u.fetch({url}).then(({body}) => {
-    const matches = body && body.match(/google\.visualization\.Query\.setResponse\((.*)\);$/)
+    const stringified = body && String(body)
+    const matches = stringified.match(/google\.visualization\.Query\.setResponse\((.*)\);$/)
     const match: string | null = matches && matches[1]
     if (!match) {
       return undefined
@@ -1053,8 +1071,23 @@ async function querySheet(spreadsheetId: string, sheetId: number, query?: string
   })
 }
 
+export function addPermissions(
+  client: t.GOAuth2Client,
+  options: t.GPermissionsCreateReq
+): Promise<t.GPermissionsRes> {
+  return google
+    .drive({version: 'v3', auth: client})
+    .permissions
+    .create(options)
+    .then(({data}) => data)
+}
 
-export function fetchUserInfo(client: t.GOAuth2Client): Promise<t.GUser | void> {
-  return google.oauth2({version: 'v2', auth: client}).userinfo.get()
+export function fetchUserInfo(
+  client: t.GOAuth2Client
+): Promise<t.GUserRes> {
+  return google
+    .oauth2({version: 'v2', auth: client})
+    .userinfo
+    .get()
     .then(({data}) => data)
 }

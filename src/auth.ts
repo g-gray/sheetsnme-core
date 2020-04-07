@@ -25,14 +25,16 @@ export function generateAuthUrl(state?: string): string {
 
 export async function exchangeCodeForToken(code: string): Promise<t.GAuthToken> {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client()
-  const token: t.GAuthToken = await oAuth2Client.getToken(code).then(({tokens}) => tokens)
-  return token
+  return await oAuth2Client
+    .getToken(code)
+    .then(({tokens}) => tokens)
 }
 
 export async function refreshToken(token: t.GAuthToken): Promise<t.GAuthToken> {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client(token)
-  const newToken: t.GAuthToken = await oAuth2Client.refreshAccessToken().then(({credentials}) => credentials)
-  return newToken
+  return await oAuth2Client
+    .refreshAccessToken()
+    .then(({credentials}) => credentials)
 }
 
 export function createOAuth2Client(token?: t.GAuthToken): t.GOAuth2Client {

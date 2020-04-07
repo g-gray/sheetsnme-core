@@ -57,7 +57,7 @@ export async function authRequired(ctx: t.Context, next: t.Next): Promise<void> 
   )
   const token: t.GAuthToken = JSON.parse(decryptedToken)
 
-  const scopes: string[] = token.scope.split(' ')
+  const scopes: string[] = (token.scope || '').split(' ')
   const isScopesDifferent: boolean = !fpx.every(
     a.SCOPES,
     (scope: string) => fpx.includes(scopes, scope)
@@ -68,7 +68,10 @@ export async function authRequired(ctx: t.Context, next: t.Next): Promise<void> 
     return
   }
 
-  const isExpired: boolean = token.expiry_date - Date.now() <= 0
+  const isExpired: boolean = token.expiry_date
+    ? token.expiry_date - Date.now() <= 0
+    : true
+
   if (isExpired) {
     let newToken: t.GAuthToken
     try {
@@ -189,13 +192,19 @@ export async function authCode (ctx: t.Context): Promise<void> {
 
   let newToken: t.GAuthToken = await a.exchangeCodeForToken(code)
   const client: t.GOAuth2Client = a.createOAuth2Client(newToken)
-  const gUser: t.GUser | void = await n.fetchUserInfo(client)
+  const gUser: t.GUserRes | void = await n.fetchUserInfo(client)
   if (!gUser) {
     ctx.throw(400, 'User not found')
     return
   }
 
+  if (!gUser.id) {
+    ctx.throw(400, 'User id required')
+    return
+  }
+
   const externalId: string = gUser.id
+
   const user: void | t.User = await db.userByExternalId(externalId)
   if (user) {
     const decryptedToken: string = u.decrypt(
@@ -219,11 +228,11 @@ export async function authCode (ctx: t.Context): Promise<void> {
 
   const upsertedUser: t.User = await db.upsertUser({
     externalId,
-    pictureUrl   : gUser.picture,
-    email        : gUser.email,
-    emailVerified: gUser.verified_email,
-    firstName    : gUser.given_name,
-    lastName     : gUser.family_name,
+    pictureUrl   : gUser.picture        || '',
+    email        : gUser.email          || '',
+    emailVerified: gUser.verified_email || false,
+    firstName    : gUser.given_name     || '',
+    lastName     : gUser.family_name    || '',
     externalToken: encryptedNewToken,
   })
 
@@ -258,13 +267,16 @@ export async function getUser(ctx: t.Context) {
 
   const spreadsheets: t.Spreadsheets = await db.spreadsheetsBySessionId(sessionId)
   let spreadsheet: t.Spreadsheet | void = spreadsheets[0]
-  let gSpreadsheet: t.GSpreadsheet | void
+  let gSpreadsheet: t.GSpreadsheetRes | void
 
   const client: t.GOAuth2Client = ctx.client
 
   if (spreadsheet) {
     try {
-      gSpreadsheet = await n.fetchSpreadsheet(client, {spreadsheetId: spreadsheet.externalId})
+      gSpreadsheet = await n.fetchSpreadsheet(
+        client,
+        {spreadsheetId: spreadsheet.externalId}
+      )
     }
     catch (error) {
       if (error.code === 401) {
@@ -277,7 +289,16 @@ export async function getUser(ctx: t.Context) {
 
   if (!gSpreadsheet) {
     gSpreadsheet = await n.createAppSpreadsheet(client, ctx.lang)
-    spreadsheet = await db.createSpreadsheet(sessionId, gSpreadsheet.spreadsheetId)
+
+    if (!gSpreadsheet.spreadsheetId) {
+      ctx.throw(400, 'Spreadsheet id required')
+      return
+    }
+
+    spreadsheet = await db.createSpreadsheet(
+      sessionId,
+      gSpreadsheet.spreadsheetId
+    )
   }
 
   ctx.body = {...user, spreadsheets: [{id: spreadsheet.id}]}
