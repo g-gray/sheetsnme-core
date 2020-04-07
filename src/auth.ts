@@ -51,7 +51,7 @@ export function createOAuth2Client(token?: t.GAuthToken): t.GOAuth2Client {
   return oAuth2Client
 }
 
-export function setCookie(ctx: t.Context, name: string, value: string) {
+export function setCookie(ctx: t.KContext, name: string, value: string) {
   ctx.cookies.set(name, value, {
     httpOnly: true,
     // sameSite: 'strict',
@@ -59,13 +59,13 @@ export function setCookie(ctx: t.Context, name: string, value: string) {
   })
 }
 
-export function setCookieExpired(ctx: t.Context, name: string) {
+export function setCookieExpired(ctx: t.KContext, name: string) {
   ctx.cookies.set(name, '', {
     httpOnly: true,
     maxAge: -1,
   })
 }
 
-export function getCookie(ctx: t.Context, name: string): string | void {
+export function getCookie(ctx: t.KContext, name: string): string | void {
   return ctx.cookies.get(name)
 }

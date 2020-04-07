@@ -27,7 +27,7 @@ const {
  * Middlewares
  */
 
-export async function authRequired(ctx: t.Context, next: t.Next): Promise<void> {
+export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void> {
   const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
   const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
@@ -104,7 +104,7 @@ export async function authRequired(ctx: t.Context, next: t.Next): Promise<void> 
   await next()
 }
 
-export async function spreadsheetIdRequired(ctx: t.Context, next: t.Next): Promise<void> {
+export async function spreadsheetIdRequired(ctx: t.KContext, next: t.KNext): Promise<void> {
   const sessionId: string = ctx.sessionId
   // const spreadsheetId: string | void = ctx.query.spreadsheetId
   // if (!spreadsheetId) {
@@ -125,7 +125,7 @@ export async function spreadsheetIdRequired(ctx: t.Context, next: t.Next): Promi
   await next()
 }
 
-export async function jsonOnly(ctx: t.Context, next: t.Next): Promise<void> {
+export async function jsonOnly(ctx: t.KContext, next: t.KNext): Promise<void> {
   if (!ctx.accepts('application/json')) {
     ctx.throw(406, 'Not acceptable')
     return
@@ -134,7 +134,7 @@ export async function jsonOnly(ctx: t.Context, next: t.Next): Promise<void> {
   await next()
 }
 
-export async function setLang(ctx: t.Context, next: t.Next): Promise<void> {
+export async function setLang(ctx: t.KContext, next: t.KNext): Promise<void> {
   const lang: string | void = ctx.headers[LANG_HEADER_NAME]
 
   ctx.lang = u.AVAILABLE_LANGS[0]
@@ -151,7 +151,7 @@ export async function setLang(ctx: t.Context, next: t.Next): Promise<void> {
  * Auth
  */
 
-export function authLogin(ctx: t.Context, next: t.Next): void {
+export function authLogin(ctx: t.KContext, next: t.KNext): void {
   // TODO Add a CSRF token generation here and pass within ctx.state to check in
   // exchangeCodeForToken function later
   const redirectTo: string = ctx.query.redirectTo
@@ -161,7 +161,7 @@ export function authLogin(ctx: t.Context, next: t.Next): void {
   ctx.redirect(authUrl)
 }
 
-export async function authLogout(ctx: t.Context): Promise<void> {
+export async function authLogout(ctx: t.KContext): Promise<void> {
   const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
   const cookieSessionId: string | void = a.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
@@ -182,7 +182,7 @@ export async function authLogout(ctx: t.Context): Promise<void> {
   ctx.redirect(LOGOUT_URL || '/')
 }
 
-export async function authCode (ctx: t.Context): Promise<void> {
+export async function authCode (ctx: t.KContext): Promise<void> {
   // TODO Add checking of a CSRF token here got from ctx.state
   const code: string | void = ctx.query.code
   if (!code) {
@@ -257,7 +257,7 @@ export async function authCode (ctx: t.Context): Promise<void> {
  * User
  */
 
-export async function getUser(ctx: t.Context) {
+export async function getUser(ctx: t.KContext) {
   const sessionId: string = ctx.sessionId
   const user: t.User | void = await db.userBySessionId(sessionId)
   if (!user) {
@@ -310,7 +310,7 @@ export async function getUser(ctx: t.Context) {
  * Accounts
  */
 
-export async function getAccounts(ctx: t.Context): Promise<void> {
+export async function getAccounts(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const accounts: t.Accounts = await n.fetchAccounts(client, gSpreadsheetId)
@@ -324,7 +324,7 @@ export async function getAccounts(ctx: t.Context): Promise<void> {
   }))
 }
 
-export async function getAccount(ctx: t.Context): Promise<void> {
+export async function getAccount(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Account id required')
@@ -347,7 +347,7 @@ export async function getAccount(ctx: t.Context): Promise<void> {
   }
 }
 
-export async function createAccount(ctx: t.Context): Promise<void> {
+export async function createAccount(ctx: t.KContext): Promise<void> {
   const errors: t.ResErrors = validateAccountFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
@@ -364,7 +364,7 @@ export async function createAccount(ctx: t.Context): Promise<void> {
   ctx.body = accountToFields(account)
 }
 
-export async function updateAccount(ctx: t.Context): Promise<void> {
+export async function updateAccount(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Account id required')
@@ -392,7 +392,7 @@ export async function updateAccount(ctx: t.Context): Promise<void> {
   ctx.body = accountToFields(account)
 }
 
-export async function deleteAccount(ctx: t.Context): Promise<void> {
+export async function deleteAccount(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Account id required')
@@ -469,14 +469,14 @@ function fieldsToAccount(fields: t.AccountFields): t.Account {
  * Categories
  */
 
-export async function getCategories(ctx: t.Context): Promise<void> {
+export async function getCategories(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const categories: t.Categories = await n.fetchCategories(client, gSpreadsheetId)
   ctx.body = fpx.map(categories, categoryToFields)
 }
 
-export async function getCategory(ctx: t.Context): Promise<void> {
+export async function getCategory(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Category id required')
@@ -494,7 +494,7 @@ export async function getCategory(ctx: t.Context): Promise<void> {
   ctx.body = categoryToFields(category)
 }
 
-export async function createCategory(ctx: t.Context): Promise<void> {
+export async function createCategory(ctx: t.KContext): Promise<void> {
   const errors: t.ResErrors = validateCategoryFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
@@ -511,7 +511,7 @@ export async function createCategory(ctx: t.Context): Promise<void> {
   ctx.body = categoryToFields(category)
 }
 
-export async function updateCategory(ctx: t.Context): Promise<void> {
+export async function updateCategory(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Category id required')
@@ -535,7 +535,7 @@ export async function updateCategory(ctx: t.Context): Promise<void> {
   ctx.body = categoryToFields(category)
 }
 
-export async function deleteCategory(ctx: t.Context): Promise<void> {
+export async function deleteCategory(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Category id required')
@@ -600,7 +600,7 @@ function fieldsToCategory(fields: t.CategoryFields): t.Category {
  * Payees
  */
 
-export async function getPayees(ctx: t.Context): Promise<void> {
+export async function getPayees(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const payees: t.Payees = await n.fetchPayees(client, gSpreadsheetId)
@@ -614,7 +614,7 @@ export async function getPayees(ctx: t.Context): Promise<void> {
   }))
 }
 
-export async function getPayee(ctx: t.Context): Promise<void> {
+export async function getPayee(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Payee id required')
@@ -637,7 +637,7 @@ export async function getPayee(ctx: t.Context): Promise<void> {
   }
 }
 
-export async function createPayee(ctx: t.Context): Promise<void> {
+export async function createPayee(ctx: t.KContext): Promise<void> {
   const errors: t.ResErrors = validatePayeeFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
@@ -654,7 +654,7 @@ export async function createPayee(ctx: t.Context): Promise<void> {
   ctx.body = payeeToFields(payee)
 }
 
-export async function updatePayee(ctx: t.Context): Promise<void> {
+export async function updatePayee(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Payee id required')
@@ -678,7 +678,7 @@ export async function updatePayee(ctx: t.Context): Promise<void> {
   ctx.body = payeeToFields(payee)
 }
 
-export async function deletePayee(ctx: t.Context): Promise<void> {
+export async function deletePayee(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Payee id required')
@@ -749,7 +749,7 @@ const TRANSFER = 'TRANSFER'
 const LOAN     = 'LOAN'
 const BORROW   = 'BORROW'
 
-export async function getTransactions(ctx: t.Context): Promise<void> {
+export async function getTransactions(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   // TODO Add validation of filter values
   const filter: t.TransactionsFilter = ctx.query
@@ -780,7 +780,7 @@ export async function getTransactions(ctx: t.Context): Promise<void> {
   }
 }
 
-export async function getTransaction(ctx: t.Context): Promise<void> {
+export async function getTransaction(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Transaction id required')
@@ -798,7 +798,7 @@ export async function getTransaction(ctx: t.Context): Promise<void> {
   ctx.body = transactionToFields(transaction)
 }
 
-export async function createTransaction(ctx: t.Context): Promise<void> {
+export async function createTransaction(ctx: t.KContext): Promise<void> {
   const errors: t.ResErrors = validateTransactionFields(ctx.request.body, ctx.lang)
   if (errors.length) {
     throw new u.PublicError('Validation error', {errors})
@@ -816,7 +816,7 @@ export async function createTransaction(ctx: t.Context): Promise<void> {
   ctx.body = transactionToFields(transaction)
 }
 
-export async function updateTransaction(ctx: t.Context): Promise<void> {
+export async function updateTransaction(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Transaction id required')
@@ -840,7 +840,7 @@ export async function updateTransaction(ctx: t.Context): Promise<void> {
   ctx.body = transactionToFields(transaction)
 }
 
-export async function deleteTransaction(ctx: t.Context): Promise<void> {
+export async function deleteTransaction(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
     ctx.throw(400, 'Transaction id required')

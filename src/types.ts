@@ -35,7 +35,7 @@ export type EnvProperties = {
  * Context
  */
 
-export type Context = Koa.Context
+export type KContext = Koa.Context
 
 export type CustomContext = {
   lang          : Lang,
@@ -48,7 +48,7 @@ export type CustomContext = {
  * Middleware
  */
 
-export type Next = Koa.Next
+export type KNext = Koa.Next
 
 
 
