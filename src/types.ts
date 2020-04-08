@@ -227,7 +227,13 @@ export type DebtsById = {[key: string]: Debt}
  * Transacation
  */
 
-export type TransactionType = 'OUTCOME' | 'INCOME' | 'TRANSFER' | 'LOAN' | 'BORROW'
+export enum TRANSACTION_TYPE {
+  OUTCOME  = 'OUTCOME',
+  INCOME   = 'INCOME',
+  TRANSFER = 'TRANSFER',
+  LOAN     = 'LOAN',
+  BORROW   = 'BORROW',
+}
 
 export type Transaction = {
   id              : string,
@@ -248,7 +254,7 @@ export type Transactions = Transaction[]
 
 export type TransactionFields = {
   id?              : string,
-  type             : TransactionType,
+  type             : TRANSACTION_TYPE,
   date             : string,
   categoryId?      : string,
   payeeId?         : string,

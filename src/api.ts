@@ -743,12 +743,6 @@ function fieldsToPayee(fields: t.PayeeFields): t.Payee {
  * Transactions
  */
 
-const OUTCOME  = 'OUTCOME'
-const INCOME   = 'INCOME'
-const TRANSFER = 'TRANSFER'
-const LOAN     = 'LOAN'
-const BORROW   = 'BORROW'
-
 export async function getTransactions(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   // TODO Add validation of filter values
@@ -856,7 +850,7 @@ export async function deleteTransaction(ctx: t.KContext): Promise<void> {
 
 function validateTransactionFields(fields: any, lang: t.Lang): t.ResErrors {
   const errors: t.ResErrors = []
-  const transactionTypes: t.TransactionType[] = [OUTCOME, INCOME, TRANSFER, LOAN, BORROW]
+  const transactionTypes: t.TRANSACTION_TYPE[] = fpx.values(t.TRANSACTION_TYPE)
   const {
     type,
     date,
@@ -875,7 +869,11 @@ function validateTransactionFields(fields: any, lang: t.Lang): t.ResErrors {
     errors.push({text: u.xln(lang, tr.DATE_MUST_BE_NON_EMPTY_AND_VALID)})
   }
 
-  if (fpx.includes([OUTCOME, TRANSFER, LOAN], type)) {
+  if (fpx.includes([
+    t.TRANSACTION_TYPE.OUTCOME,
+    t.TRANSACTION_TYPE.TRANSFER,
+    t.TRANSACTION_TYPE.LOAN,
+  ], type)) {
     if (!outcomeAccountId) {
       errors.push({text: u.xln(lang, tr.OUTCOME_ACCOUNT_REQUIRED)})
     }
@@ -885,7 +883,11 @@ function validateTransactionFields(fields: any, lang: t.Lang): t.ResErrors {
     }
   }
 
-  if (fpx.includes([INCOME, TRANSFER, BORROW], type)) {
+  if (fpx.includes([
+    t.TRANSACTION_TYPE.INCOME,
+    t.TRANSACTION_TYPE.TRANSFER,
+    t.TRANSACTION_TYPE.BORROW,
+  ], type)) {
     if (!incomeAccountId) {
       errors.push({text: u.xln(lang, tr.INCOME_ACCOUNT_REQUIRED)})
     }
@@ -895,26 +897,29 @@ function validateTransactionFields(fields: any, lang: t.Lang): t.ResErrors {
     }
   }
 
-  if (fpx.includes([LOAN, BORROW], type) && !payeeId) {
+  if (fpx.includes([
+    t.TRANSACTION_TYPE.LOAN,
+    t.TRANSACTION_TYPE.BORROW,
+  ], type) && !payeeId) {
     errors.push({text: u.xln(lang, tr.PAYEE_REQUIRED)})
   }
 
   return errors
 }
 
-function defTransactionType(transaction: t.Transaction): t.TransactionType {
+function defTransactionType(transaction: t.Transaction): t.TRANSACTION_TYPE {
   const {outcomeAccountId, incomeAccountId} = transaction
   return outcomeAccountId && !incomeAccountId
-    ? OUTCOME
+    ? t.TRANSACTION_TYPE.OUTCOME
     : outcomeAccountId && incomeAccountId === s.DEBT_ACCOUNT_ID
-    ? LOAN
+    ? t.TRANSACTION_TYPE.LOAN
     : incomeAccountId && !outcomeAccountId
-    ? INCOME
+    ? t.TRANSACTION_TYPE.INCOME
     : incomeAccountId && outcomeAccountId === s.DEBT_ACCOUNT_ID
-    ? BORROW
+    ? t.TRANSACTION_TYPE.BORROW
     : outcomeAccountId && incomeAccountId
-    ? TRANSFER
-    : OUTCOME
+    ? t.TRANSACTION_TYPE.TRANSFER
+    : t.TRANSACTION_TYPE.OUTCOME
 }
 
 function transactionToFields(transaction: t.Transaction): t.TransactionFields {
@@ -965,7 +970,7 @@ function fieldsToTransaction(fields: t.TransactionFields): t.Transaction {
   }: t.TransactionFields = fields
 
   // TODO Think how to split t.Transaction on t.IncomeTransaction, t.OutcomeTransaction, etc.
-  if (type === INCOME) {
+  if (type === t.TRANSACTION_TYPE.INCOME) {
     return {
       id              : id || uuid(),
       date            : date || '',
@@ -984,7 +989,7 @@ function fieldsToTransaction(fields: t.TransactionFields): t.Transaction {
     }
   }
 
-  if (type === LOAN) {
+  if (type === t.TRANSACTION_TYPE.LOAN) {
     return {
       id              : id || uuid(),
       date            : date || '',
@@ -1003,7 +1008,7 @@ function fieldsToTransaction(fields: t.TransactionFields): t.Transaction {
     }
   }
 
-  if (type === BORROW) {
+  if (type === t.TRANSACTION_TYPE.BORROW) {
     return {
       id              : id || uuid(),
       date            : date || '',
@@ -1022,7 +1027,7 @@ function fieldsToTransaction(fields: t.TransactionFields): t.Transaction {
     }
   }
 
-  if (type === TRANSFER) {
+  if (type === t.TRANSACTION_TYPE.TRANSFER) {
     return {
       id              : id || uuid(),
       date            : date || '',
