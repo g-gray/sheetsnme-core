@@ -12,6 +12,8 @@ import * as s from './sheets'
 import * as db from './db'
 import * as tr from './translations'
 
+import {fetchTransactions} from './transaction/model'
+
 const {
   LOGOUT_URL,
   SESSION_HEADER_NAME,
@@ -405,7 +407,7 @@ export async function deleteAccount(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, {accountId: id})
+  const transactions: t.Transactions = await fetchTransactions(client, gSpreadsheetId, {accountId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return
@@ -544,7 +546,7 @@ export async function deleteCategory(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, {categoryId: id})
+  const transactions: t.Transactions = await fetchTransactions(client, gSpreadsheetId, {categoryId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return
@@ -687,7 +689,7 @@ export async function deletePayee(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, {payeeId: id})
+  const transactions: t.Transactions = await fetchTransactions(client, gSpreadsheetId, {payeeId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return
@@ -734,332 +736,5 @@ function fieldsToPayee(fields: t.PayeeFields): t.Payee {
   return {
     id   : id || uuid(),
     title: title || '',
-  }
-}
-
-
-
-/**
- * Transactions
- */
-
-export async function getTransactions(ctx: t.KContext): Promise<void> {
-  const client: t.GOAuth2Client = ctx.client
-  // TODO Add validation of filter values
-  const filter: t.TransactionsFilter = ctx.query
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId, filter)
-  const transactionsAmounts: t.TransactionsAmounts = await n.fetchTransactionsAmounts(client, gSpreadsheetId, filter)
-  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
-
-  const limit: number = parseInt(filter.limit || '', 10)
-  if (filter.limit && (!fpx.isInteger(limit) || limit < 0)) {
-    ctx.throw(400, 'Limit must be a positive integer')
-    return
-  }
-
-  const offset: number = parseInt(filter.offset || '', 10)
-  if (filter.offset && (!fpx.isInteger(offset) || offset < 0)) {
-    ctx.throw(400, 'Offset must be a positive integer')
-    return
-  }
-
-  ctx.body = {
-    limit: limit || u.DEFAULT_LIMIT,
-    offset: offset || 0,
-    total: transactionsNumber,
-    items: fpx.map(transactions, transactionToFields),
-    outcomeAmount: transactionsAmounts.outcomeAmount,
-    incomeAmount: transactionsAmounts.incomeAmount,
-  }
-}
-
-export async function getTransaction(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
-  if (!id) {
-    ctx.throw(400, 'Transaction id required')
-    return
-  }
-
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction | void = await n.fetchTransaction(client, gSpreadsheetId, id)
-  if (!transaction) {
-    ctx.throw(404, 'Transaction not found')
-    return
-  }
-
-  ctx.body = transactionToFields(transaction)
-}
-
-export async function createTransaction(ctx: t.KContext): Promise<void> {
-  const errors: t.ResErrors = validateTransactionFields(ctx.request.body, ctx.lang)
-  if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
-  }
-
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-
-  const transaction: t.Transaction = await n.createTransaction(
-    client,
-    gSpreadsheetId,
-    fieldsToTransaction(ctx.request.body)
-  )
-
-  ctx.body = transactionToFields(transaction)
-}
-
-export async function updateTransaction(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
-  if (!id) {
-    ctx.throw(400, 'Transaction id required')
-    return
-  }
-
-  const errors: t.ResErrors = validateTransactionFields(ctx.request.body, ctx.lang)
-  if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
-  }
-
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction = await n.updateTransaction(
-    client,
-    gSpreadsheetId,
-    id,
-    fieldsToTransaction(ctx.request.body)
-  )
-
-  ctx.body = transactionToFields(transaction)
-}
-
-export async function deleteTransaction(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
-  if (!id) {
-    ctx.throw(400, 'Transaction id required')
-    return
-  }
-
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction = await n.deleteTransaction(client, gSpreadsheetId, id)
-  ctx.body = transaction
-}
-
-
-function validateTransactionFields(fields: any, lang: t.Lang): t.ResErrors {
-  const errors: t.ResErrors = []
-  const transactionTypes: t.TRANSACTION_TYPE[] = fpx.values(t.TRANSACTION_TYPE)
-  const {
-    type,
-    date,
-    outcomeAccountId,
-    outcomeAmount,
-    incomeAccountId,
-    incomeAmount,
-    payeeId,
-  } = fields
-
-  if (!fpx.includes(transactionTypes, type)) {
-    errors.push({text: `${u.xln(lang, tr.TYPE_MUST_BE_ONE_OF)}: [${transactionTypes.join(', ')}]`})
-  }
-
-  if (!date || !fpx.isValidDate(new Date(date))) {
-    errors.push({text: u.xln(lang, tr.DATE_MUST_BE_NON_EMPTY_AND_VALID)})
-  }
-
-  if (fpx.includes([
-    t.TRANSACTION_TYPE.OUTCOME,
-    t.TRANSACTION_TYPE.TRANSFER,
-    t.TRANSACTION_TYPE.LOAN,
-  ], type)) {
-    if (!outcomeAccountId) {
-      errors.push({text: u.xln(lang, tr.OUTCOME_ACCOUNT_REQUIRED)})
-    }
-
-    if (!fpx.isNumber(outcomeAmount)) {
-      errors.push({text: u.xln(lang, tr.OUTCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
-    }
-  }
-
-  if (fpx.includes([
-    t.TRANSACTION_TYPE.INCOME,
-    t.TRANSACTION_TYPE.TRANSFER,
-    t.TRANSACTION_TYPE.BORROW,
-  ], type)) {
-    if (!incomeAccountId) {
-      errors.push({text: u.xln(lang, tr.INCOME_ACCOUNT_REQUIRED)})
-    }
-
-    if (!fpx.isNumber(incomeAmount)) {
-      errors.push({text: u.xln(lang, tr.INCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
-    }
-  }
-
-  if (fpx.includes([
-    t.TRANSACTION_TYPE.LOAN,
-    t.TRANSACTION_TYPE.BORROW,
-  ], type) && !payeeId) {
-    errors.push({text: u.xln(lang, tr.PAYEE_REQUIRED)})
-  }
-
-  return errors
-}
-
-function defTransactionType(transaction: t.Transaction): t.TRANSACTION_TYPE {
-  const {outcomeAccountId, incomeAccountId} = transaction
-  return outcomeAccountId && !incomeAccountId
-    ? t.TRANSACTION_TYPE.OUTCOME
-    : outcomeAccountId && incomeAccountId === s.DEBT_ACCOUNT_ID
-    ? t.TRANSACTION_TYPE.LOAN
-    : incomeAccountId && !outcomeAccountId
-    ? t.TRANSACTION_TYPE.INCOME
-    : incomeAccountId && outcomeAccountId === s.DEBT_ACCOUNT_ID
-    ? t.TRANSACTION_TYPE.BORROW
-    : outcomeAccountId && incomeAccountId
-    ? t.TRANSACTION_TYPE.TRANSFER
-    : t.TRANSACTION_TYPE.OUTCOME
-}
-
-function transactionToFields(transaction: t.Transaction): t.TransactionFields {
-  const {
-    id,
-    date,
-    categoryId,
-    payeeId,
-    comment,
-    outcomeAccountId,
-    outcomeAmount,
-    incomeAccountId,
-    incomeAmount,
-    createdAt,
-    updatedAt,
-  } = transaction
-
-  return {
-    id,
-    type: defTransactionType(transaction),
-    date,
-    categoryId,
-    payeeId,
-    comment,
-    outcomeAccountId,
-    outcomeAmount,
-    incomeAccountId,
-    incomeAmount,
-    createdAt,
-    updatedAt,
-  }
-}
-
-function fieldsToTransaction(fields: t.TransactionFields): t.Transaction {
-  const {
-    id,
-    type,
-    date,
-    categoryId,
-    payeeId,
-    outcomeAccountId,
-    outcomeAmount,
-    incomeAccountId,
-    incomeAmount,
-    comment,
-    createdAt,
-    updatedAt,
-  }: t.TransactionFields = fields
-
-  // TODO Think how to split t.Transaction on t.IncomeTransaction, t.OutcomeTransaction, etc.
-  if (type === t.TRANSACTION_TYPE.INCOME) {
-    return {
-      id              : id || uuid(),
-      date            : date || '',
-
-      categoryId      : categoryId || '',
-      payeeId         : payeeId || '',
-
-      outcomeAccountId : '',
-      outcomeAmount    : 0,
-      incomeAccountId : incomeAccountId || '',
-      incomeAmount    : incomeAmount || 0,
-
-      comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
-    }
-  }
-
-  if (type === t.TRANSACTION_TYPE.LOAN) {
-    return {
-      id              : id || uuid(),
-      date            : date || '',
-
-      categoryId      : '',
-      payeeId         : payeeId || '',
-
-      outcomeAccountId: outcomeAccountId || '',
-      outcomeAmount   : outcomeAmount || 0,
-      incomeAccountId : s.DEBT_ACCOUNT_ID,
-      incomeAmount    : outcomeAmount || 0,
-
-      comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
-    }
-  }
-
-  if (type === t.TRANSACTION_TYPE.BORROW) {
-    return {
-      id              : id || uuid(),
-      date            : date || '',
-
-      categoryId      : '',
-      payeeId         : payeeId || '',
-
-      outcomeAccountId: s.DEBT_ACCOUNT_ID,
-      outcomeAmount   : incomeAmount || 0,
-      incomeAccountId : '',
-      incomeAmount    : incomeAmount || 0,
-
-      comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
-    }
-  }
-
-  if (type === t.TRANSACTION_TYPE.TRANSFER) {
-    return {
-      id              : id || uuid(),
-      date            : date || '',
-
-      categoryId      : '',
-      payeeId         : '',
-
-      outcomeAccountId: outcomeAccountId || '',
-      outcomeAmount   : incomeAmount || 0,
-      incomeAccountId : incomeAccountId || '',
-      incomeAmount    : incomeAmount || 0,
-
-      comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
-    }
-  }
-
-  return {
-    id              : id || uuid(),
-    date            : date || '',
-
-    categoryId      : categoryId || '',
-    payeeId         : payeeId || '',
-
-    outcomeAccountId: outcomeAccountId || '',
-    outcomeAmount   : outcomeAmount || 0,
-    incomeAccountId : '',
-    incomeAmount    : 0,
-
-    comment         : comment || '',
-    createdAt       : createdAt || '',
-    updatedAt       : updatedAt || '',
   }
 }

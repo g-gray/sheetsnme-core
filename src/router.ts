@@ -4,6 +4,7 @@ import Router from 'koa-router'
 import Koa from 'koa'
 
 import * as api from './api'
+import {transactionsRoutes, transactionsAllowedMethods} from './transaction/router'
 
 const authRouter: Router<Koa.DefaultState, Koa.Context> = new Router<Koa.DefaultState, Koa.Context>()
 
@@ -16,69 +17,62 @@ export const authRoutes = authRouter.routes()
 export const authAllowedMethods = authRouter.allowedMethods()
 
 
-const apiRouter: Router = new Router()
+const apiRouter: Router = new Router({
+  prefix: '/api'
+})
 
 apiRouter
   .use(api.setLang)
   .use(api.jsonOnly)
   .use(api.authRequired)
 
-
-
 apiRouter
-  .get('/api/user',                       api.getUser)
+  .get('/user',                       api.getUser)
 
 
 
 apiRouter
   .use(api.spreadsheetIdRequired)
+  .use(transactionsRoutes).use(transactionsAllowedMethods)
 
 /**
  * GET
  */
 
 apiRouter
-  .get('/api/accounts',                   api.getAccounts)
-  .get('/api/accounts/:id',               api.getAccount)
+  .get('/accounts',                   api.getAccounts)
+  .get('/accounts/:id',               api.getAccount)
 
-  .get('/api/categories',                 api.getCategories)
-  .get('/api/categories/:id',             api.getCategory)
+  .get('/categories',                 api.getCategories)
+  .get('/categories/:id',             api.getCategory)
 
-  .get('/api/payees',                     api.getPayees)
-  .get('/api/payees/:id',                 api.getPayee)
-
-  .get('/api/transactions',               api.getTransactions)
-  .get('/api/transactions/:id',           api.getTransaction)
+  .get('/payees',                     api.getPayees)
+  .get('/payees/:id',                 api.getPayee)
 
 /**
  * POST
  */
 
 apiRouter
-  .post('/api/transactions',              api.createTransaction)
-  .post('/api/transactions/:id',          api.updateTransaction)
+  .post('/accounts',                  api.createAccount)
+  .post('/accounts/:id',              api.updateAccount)
 
-  .post('/api/accounts',                  api.createAccount)
-  .post('/api/accounts/:id',              api.updateAccount)
+  .post('/categories',                api.createCategory)
+  .post('/categories/:id',            api.updateCategory)
 
-  .post('/api/categories',                api.createCategory)
-  .post('/api/categories/:id',            api.updateCategory)
-
-  .post('/api/payees',                    api.createPayee)
-  .post('/api/payees/:id',                api.updatePayee)
+  .post('/payees',                    api.createPayee)
+  .post('/payees/:id',                api.updatePayee)
 
 /**
  * DEL
  */
 
 apiRouter
-  .del('/api/accounts/:id',               api.deleteAccount)
+  .del('/accounts/:id',               api.deleteAccount)
 
-  .del('/api/categories/:id',             api.deleteCategory)
+  .del('/categories/:id',             api.deleteCategory)
 
-  .del('/api/payees/:id',                 api.deletePayee)
-
-  .del('/api/transactions/:id',           api.deleteTransaction)
+  .del('/payees/:id',                 api.deletePayee)
 
 export const apiRoutes = apiRouter.routes()
 export const apiAllowedMethods = apiRouter.allowedMethods()
