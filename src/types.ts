@@ -3,6 +3,7 @@ import {oauth2_v2, drive_v3, sheets_v4} from 'googleapis'
 import {OAuth2Client, Credentials} from 'google-auth-library';
 
 export * from './transaction/types'
+export * from './account/types'
 
 /**
  * Env
@@ -129,41 +130,6 @@ export type Entity = {
   id  : string,
   row?: number,
 }
-
-/**
- * Account
- */
-
-export type Account = {
-  id          : string,
-  title       : string,
-  currencyCode: string,
-  createdAt?  : string,
-  updatedAt?  : string,
-  row?        : number,
-}
-
-export type Accounts = Account[]
-
-export type AccountFields = {
-  id?          : string,
-  title        : string,
-  currencyCode?: string,
-  createdAt?   : string,
-  updatedAt?   : string,
-}
-
-
-/**
- * Balance
- */
-
-export type Balance = {
-  accountId: string,
-  balance  : number,
-}
-
-export type BalancesById = {[key: string]: Balance}
 
 
 

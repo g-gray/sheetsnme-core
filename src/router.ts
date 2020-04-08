@@ -4,6 +4,7 @@ import Router from 'koa-router'
 import Koa from 'koa'
 
 import * as api from './api'
+import {accountsRoutes, accountsAllowedMethods} from './account/router'
 import {transactionsRoutes, transactionsAllowedMethods} from './transaction/router'
 
 const authRouter: Router<Koa.DefaultState, Koa.Context> = new Router<Koa.DefaultState, Koa.Context>()
@@ -33,6 +34,7 @@ apiRouter
 
 apiRouter
   .use(api.spreadsheetIdRequired)
+  .use(accountsRoutes).use(accountsAllowedMethods)
   .use(transactionsRoutes).use(transactionsAllowedMethods)
 
 /**
@@ -40,9 +42,6 @@ apiRouter
  */
 
 apiRouter
-  .get('/accounts',                   api.getAccounts)
-  .get('/accounts/:id',               api.getAccount)
-
   .get('/categories',                 api.getCategories)
   .get('/categories/:id',             api.getCategory)
 
@@ -54,9 +53,6 @@ apiRouter
  */
 
 apiRouter
-  .post('/accounts',                  api.createAccount)
-  .post('/accounts/:id',              api.updateAccount)
-
   .post('/categories',                api.createCategory)
   .post('/categories/:id',            api.updateCategory)
 
@@ -68,8 +64,6 @@ apiRouter
  */
 
 apiRouter
-  .del('/accounts/:id',               api.deleteAccount)
-
   .del('/categories/:id',             api.deleteCategory)
 
   .del('/payees/:id',                 api.deletePayee)
