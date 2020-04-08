@@ -2,8 +2,9 @@ import * as Koa from 'koa'
 import {oauth2_v2, drive_v3, sheets_v4} from 'googleapis'
 import {OAuth2Client, Credentials} from 'google-auth-library';
 
-export * from './transaction/types'
 export * from './account/types'
+export * from './category/types'
+export * from './transaction/types'
 
 /**
  * Env
@@ -129,29 +130,6 @@ export type Spreadsheets = Spreadsheet[]
 export type Entity = {
   id  : string,
   row?: number,
-}
-
-
-
-/**
- * Category
- */
-
-export type Category = {
-  id        : string,
-  title     : string,
-  createdAt?: string,
-  updatedAt?: string,
-  row?      : number,
-}
-
-export type Categories = Category[]
-
-export type CategoryFields = {
-  id        : string,
-  title     : string,
-  createdAt?: string,
-  updatedAt?: string,
 }
 
 
