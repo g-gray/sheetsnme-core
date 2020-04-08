@@ -5,10 +5,6 @@ export const categoryRouter: Router = new Router({
   prefix: '/categories'
 })
 
-/**
- * GET
- */
-
 categoryRouter
   .get('/',    c.getCategories)
   .get('/:id', c.getCategory)

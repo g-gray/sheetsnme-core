@@ -3,11 +3,12 @@ import * as t from '../types'
 // @ts-ignore
 import * as fpx from 'fpx'
 
-import * as m from './model'
 import * as u from '../utils'
-import * as s from '../sheets'
 
-import {fetchTransactions} from '../transaction/model'
+import * as s from '../sheet/sheets'
+import * as tn from '../transaction/net'
+
+import * as m from './net'
 
 export async function getAccounts(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
@@ -104,7 +105,7 @@ export async function deleteAccount(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await fetchTransactions(client, gSpreadsheetId, {accountId: id})
+  const transactions: t.Transactions = await tn.fetchTransactions(client, gSpreadsheetId, {accountId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return

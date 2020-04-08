@@ -1,4 +1,5 @@
 import Router from 'koa-router'
+
 import * as c from './controller'
 
 export const accountRouter: Router = new Router({

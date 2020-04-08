@@ -5,19 +5,21 @@ import * as fpx from 'fpx'
 import uuid from 'uuid/v4'
 
 import * as u from '../utils'
-import * as n from '../net'
-import * as s from '../sheets'
 import * as tr from '../translations'
+
+import * as ss from '../sheet/sheets'
+import * as sn from '../sheet/net'
+import * as en from '../entity/net'
 
 export async function fetchPayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Payee | void> {
-  const result: t.Payee | void = await n.queryEntityById<t.Payee>(
+  const result: t.Payee | void = await en.queryEntityById<t.Payee>(
     client,
     spreadsheetId,
-    s.PAYEES_SHEET_ID,
+    ss.PAYEES_SHEET_ID,
     id,
     rowToPayee,
   )
@@ -30,10 +32,10 @@ export async function createPayee(
   payee        : t.Payee
 ): Promise<t.Payee> {
 
-  const result: t.Payee = await n.createEntity<t.Payee>(
+  const result: t.Payee = await en.createEntity<t.Payee>(
     client,
     spreadsheetId,
-    s.PAYEES_SHEET_ID,
+    ss.PAYEES_SHEET_ID,
     payee,
     payeeToRow,
     rowToPayee,
@@ -47,10 +49,10 @@ export async function updatePayee(
   id           : string,
   payee        : t.Payee
 ): Promise<t.Payee> {
-  const result: t.Payee = await n.updateEntityById<t.Payee>(
+  const result: t.Payee = await en.updateEntityById<t.Payee>(
     client,
     spreadsheetId,
-    s.PAYEES_SHEET_ID,
+    ss.PAYEES_SHEET_ID,
     id,
     payee,
     payeeToRow,
@@ -64,10 +66,10 @@ export async function deletePayee(
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Payee> {
-  const result: t.Payee = await n.deleteEntityById<t.Payee>(
+  const result: t.Payee = await en.deleteEntityById<t.Payee>(
     client,
     spreadsheetId,
-    s.PAYEES_SHEET_ID,
+    ss.PAYEES_SHEET_ID,
     id,
     rowToPayee,
   )
@@ -78,10 +80,10 @@ export async function fetchPayees(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
 ): Promise<t.Payees> {
-  const result: t.Payees = await n.queryEntities<t.Payee>(
+  const result: t.Payees = await en.queryEntities<t.Payee>(
     client,
     spreadsheetId,
-    s.PAYEES_SHEET_ID,
+    ss.PAYEES_SHEET_ID,
     rowToPayee,
     `select * where A != 'id' order by B`
   )
@@ -120,12 +122,12 @@ export async function fetchDebtsByPayeeIds(
   spreadsheetId: string,
   payeeIds: string[],
 ): Promise<t.DebtsById> {
-  const loansTable: t.GQueryTable | void = await n.querySheet(
+  const loansTable: t.GQueryTable | void = await sn.querySheet(
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     `
     select D, sum(G)
-    where F = '${s.DEBT_ACCOUNT_ID}'
+    where F = '${ss.DEBT_ACCOUNT_ID}'
     group by D
     `,
   )
@@ -136,12 +138,12 @@ export async function fetchDebtsByPayeeIds(
       )
     : {}
 
-  const borrowsTable: t.GQueryTable | void = await n.querySheet(
+  const borrowsTable: t.GQueryTable | void = await sn.querySheet(
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     `
     select D, sum(I)
-    where H = '${s.DEBT_ACCOUNT_ID}'
+    where H = '${ss.DEBT_ACCOUNT_ID}'
     group by D
     `,
   )

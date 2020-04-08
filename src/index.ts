@@ -4,19 +4,16 @@ import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
 
 import * as e from './env'
-import * as r from './router'
 import * as u from './utils'
+import * as r from './router'
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36161
 const app: Koa<Koa.DefaultState, t.CustomContext> = new Koa<Koa.DefaultState, t.CustomContext>()
 app
   .use(bodyParser())
   .use(handlePublicError)
-  .use(r.authRoutes)
-  .use(r.authAllowedMethods)
-  .use(r.apiRoutes)
-  .use(r.apiAllowedMethods)
-
+  .use(r.appRoutes)
+  .use(r.appAllowedMethods)
 
 const {HOST, PORT} = e.properties
 app.listen(PORT, HOST, undefined, () => {

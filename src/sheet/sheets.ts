@@ -1,9 +1,9 @@
-import * as t from './types'
+import * as t from '../types'
 
 import uuid from 'uuid/v4'
 
-import * as u from './utils'
-import * as tr from './translations'
+import * as u from '../utils'
+import * as tr from '../translations'
 
 export const TRANSACTIONS_SHEET_ID = 0
 export const ACCOUNTS_SHEET_ID     = 1

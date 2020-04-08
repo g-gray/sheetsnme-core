@@ -5,19 +5,20 @@ import * as fpx from 'fpx'
 import uuid from 'uuid/v4'
 
 import * as u from '../utils'
-import * as n from '../net'
-import * as s from '../sheets'
 import * as tr from '../translations'
+
+import * as ss from '../sheet/sheets'
+import * as en from '../entity/net'
 
 export async function fetchCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Category | void> {
-  const result: t.Category | void = await n.queryEntityById<t.Category>(
+  const result: t.Category | void = await en.queryEntityById<t.Category>(
     client,
     spreadsheetId,
-    s.CATEGORIES_SHEET_ID,
+    ss.CATEGORIES_SHEET_ID,
     id,
     rowToCategory,
   )
@@ -29,10 +30,10 @@ export async function createCategory(
   spreadsheetId: string,
   category     : t.Category,
 ): Promise<t.Category> {
-  const result: t.Category = await n.createEntity<t.Category>(
+  const result: t.Category = await en.createEntity<t.Category>(
     client,
     spreadsheetId,
-    s.CATEGORIES_SHEET_ID,
+    ss.CATEGORIES_SHEET_ID,
     category,
     categoryToRow,
     rowToCategory,
@@ -46,10 +47,10 @@ export async function updateCategory(
   id           : string,
   category     : t.Category,
 ): Promise<t.Category> {
-  const result: t.Category = await n.updateEntityById<t.Category>(
+  const result: t.Category = await en.updateEntityById<t.Category>(
     client,
     spreadsheetId,
-    s.CATEGORIES_SHEET_ID,
+    ss.CATEGORIES_SHEET_ID,
     id,
     category,
     categoryToRow,
@@ -63,10 +64,10 @@ export async function deleteCategory(
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Category> {
-  const result: t.Category = await n.deleteEntityById<t.Category>(
+  const result: t.Category = await en.deleteEntityById<t.Category>(
     client,
     spreadsheetId,
-    s.CATEGORIES_SHEET_ID,
+    ss.CATEGORIES_SHEET_ID,
     id,
     rowToCategory,
   )
@@ -77,10 +78,10 @@ export async function fetchCategories(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
 ): Promise<t.Categories> {
-  const result: t.Categories = await n.queryEntities<t.Category>(
+  const result: t.Categories = await en.queryEntities<t.Category>(
     client,
     spreadsheetId,
-    s.CATEGORIES_SHEET_ID,
+    ss.CATEGORIES_SHEET_ID,
     rowToCategory,
     `select * where A != 'id' order by B`
   )

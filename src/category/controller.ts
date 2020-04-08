@@ -3,11 +3,11 @@ import * as t from '../types'
 // @ts-ignore
 import * as fpx from 'fpx'
 
-import * as m from './model'
 import * as u from '../utils'
-import * as s from '../sheets'
 
-import {fetchTransactions} from '../transaction/model'
+import * as tn from '../transaction/net'
+
+import * as m from './net'
 
 export async function getCategories(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
@@ -84,7 +84,7 @@ export async function deleteCategory(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await fetchTransactions(client, gSpreadsheetId, {categoryId: id})
+  const transactions: t.Transactions = await tn.fetchTransactions(client, gSpreadsheetId, {categoryId: id})
   if (transactions.length) {
     ctx.throw(400, 'Can not delete. There are related transactions')
     return

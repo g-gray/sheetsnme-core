@@ -46,6 +46,8 @@ export function round(num: number, decimals: number = 0): number {
  * Errors
  */
 
+// TODO Add interface for PublicError and ValidationError
+// Implement ValidationError interface below
 export class PublicError extends Error {
   body: any
 
@@ -65,10 +67,13 @@ export class PublicError extends Error {
  */
 
 export function fetch(params: t.XHttpParams): Promise<t.XHttpResponse> {
-  return new Promise((resolve, reject) => {
-    xhttp.jsonRequest(params, (err: any, response: t.XHttpResponse) => {
-      if (response.ok) resolve(response)
-      else reject(response)
+  return new Promise((
+      resolve: (response: t.XHttpResponse) => void,
+      reject: (reject: t.XHttpResponse) => void
+    ) => {
+      xhttp.jsonRequest(params, (err: any, response: t.XHttpResponse) => {
+        if (response.ok) resolve(response)
+        else reject(response)
     })
   })
 }
@@ -79,6 +84,7 @@ export function fetch(params: t.XHttpParams): Promise<t.XHttpResponse> {
  * Crypto
  */
 
+// TODO Fix types according to crypto library
 export function encrypt(
   algorythm: string,
   password : string,
@@ -95,6 +101,7 @@ export function encrypt(
   return encrypted
 }
 
+// TODO Fix types according to crypto library
 export function decrypt(
   algorythm: string,
   password : string,

@@ -1,43 +1,51 @@
-import * as t from './types'
-
 import Router from 'koa-router'
 import Koa from 'koa'
 
-import * as api from './api'
+import {setLang, jsonOnly} from './middleware'
+
+import {authRequired} from './auth/middleware'
+import {authRoutes, authAllowedMethods} from './auth/router'
+
+import {userRoutes, userAllowedMethods} from './user/router'
+
+import {spreadsheetIdRequired} from './sheet/middleware'
+
 import {accountsRoutes, accountsAllowedMethods} from './account/router'
 import {categoriesRoutes, categoriesAllowedMethods} from './category/router'
 import {payeesRoutes, payeesAllowedMethods} from './payee/router'
 import {transactionsRoutes, transactionsAllowedMethods} from './transaction/router'
-
-const authRouter: Router<Koa.DefaultState, Koa.Context> = new Router<Koa.DefaultState, Koa.Context>()
-
-authRouter
-  .get('/auth/login',                     api.authLogin)
-  .get('/auth/logout',                    api.authLogout)
-  .get('/auth/code',                      api.authCode)
-
-export const authRoutes = authRouter.routes()
-export const authAllowedMethods = authRouter.allowedMethods()
-
 
 const apiRouter: Router = new Router({
   prefix: '/api'
 })
 
 apiRouter
-  .use(api.setLang)
-  .use(api.jsonOnly)
-  .use(api.authRequired)
+  .use(setLang)
+  .use(jsonOnly)
+  .use(authRequired)
 
 apiRouter
-  .get('/user',                       api.getUser)
+  .use(userRoutes).use(userAllowedMethods)
 
 apiRouter
-  .use(api.spreadsheetIdRequired)
+  .use(spreadsheetIdRequired)
   .use(accountsRoutes).use(accountsAllowedMethods)
   .use(categoriesRoutes).use(categoriesAllowedMethods)
   .use(payeesRoutes).use(payeesAllowedMethods)
   .use(transactionsRoutes).use(transactionsAllowedMethods)
 
-export const apiRoutes = apiRouter.routes()
-export const apiAllowedMethods = apiRouter.allowedMethods()
+const apiRoutes = apiRouter.routes()
+const apiAllowedMethods = apiRouter.allowedMethods()
+
+
+
+const appRouter: Router<Koa.DefaultState, Koa.Context> = new Router<Koa.DefaultState, Koa.Context>()
+
+appRouter
+  .use(authRoutes)
+  .use(authAllowedMethods)
+  .use(apiRoutes)
+  .use(apiAllowedMethods)
+
+export const appRoutes = appRouter.routes()
+export const appAllowedMethods = appRouter.allowedMethods()

@@ -5,9 +5,11 @@ import * as fpx from 'fpx'
 import uuid from 'uuid/v4'
 
 import * as u from '../utils'
-import * as n from '../net'
-import * as s from '../sheets'
 import * as tr from '../translations'
+
+import * as ss from '../sheet/sheets'
+import * as sn from '../sheet/net'
+import * as en from '../entity/net'
 
 /**
  * Accounts
@@ -18,10 +20,10 @@ export async function fetchAccount(
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Account | void> {
-  const result: t.Account | void = await n.queryEntityById<t.Account>(
+  const result: t.Account | void = await en.queryEntityById<t.Account>(
     client,
     spreadsheetId,
-    s.ACCOUNTS_SHEET_ID,
+    ss.ACCOUNTS_SHEET_ID,
     id,
     rowToAccount,
   )
@@ -33,10 +35,10 @@ export async function createAccount(
   spreadsheetId: string,
   account      : t.Account,
 ): Promise<t.Account> {
-  const result: t.Account = await n.createEntity<t.Account>(
+  const result: t.Account = await en.createEntity<t.Account>(
     client,
     spreadsheetId,
-    s.ACCOUNTS_SHEET_ID,
+    ss.ACCOUNTS_SHEET_ID,
     account,
     accountToRow,
     rowToAccount,
@@ -50,10 +52,10 @@ export async function updateAccount(
   id           : string,
   account      : t.Account,
 ): Promise<t.Account> {
-  const result: t.Account = await n.updateEntityById<t.Account>(
+  const result: t.Account = await en.updateEntityById<t.Account>(
     client,
     spreadsheetId,
-    s.ACCOUNTS_SHEET_ID,
+    ss.ACCOUNTS_SHEET_ID,
     id,
     account,
     accountToRow,
@@ -67,10 +69,10 @@ export async function deleteAccount(
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Account> {
-  const result: t.Account = await n.deleteEntityById<t.Account>(
+  const result: t.Account = await en.deleteEntityById<t.Account>(
     client,
     spreadsheetId,
-    s.ACCOUNTS_SHEET_ID,
+    ss.ACCOUNTS_SHEET_ID,
     id,
     rowToAccount,
   )
@@ -81,14 +83,14 @@ export async function fetchAccounts(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
 ): Promise<t.Accounts> {
-  const result: t.Accounts = await n.queryEntities<t.Account>(
+  const result: t.Accounts = await en.queryEntities<t.Account>(
     client,
     spreadsheetId,
-    s.ACCOUNTS_SHEET_ID,
+    ss.ACCOUNTS_SHEET_ID,
     rowToAccount,
     `
     select *
-    where A != 'id' and A !='${s.DEBT_ACCOUNT_ID}'
+    where A != 'id' and A !='${ss.DEBT_ACCOUNT_ID}'
     `
   )
   return result
@@ -132,9 +134,9 @@ export async function fetchBalancesByAccountIds(
     accountIds,
     (id: string) => `F = '${id}'`
   ).join(' OR ')
-  const outcomeTable: t.GQueryTable | void = await n.querySheet(
+  const outcomeTable: t.GQueryTable | void = await sn.querySheet(
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     `
     select F, sum(G)
     where ${outcomeIdsCond}
@@ -152,9 +154,9 @@ export async function fetchBalancesByAccountIds(
     accountIds,
     (id: string) => `H = '${id}'`
   ).join(' OR ')
-  const incomeTable: t.GQueryTable | void = await n.querySheet(
+  const incomeTable: t.GQueryTable | void = await sn.querySheet(
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     `
     select H, sum(I)
     where ${incomeIdsCond}

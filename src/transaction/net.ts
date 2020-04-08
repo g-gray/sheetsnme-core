@@ -5,19 +5,21 @@ import * as fpx from 'fpx'
 import uuid from 'uuid/v4'
 
 import * as u from '../utils'
-import * as n from '../net'
-import * as s from '../sheets'
 import * as tr from '../translations'
+
+import * as ss from '../sheet/sheets'
+import * as sn from '../sheet/net'
+import * as en from '../entity/net'
 
 export async function fetchTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Transaction | void> {
-  const result: t.Transaction | void = await n.queryEntityById<t.Transaction>(
+  const result: t.Transaction | void = await en.queryEntityById<t.Transaction>(
     client,
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     id,
     rowToTransaction,
   )
@@ -29,10 +31,10 @@ export async function createTransaction(
   spreadsheetId: string,
   transaction  : t.Transaction,
 ): Promise<t.Transaction> {
-  const result: t.Transaction = await n.createEntity<t.Transaction>(
+  const result: t.Transaction = await en.createEntity<t.Transaction>(
     client,
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     transaction,
     transactionToRow,
     rowToTransaction,
@@ -46,10 +48,10 @@ export async function updateTransaction(
   id           : string,
   transaction  : t.Transaction,
 ): Promise<t.Transaction> {
-  const result: t.Transaction = await n.updateEntityById<t.Transaction>(
+  const result: t.Transaction = await en.updateEntityById<t.Transaction>(
     client,
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     id,
     transaction,
     transactionToRow,
@@ -63,10 +65,10 @@ export async function deleteTransaction(
   spreadsheetId: string,
   id           : string,
 ): Promise<t.Transaction> {
-  const result: t.Transaction = await n.deleteEntityById<t.Transaction>(
+  const result: t.Transaction = await en.deleteEntityById<t.Transaction>(
     client,
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     id,
     rowToTransaction,
   )
@@ -79,10 +81,10 @@ export async function fetchTransactions(
   filter       : t.TransactionsFilter,
 ): Promise<t.Transactions> {
   const query: string = transactionsQuery(filter)
-  const result: t.Transactions = await n.queryEntities<t.Transaction>(
+  const result: t.Transactions = await en.queryEntities<t.Transaction>(
     client,
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     rowToTransaction,
     query,
   )
@@ -152,10 +154,10 @@ export async function fetchTransactionsNumber(
   filter       : t.TransactionsFilter,
 ): Promise<number> {
   const query: string = transactionsNumberQuery(filter)
-  const result: number = await n.queryEntitiesNumber(
+  const result: number = await en.queryEntitiesNumber(
     client,
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     query,
   )
   return result
@@ -180,9 +182,9 @@ export async function fetchTransactionsAmounts(
 ): Promise<t.TransactionsAmounts> {
   const query: string = transactionsAmountsQuery(filter)
 
-  const table: t.GQueryTable | void = await n.querySheet(
+  const table: t.GQueryTable | void = await sn.querySheet(
     spreadsheetId,
-    s.TRANSACTIONS_SHEET_ID,
+    ss.TRANSACTIONS_SHEET_ID,
     query,
   )
 
@@ -207,7 +209,7 @@ function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
     `select sum(G), sum(I)`,
     `where ${[
       // Ignore debts
-      `(F != '${s.DEBT_ACCOUNT_ID}' and H != '${s.DEBT_ACCOUNT_ID}')`,
+      `(F != '${ss.DEBT_ACCOUNT_ID}' and H != '${ss.DEBT_ACCOUNT_ID}')`,
       // Ignore transfers
       `((F != '' and H = '') or (F = '' and H != ''))`,
       where,
@@ -296,11 +298,11 @@ function defTransactionType(transaction: t.Transaction): t.TRANSACTION_TYPE {
   const {outcomeAccountId, incomeAccountId} = transaction
   return outcomeAccountId && !incomeAccountId
     ? t.TRANSACTION_TYPE.OUTCOME
-    : outcomeAccountId && incomeAccountId === s.DEBT_ACCOUNT_ID
+    : outcomeAccountId && incomeAccountId === ss.DEBT_ACCOUNT_ID
     ? t.TRANSACTION_TYPE.LOAN
     : incomeAccountId && !outcomeAccountId
     ? t.TRANSACTION_TYPE.INCOME
-    : incomeAccountId && outcomeAccountId === s.DEBT_ACCOUNT_ID
+    : incomeAccountId && outcomeAccountId === ss.DEBT_ACCOUNT_ID
     ? t.TRANSACTION_TYPE.BORROW
     : outcomeAccountId && incomeAccountId
     ? t.TRANSACTION_TYPE.TRANSFER
@@ -384,7 +386,7 @@ export function fieldsToTransaction(fields: t.TransactionFields): t.Transaction 
 
       outcomeAccountId: outcomeAccountId || '',
       outcomeAmount   : outcomeAmount || 0,
-      incomeAccountId : s.DEBT_ACCOUNT_ID,
+      incomeAccountId : ss.DEBT_ACCOUNT_ID,
       incomeAmount    : outcomeAmount || 0,
 
       comment         : comment || '',
@@ -401,7 +403,7 @@ export function fieldsToTransaction(fields: t.TransactionFields): t.Transaction 
       categoryId      : '',
       payeeId         : payeeId || '',
 
-      outcomeAccountId: s.DEBT_ACCOUNT_ID,
+      outcomeAccountId: ss.DEBT_ACCOUNT_ID,
       outcomeAmount   : incomeAmount || 0,
       incomeAccountId : '',
       incomeAmount    : incomeAmount || 0,

@@ -1,9 +1,9 @@
-import * as t from './types'
+import * as t from '../types'
 
 import {google} from 'googleapis'
 
-import * as e from './env'
-import * as u from './utils'
+import * as e from '../env'
+import * as u from '../utils'
 
 export const SCOPES: string[] = [
   'https://www.googleapis.com/auth/userinfo.email',
@@ -11,7 +11,11 @@ export const SCOPES: string[] = [
   'https://www.googleapis.com/auth/drive.file',
 ]
 
-const {REDIRECT_URL, CLIENT_ID, CLIENT_SECRET} = e.properties
+const {
+  REDIRECT_URL,
+  CLIENT_ID,
+  CLIENT_SECRET,
+} = e.properties
 
 export function generateAuthUrl(state?: string): string {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client()

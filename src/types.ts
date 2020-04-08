@@ -1,7 +1,14 @@
 import * as Koa from 'koa'
-import {oauth2_v2, drive_v3, sheets_v4} from 'googleapis'
-import {OAuth2Client, Credentials} from 'google-auth-library';
+import * as pg from 'pg'
 
+import {GOAuth2Client} from './auth/types'
+export * from './auth/types'
+
+export * from './user/types'
+
+export * from './sheet/types'
+
+export * from './entity/types'
 export * from './account/types'
 export * from './category/types'
 export * from './payee/types'
@@ -34,8 +41,6 @@ export type EnvProperties = {
   DATABASE_URL       : string,
 }
 
-
-
 /**
  * Context
  */
@@ -55,144 +60,14 @@ export type CustomContext = {
 
 export type KNext = Koa.Next
 
-
-
 /**
- * Auth
+ * Database
  */
 
-export type Session = {
-  id        : string,
-  userId    : string,
-  createdAt?: Date,
-  updatedAt?: Date,
-}
-
-export type SessionQueryFields = {
-  id?       : string,
-  userId    : string,
-  createdAt?: Date,
-  updatedAt?: Date,
-}
-
-
-
-/**
- * User
- */
-
-export type User = {
-  id           : string,
-  externalId   : string,
-  pictureUrl   : string,
-  email        : string,
-  emailVerified: boolean,
-  firstName    : string,
-  lastName     : string,
-  externalToken: string,
-  createdAt    : Date,
-  updatedAt    : Date,
-}
-
-export type UserQueryFields = {
-  externalId   : string,
-  pictureUrl   : string,
-  email        : string,
-  emailVerified: boolean,
-  firstName    : string,
-  lastName     : string,
-  externalToken: string,
-  createdAt?   : Date,
-  updatedAt?   : Date,
-}
-
-
-
-/**
- * Spreadsheet
- */
-
-export type Spreadsheet = {
-  id        : string,
-  userId    : string,
-  externalId: string,
-  createdAt : Date,
-  updatedAt : Date,
-}
-
-export type Spreadsheets = Spreadsheet[]
-
-
-
-/**
- * Entity
- */
-
-export type Entity = {
-  id  : string,
-  row?: number,
-}
-
-
-
-/**
- * Google
- */
-
-export interface GAuthToken extends Credentials {
-  scope?: string,
-}
-
-export type GOAuth2Client = OAuth2Client
-
-
-export type GUserRes = oauth2_v2.Schema$Userinfoplus
-
-
-export type GPermissionsCreateReq = drive_v3.Params$Resource$Permissions$Create
-export type GPermissionsRes = drive_v3.Schema$Permission
-
-
-export type GSheet = sheets_v4.Schema$Sheet
-
-export type GSpreadsheetRes = sheets_v4.Schema$Spreadsheet
-
-export type GSpreadsheetsGetReq = sheets_v4.Params$Resource$Spreadsheets$Get
-export type GSpreadsheetsCreateReq = sheets_v4.Params$Resource$Spreadsheets$Create
-
-export type GSpreadsheetsBatchUpdateReq = sheets_v4.Params$Resource$Spreadsheets$Batchupdate
-export type GSpreadsheetsBatchUpdateRes = sheets_v4.Schema$BatchUpdateSpreadsheetResponse
-
-export type GRowData = sheets_v4.Schema$RowData
-
-
-export type GQueryCol = {
-  id     : string,
-  label  : string,
-  type   : string,
-  pattern: string,
-}
-
-export type GQueryCell = {
-  v: string | number,
-  f?: string,
-}
-
-export type GQueryRow = {
-  c: (GQueryCell| null)[]
-}
-
-export type GQueryTable = {
-  cols: GQueryCol[],
-  rows: GQueryRow[],
-  parsedNumHeaders: number,
-}
-
-export type GQueryRes = {
-  table: GQueryTable,
-}
-
-
+export type PGClientConfig = pg.ClientConfig
+export type PGPool = pg.Pool
+export type PGQueryResult = pg.QueryResult
+export type PGQueryResultRow = pg.QueryResultRow
 
 /**
  * Net
@@ -216,8 +91,6 @@ export type XHttpResponse = {
   params    : XHttpParams,
 }
 
-
-
 /**
  * Errors
  */
@@ -227,8 +100,6 @@ export type ResError = {
 }
 
 export type ResErrors = ResError[]
-
-
 
 /**
  * i18n
@@ -240,8 +111,6 @@ export type Translations = {
   en: string,
   ru: string,
 }
-
-
 
 /**
  * Misc

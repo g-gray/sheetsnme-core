@@ -1,13 +1,10 @@
 import Router from 'koa-router'
+
 import * as c from './controller'
 
 export const payeeRouter: Router = new Router({
   prefix: '/payees'
 })
-
-/**
- * GET
- */
 
 payeeRouter
   .get('/',     c.getPayees)
