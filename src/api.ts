@@ -2,17 +2,12 @@ import * as t from './types'
 
 // @ts-ignore
 import * as fpx from 'fpx'
-import uuid from 'uuid/v4'
 
 import * as e from './env'
 import * as u from './utils'
 import * as n from './net'
 import * as a from './auth'
-import * as s from './sheets'
 import * as db from './db'
-import * as tr from './translations'
-
-import {fetchTransactions} from './transaction/model'
 
 const {
   LOGOUT_URL,
@@ -304,147 +299,4 @@ export async function getUser(ctx: t.KContext) {
   }
 
   ctx.body = {...user, spreadsheets: [{id: spreadsheet.id}]}
-}
-
-
-
-/**
- * Payees
- */
-
-export async function getPayees(ctx: t.KContext): Promise<void> {
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payees: t.Payees = await n.fetchPayees(client, gSpreadsheetId)
-
-  const payeeIds = fpx.map(payees, (payee: t.Payee) => payee.id)
-  const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, payeeIds)
-
-  ctx.body = fpx.map(payees, (payee: t.Payee) => ({
-    ...payeeToFields(payee),
-    debt: debts[payee.id] ? debts[payee.id].debt : 0,
-  }))
-}
-
-export async function getPayee(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
-  if (!id) {
-    ctx.throw(400, 'Payee id required')
-    return
-  }
-
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee | void = await n.fetchPayee(client, gSpreadsheetId, id)
-  if (!payee) {
-    ctx.throw(404, 'Payee not found')
-    return
-  }
-
-  const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, [payee.id])
-
-  ctx.body = {
-    ...payeeToFields(payee),
-    debt: debts[payee.id] ? debts[payee.id].debt : 0,
-  }
-}
-
-export async function createPayee(ctx: t.KContext): Promise<void> {
-  const errors: t.ResErrors = validatePayeeFields(ctx.request.body, ctx.lang)
-  if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
-  }
-
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee = await n.createPayee(
-    client,
-    gSpreadsheetId,
-    fieldsToPayee(ctx.request.body)
-  )
-
-  ctx.body = payeeToFields(payee)
-}
-
-export async function updatePayee(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
-  if (!id) {
-    ctx.throw(400, 'Payee id required')
-    return
-  }
-
-  const errors: t.ResErrors = validatePayeeFields(ctx.request.body, ctx.lang)
-  if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
-  }
-
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee = await n.updatePayee(
-    client,
-    gSpreadsheetId,
-    id,
-    fieldsToPayee(ctx.request.body)
-  )
-
-  ctx.body = payeeToFields(payee)
-}
-
-export async function deletePayee(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
-  if (!id) {
-    ctx.throw(400, 'Payee id required')
-    return
-  }
-
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await fetchTransactions(client, gSpreadsheetId, {payeeId: id})
-  if (transactions.length) {
-    ctx.throw(400, 'Can not delete. There are related transactions')
-    return
-  }
-
-  const payee: t.Payee = await n.deletePayee(client, gSpreadsheetId, id)
-  ctx.body = payee
-}
-
-
-function validatePayeeFields(fields: any, lang: t.Lang): t.ResErrors {
-  const errors: t.ResErrors = []
-  const {title} = fields
-
-  if (!fpx.isString(title) || !title.length) {
-    errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
-  }
-
-  return errors
-}
-
-function payeeToFields(payee: t.Payee): t.PayeeFields {
-  const {
-    id,
-    title,
-    createdAt,
-    updatedAt,
-  } = payee
-
-  return {
-    id,
-    title,
-    createdAt,
-    updatedAt,
-  }
-}
-
-function fieldsToPayee(fields: t.PayeeFields): t.Payee {
-  const {
-    id,
-    title,
-  }: t.PayeeFields = fields
-
-  return {
-    id   : id || uuid(),
-    title: title || '',
-  }
 }
