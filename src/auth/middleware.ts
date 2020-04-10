@@ -26,20 +26,17 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
   const cookieSessionId: string | void = n.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
   if (!sessionId) {
-    ctx.throw(401, 'Unauthorized')
-    return
+    throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
   }
 
   const session: t.Session | void = await m.sessionById(sessionId)
   if (!session) {
-    ctx.throw(401, 'Unauthorized')
-    return
+    throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
   }
 
   const user: t.User | void = await um.userBySessionId(session.id)
   if (!user) {
-    ctx.throw(400, 'User not found')
-    return
+    throw new u.PublicError(400, t.AUTH_ERROR.SESSION_ID_REQUIRED)
   }
 
   const decryptedToken: string = u.decrypt(
@@ -58,8 +55,7 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
   )
 
   if (isScopesDifferent) {
-    ctx.throw(401, 'Unauthorized')
-    return
+    throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
   }
 
   const isExpired: boolean = token.expiry_date
@@ -67,17 +63,8 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
     : true
 
   if (isExpired) {
-    let newToken: t.GAuthToken
-    try {
-      newToken = await n.refreshToken(token)
-    } catch (err) {
-      if (err.message === t.ERROR.INVALID_GRANT) {
-        ctx.throw(401, 'Unauthorized')
-        return
-      }
+    const newToken: t.GAuthToken = await n.refreshToken(token)
 
-      throw err
-    }
     const encryptedNewToken: string = u.encrypt(
       CRYPTO_ALGORITHM,
       CRYPTO_PASSWORD,
@@ -96,4 +83,16 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
   ctx.sessionId = session.id
 
   await next()
+}
+
+export async function handleAuthError(_: t.KContext, next: t.KNext): Promise<void> {
+  try {
+    await next()
+  }
+  catch (error) {
+    if (error.message === t.AUTH_ERROR.G_INVALID_GRANT) {
+      throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
+    }
+    throw error
+  }
 }

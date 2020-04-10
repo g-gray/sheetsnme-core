@@ -6,18 +6,18 @@ import * as fpx from 'fpx'
 import * as u from '../utils'
 import * as tn from '../transaction/net'
 
-import * as m from './net'
+import * as n from './net'
 
 export async function getPayees(ctx: t.KContext): Promise<void> {
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payees: t.Payees = await m.fetchPayees(client, gSpreadsheetId)
+  const payees: t.Payees = await n.fetchPayees(client, gSpreadsheetId)
 
   const payeeIds = fpx.map(payees, (payee: t.Payee) => payee.id)
-  const debts: t.DebtsById = await m.fetchDebtsByPayeeIds(client, gSpreadsheetId, payeeIds)
+  const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, payeeIds)
 
   ctx.body = fpx.map(payees, (payee: t.Payee) => ({
-    ...m.payeeToFields(payee),
+    ...n.payeeToFields(payee),
     debt: debts[payee.id] ? debts[payee.id].debt : 0,
   }))
 }
@@ -25,82 +25,77 @@ export async function getPayees(ctx: t.KContext): Promise<void> {
 export async function getPayee(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Payee id required')
-    return
+    throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee | void = await m.fetchPayee(client, gSpreadsheetId, id)
+  const payee: t.Payee | void = await n.fetchPayee(client, gSpreadsheetId, id)
   if (!payee) {
-    ctx.throw(404, 'Payee not found')
-    return
+    throw new u.PublicError(404, t.PAYEE_ERROR.NOT_FOUND)
   }
 
-  const debts: t.DebtsById = await m.fetchDebtsByPayeeIds(client, gSpreadsheetId, [payee.id])
+  const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(client, gSpreadsheetId, [payee.id])
 
   ctx.body = {
-    ...m.payeeToFields(payee),
+    ...n.payeeToFields(payee),
     debt: debts[payee.id] ? debts[payee.id].debt : 0,
   }
 }
 
 export async function createPayee(ctx: t.KContext): Promise<void> {
-  const errors: t.ResErrors = m.validatePayeeFields(ctx.request.body, ctx.lang)
+  const errors: t.ValidationErrors = n.validatePayeeFields(ctx.request.body, ctx.lang)
   if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
+    throw new u.ValidationError({errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee = await m.createPayee(
+  const payee: t.Payee = await n.createPayee(
     client,
     gSpreadsheetId,
-    m.fieldsToPayee(ctx.request.body)
+    n.fieldsToPayee(ctx.request.body)
   )
 
-  ctx.body = m.payeeToFields(payee)
+  ctx.body = n.payeeToFields(payee)
 }
 
 export async function updatePayee(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Payee id required')
-    return
+    throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
   }
 
-  const errors: t.ResErrors = m.validatePayeeFields(ctx.request.body, ctx.lang)
+  const errors: t.ValidationErrors = n.validatePayeeFields(ctx.request.body, ctx.lang)
   if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
+    throw new u.ValidationError({errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee = await m.updatePayee(
+  const payee: t.Payee = await n.updatePayee(
     client,
     gSpreadsheetId,
     id,
-    m.fieldsToPayee(ctx.request.body)
+    n.fieldsToPayee(ctx.request.body)
   )
 
-  ctx.body = m.payeeToFields(payee)
+  ctx.body = n.payeeToFields(payee)
 }
 
 export async function deletePayee(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Payee id required')
-    return
+    throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const transactions: t.Transactions = await tn.fetchTransactions(client, gSpreadsheetId, {payeeId: id})
   if (transactions.length) {
-    ctx.throw(400, 'Can not delete. There are related transactions')
-    return
+    throw new u.PublicError(400, t.PAYEE_ERROR.THERE_ARE_RELATED_ENTITIES)
   }
 
-  const payee: t.Payee = await m.deletePayee(client, gSpreadsheetId, id)
+  const payee: t.Payee = await n.deletePayee(client, gSpreadsheetId, id)
   ctx.body = payee
 }

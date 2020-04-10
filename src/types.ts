@@ -92,16 +92,6 @@ export type XHttpResponse = {
 }
 
 /**
- * Errors
- */
-
-export type ResError = {
-  text: string,
-}
-
-export type ResErrors = ResError[]
-
-/**
  * i18n
  */
 
@@ -113,9 +103,38 @@ export type Translations = {
 }
 
 /**
- * Misc
+ * Errors
  */
 
-export enum ERROR {
-  INVALID_GRANT = 'invalid_grant',
+
+
+export interface IPublicError extends Error {
+  status: number
+  body: any
+}
+
+export interface IPublicErrorConstructor extends ErrorConstructor {
+  new (status: number, message: string, body?: any): IPublicError
+  (status: number, message: string, body?: any): IPublicError
+  readonly prototype: IPublicError
+}
+
+export type ValidationError = {
+  text: string,
+}
+
+export type ValidationErrors = ValidationError[]
+
+export type ValidationErrorBody = {errors: ValidationErrors}
+
+export interface IValidationError extends IPublicError {}
+
+export interface IValidationErrorConstructor extends IPublicErrorConstructor {
+  new (body?: ValidationErrorBody): IValidationError
+  (body?: ValidationErrorBody): IValidationError
+  readonly prototype: IValidationError
+}
+
+export enum APP_ERROR {
+  NOT_ACCEPTABLE = 'NOT_ACCEPTABLE',
 }

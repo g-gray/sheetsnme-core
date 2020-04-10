@@ -19,25 +19,23 @@ export async function getCategories(ctx: t.KContext): Promise<void> {
 export async function getCategory(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Category id required')
-    return
+    throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const category: t.Category | void = await m.fetchCategory(client, gSpreadsheetId, id)
   if (!category) {
-    ctx.throw(404, 'Category not found')
-    return
+    throw new u.PublicError(404, t.CATEGORY_ERROR.NOT_FOUND)
   }
 
   ctx.body = m.categoryToFields(category)
 }
 
 export async function createCategory(ctx: t.KContext): Promise<void> {
-  const errors: t.ResErrors = m.validateCategoryFields(ctx.request.body, ctx.lang)
+  const errors: t.ValidationErrors = m.validateCategoryFields(ctx.request.body, ctx.lang)
   if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
+    throw new u.ValidationError({errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -54,13 +52,12 @@ export async function createCategory(ctx: t.KContext): Promise<void> {
 export async function updateCategory(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Category id required')
-    return
+    throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
-  const errors: t.ResErrors = m.validateCategoryFields(ctx.request.body, ctx.lang)
+  const errors: t.ValidationErrors = m.validateCategoryFields(ctx.request.body, ctx.lang)
   if (errors.length) {
-    throw new u.PublicError('Validation error', {errors})
+    throw new u.ValidationError({errors})
   }
 
   const client: t.GOAuth2Client = ctx.client
@@ -78,16 +75,14 @@ export async function updateCategory(ctx: t.KContext): Promise<void> {
 export async function deleteCategory(ctx: t.KContext): Promise<void> {
   const id: string | void = ctx.params.id
   if (!id) {
-    ctx.throw(400, 'Category id required')
-    return
+    throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
   const transactions: t.Transactions = await tn.fetchTransactions(client, gSpreadsheetId, {categoryId: id})
   if (transactions.length) {
-    ctx.throw(400, 'Can not delete. There are related transactions')
-    return
+    throw new u.PublicError(400, t.CATEGORY_ERROR.THERE_ARE_RELATED_ENTITIES)
   }
 
   const category: t.Category = await m.deleteCategory(client, gSpreadsheetId, id)

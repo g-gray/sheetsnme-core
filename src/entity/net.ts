@@ -14,7 +14,7 @@ export async function queryEntityById<T extends t.Entity>(
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T | void> {
   if (!id) {
-    throw new Error('Entity id required')
+    throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
   const query: string = `select * where A = '${id}'`
@@ -55,7 +55,6 @@ export async function queryEntities<T>(
 
 // TODO Probably replace generic by a common type for all key entities
 export async function queryEntitiesNumber(
-  client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
   query?: string,
@@ -94,7 +93,7 @@ export async function createEntity<T extends t.Entity>(
     rowToEntity,
   )
   if (!created) {
-    throw new Error('Entity was not created')
+    throw new Error(t.ENTITY_ERROR.WAS_NOT_CREATED)
   }
 
   return created
@@ -109,7 +108,7 @@ export async function deleteEntityById<T extends t.Entity>(
   rowToEntity  : (row: t.GQueryRow) => T,
 ): Promise<T> {
   if (!id) {
-    throw new Error('Entity id required')
+    throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
   const toDelete: T | void = await queryEntityById<T>(
@@ -120,12 +119,12 @@ export async function deleteEntityById<T extends t.Entity>(
     rowToEntity,
   )
   if (!toDelete) {
-    throw new Error('Entity not found')
+    throw new Error(t.ENTITY_ERROR.NOT_FOUND)
   }
 
   const rowNumber: number = toDelete.row || 0
   if (!rowNumber) {
-    throw new Error('Row number not found')
+    throw new Error(t.ENTITY_ERROR.ROW_NUMBER_NOT_FOUND)
   }
 
   await sn.deleteRow(client, spreadsheetId, sheetId, rowNumber)
@@ -144,7 +143,7 @@ export async function updateEntityById<T extends t.Entity>(
   rowToEntity   : (row: t.GQueryRow) => T,
 ): Promise<T> {
   if (!id) {
-    throw new Error('Entity id required')
+    throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
   const toUpdate: T | void = await queryEntityById<T>(
@@ -155,12 +154,12 @@ export async function updateEntityById<T extends t.Entity>(
     rowToEntity,
   )
   if (!toUpdate) {
-    throw new Error('Entity not found')
+    throw new Error(t.ENTITY_ERROR.NOT_FOUND)
   }
 
   const rowNumber: number = toUpdate.row || 0
   if (!rowNumber) {
-    throw new Error('Row number not found')
+    throw new Error(t.ENTITY_ERROR.ROW_NUMBER_NOT_FOUND)
   }
 
   await sn.updateRow(client, spreadsheetId, sheetId, rowNumber, entityToRow(entity))
@@ -173,7 +172,7 @@ export async function updateEntityById<T extends t.Entity>(
     rowToEntity,
   )
   if (!updated) {
-    throw new Error('Entity was not updated')
+    throw new Error(t.ENTITY_ERROR.WAS_NOT_CREATED)
   }
 
   return updated

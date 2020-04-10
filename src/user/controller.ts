@@ -1,5 +1,7 @@
 import * as t from '../types'
 
+import * as u from '../utils'
+
 import * as sm from '../sheet/model'
 import * as sn from '../sheet/net'
 
@@ -9,8 +11,7 @@ export async function getUser(ctx: t.KContext) {
   const sessionId: string = ctx.sessionId
   const user: t.User | void = await m.userBySessionId(sessionId)
   if (!user) {
-    ctx.throw(404, 'User not found')
-    return
+    throw new u.PublicError(404, 'User not found')
   }
 
   const spreadsheets: t.Spreadsheets = await sm.spreadsheetsBySessionId(sessionId)
@@ -28,8 +29,7 @@ export async function getUser(ctx: t.KContext) {
     }
     catch (error) {
       if (error.code === 401) {
-        ctx.throw(401, 'Unauthorized')
-        return
+        throw new u.PublicError(401, 'Unauthorized')
       }
       throw error
     }
@@ -39,8 +39,7 @@ export async function getUser(ctx: t.KContext) {
     gSpreadsheet = await sn.createAppSpreadsheet(client, ctx.lang)
 
     if (!gSpreadsheet.spreadsheetId) {
-      ctx.throw(400, 'Spreadsheet id required')
-      return
+      throw new u.PublicError(400, 'Spreadsheet id required')
     }
 
     spreadsheet = await sm.createSpreadsheet(

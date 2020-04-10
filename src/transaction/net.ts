@@ -155,7 +155,6 @@ export async function fetchTransactionsNumber(
 ): Promise<number> {
   const query: string = transactionsNumberQuery(filter)
   const result: number = await en.queryEntitiesNumber(
-    client,
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     query,
@@ -235,8 +234,8 @@ function transactionsWhere(filter: t.TransactionsFilter): string {
   ]).join(' and ')
 }
 
-export function validateTransactionFields(fields: any, lang: t.Lang): t.ResErrors {
-  const errors: t.ResErrors = []
+export function validateTransactionFields(fields: any, lang: t.Lang): t.ValidationErrors {
+  const errors: t.ValidationErrors = []
   const transactionTypes: t.TRANSACTION_TYPE[] = fpx.values(t.TRANSACTION_TYPE)
   const {
     type,

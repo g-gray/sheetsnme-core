@@ -22,3 +22,11 @@ export type Debt = {
 }
 
 export type DebtsById = {[key: string]: Debt}
+
+
+
+export enum PAYEE_ERROR {
+  ID_REQUIRED                = 'PAYEE_ID_REQUIRED',
+  NOT_FOUND                  = 'PAYEE_NOT_FOUND',
+  THERE_ARE_RELATED_ENTITIES = 'CAN_NOT_DELETE_THIS_PAYEE_THERE_ARE_RELATED_TRANSACTIONS',
+}

@@ -34,14 +34,12 @@ export async function authLogout(ctx: t.KContext): Promise<void> {
   const cookieSessionId: string | void = n.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: string | void = headerSessionId || cookieSessionId
   if (!sessionId) {
-    ctx.throw(400, 'Session id required')
-    return
+    throw new u.PublicError(400, t.AUTH_ERROR.SESSION_ID_REQUIRED)
   }
 
   const session: t.Session | void = await m.deleteSessionById(sessionId)
   if (!session) {
-    ctx.throw(400, 'Session not found')
-    return
+    throw new u.PublicError(400, t.AUTH_ERROR.SESSION_NOT_FOUND)
   }
 
   await m.deleteExpiredSessions(session.userId)
@@ -54,21 +52,18 @@ export async function authCode (ctx: t.KContext): Promise<void> {
   // TODO Add checking of a CSRF token here got from ctx.state
   const code: string | void = ctx.query.code
   if (!code) {
-      ctx.throw(400, 'Code required')
-      return
+      throw new u.PublicError(400, t.AUTH_ERROR.CODE_REQUIRED)
   }
 
   let newToken: t.GAuthToken = await n.exchangeCodeForToken(code)
   const client: t.GOAuth2Client = n.createOAuth2Client(newToken)
   const gUser: t.GUserRes | void = await un.fetchUserInfo(client)
   if (!gUser) {
-      ctx.throw(400, 'User not found')
-      return
+      throw new u.PublicError(400, t.AUTH_ERROR.USER_NOT_FOUND)
   }
 
   if (!gUser.id) {
-      ctx.throw(400, 'User id required')
-      return
+      throw new u.PublicError(400, t.AUTH_ERROR.USER_ID_REQUIRED)
   }
 
   const externalId: string = gUser.id

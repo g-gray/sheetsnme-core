@@ -201,8 +201,8 @@ function rowToBalance(row: t.GQueryRow): t.Balance {
 }
 
 
-export function validateAccountFields(fields: any, lang: t.Lang): t.ResErrors {
-  const errors: t.ResErrors = []
+export function validateAccountFields(fields: any, lang: t.Lang): t.ValidationErrors {
+  const errors: t.ValidationErrors = []
   const {title} = fields
 
   if (!fpx.isString(title) || !title.length) {

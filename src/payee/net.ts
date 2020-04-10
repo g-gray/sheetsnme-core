@@ -186,8 +186,8 @@ function rowToDebt(row: t.GQueryRow): t.Debt {
 }
 
 
-export function validatePayeeFields(fields: any, lang: t.Lang): t.ResErrors {
-  const errors: t.ResErrors = []
+export function validatePayeeFields(fields: any, lang: t.Lang): t.ValidationErrors {
+  const errors: t.ValidationErrors = []
   const {title} = fields
 
   if (!fpx.isString(title) || !title.length) {

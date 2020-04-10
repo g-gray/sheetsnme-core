@@ -12,8 +12,7 @@ const {
 
 export async function jsonOnly(ctx: t.KContext, next: t.KNext): Promise<void> {
   if (!ctx.accepts('application/json')) {
-    ctx.throw(406, 'Not acceptable')
-    return
+    throw new u.PublicError(406, t.APP_ERROR.NOT_ACCEPTABLE)
   }
 
   await next()
@@ -28,4 +27,23 @@ export async function setLang(ctx: t.KContext, next: t.KNext): Promise<void> {
   }
 
   await next()
+}
+
+export async function handlePublicError(ctx: t.KContext, next: t.KNext): Promise<void> {
+  try {
+    await next()
+  }
+  catch (error) {
+    if (error instanceof u.PublicError) {
+      ctx.status = error.status
+      ctx.body = error.message
+      if (error.body) {
+        ctx.body = error.body
+      }
+
+      ctx.app.emit('error', error, ctx)
+      return
+    }
+    throw error
+  }
 }

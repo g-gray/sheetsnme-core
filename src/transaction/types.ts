@@ -57,3 +57,12 @@ export type TransactionsFilter = {
   limit?     : string,
   offset?    : string,
 }
+
+
+
+export enum TRANSACTION_ERROR {
+  ID_REQUIRED                       = 'TRANSACTION_ID_REQUIRED',
+  NOT_FOUND                         = 'TRANSACTION_NOT_FOUND',
+  LIMIT_MUST_BE_A_POSITIVE_INTEGER  = 'LIMIT_MUST_BE_A_POSITIVE_INTEGER',
+  OFFSET_MUST_BE_A_POSITIVE_INTEGER = 'OFFSET_MUST_BE_A_POSITIVE_INTEGER',
+}

@@ -46,20 +46,28 @@ export function round(num: number, decimals: number = 0): number {
  * Errors
  */
 
-// TODO Add interface for PublicError and ValidationError
-// Implement ValidationError interface below
-export class PublicError extends Error {
+export class PublicError extends Error implements t.IPublicError {
+  status: number
   body: any
 
-  constructor(message: string, body?: any) {
+  constructor(status: number, message: string, body?: any) {
     super(...arguments)
-    Error.captureStackTrace(this, this.constructor)
-    this.message = message
-    this.body = body
+    PublicError.captureStackTrace(this, this.constructor)
     this.name = 'PublicError'
+    this.message = message
+    this.status = status
+    this.body = body
   }
 }
 
+export class ValidationError extends PublicError implements t.IValidationError {
+  body: any
+
+  constructor(body?: t.ValidationErrorBody) {
+    super(400, 'ValidationError', body)
+    this.name = 'ValidationError'
+  }
+}
 
 
 /**
