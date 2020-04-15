@@ -58,7 +58,7 @@ export function createOAuth2Client(token?: t.IGAuthToken): t.GOAuth2Client {
 export function setCookie(ctx: t.KContext, name: string, value: string) {
   ctx.cookies.set(name, value, {
     httpOnly: true,
-    // sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: u.WEEK, // Expires in a week
   })
 }
