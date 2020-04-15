@@ -100,8 +100,11 @@ export function encrypt(
   keyLength: number,
   text     : string,
 ): string {
-  const key: Buffer = crypto.scryptSync(password, salt, keyLength) // Use the async `crypto.scrypt()` instead.
-  const iv: Buffer = Buffer.alloc(16, 0) // Initialization vector. Use `crypto.randomBytes` to generate a random iv instead of the static iv shown here.
+  // Use the async `crypto.scrypt()` instead.
+  const key: Buffer = crypto.scryptSync(password, salt, keyLength)
+  // Initialization vector. Use `crypto.randomBytes` to generate a random iv
+  // instead of the static iv shown here.
+  const iv: Buffer = Buffer.alloc(16, 0)
   const cipher = crypto.createCipheriv(algorythm, key, iv)
   let encrypted: string = cipher.update(text, 'utf8', 'hex')
   encrypted += cipher.final('hex')
@@ -117,9 +120,13 @@ export function decrypt(
   keyLength: number,
   cipher   : string
 ): string {
-  const key: Buffer = crypto.scryptSync(password, salt, keyLength) // Use the async `crypto.scrypt()` instead.
-  const iv: Buffer = Buffer.alloc(16, 0) // Initialization vector. Use `crypto.randomBytes` to generate a random iv instead of the static iv shown here.
-  const decipher = crypto.createDecipheriv(algorythm, key, iv) // Encrypted using same algorithm, key and iv.
+  // Use the async `crypto.scrypt()` instead.
+  const key: Buffer = crypto.scryptSync(password, salt, keyLength)
+  // Initialization vector. Use `crypto.randomBytes` to generate a random iv
+  // instead of the static iv shown here.
+  const iv: Buffer = Buffer.alloc(16, 0)
+  // Encrypted using same algorithm, key and iv.
+  const decipher = crypto.createDecipheriv(algorythm, key, iv)
   let decrypted: string = decipher.update(cipher, 'hex', 'utf8')
   decrypted += decipher.final('utf8')
 

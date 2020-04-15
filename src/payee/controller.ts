@@ -91,7 +91,12 @@ export async function deletePayee(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await tn.fetchTransactions(client, gSpreadsheetId, {payeeId: id})
+  const transactions: t.Transactions = await tn.fetchTransactions(
+    client,
+    gSpreadsheetId,
+    {payeeId: id}
+  )
+
   if (transactions.length) {
     throw new u.PublicError(400, t.PAYEE_ERROR.THERE_ARE_RELATED_ENTITIES)
   }

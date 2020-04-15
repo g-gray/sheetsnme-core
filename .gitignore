@@ -7,6 +7,7 @@
 !/yarn.lock
 !/readme.md
 !/tsconfig.json
+!/tslint.json
 !/yarn.lock
 !/db
 !/src

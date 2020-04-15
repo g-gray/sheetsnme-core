@@ -1,4 +1,4 @@
-import {OAuth2Client, Credentials} from 'google-auth-library';
+import {OAuth2Client, Credentials} from 'google-auth-library'
 
 export type Session = {
   id        : string,
@@ -16,7 +16,7 @@ export type SessionQueryFields = {
 
 
 
-export interface GAuthToken extends Credentials {
+export interface IGAuthToken extends Credentials {
   scope?: string,
 }
 

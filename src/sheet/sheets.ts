@@ -18,6 +18,8 @@ export const SALARY_CATEGORY_ID = '00000000-0000-0000-0002-000000000001'
 
 export const EMPLOYER_PAYEE_ID  = '00000000-0000-0000-0003-000000000001'
 
+const ROW_NUMBER_FORMULA: string = 'ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'
+
 export function createTransactionsSheet(lang: t.Lang): t.GSheet {
   const date: Date = new Date()
   return {
@@ -48,7 +50,7 @@ export function createTransactionsSheet(lang: t.Lang): t.GSheet {
               {userEnteredValue: {stringValue: 'incomeAmount'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
+              {userEnteredValue: {formulaValue: ROW_NUMBER_FORMULA}},
             ],
           },
           {
@@ -96,7 +98,7 @@ export function createAccountsSheet(lang: t.Lang): t.GSheet {
               {userEnteredValue: {stringValue: 'currencyCode'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
+              {userEnteredValue: {formulaValue: ROW_NUMBER_FORMULA}},
             ],
           },
           {
@@ -164,7 +166,7 @@ export function createCategoriesSheet(lang: t.Lang): t.GSheet {
               {userEnteredValue: {stringValue: 'title'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
+              {userEnteredValue: {formulaValue: ROW_NUMBER_FORMULA}},
             ],
           },
           {
@@ -268,7 +270,7 @@ export function createPayeesSheet(lang: t.Lang): t.GSheet {
               {userEnteredValue: {stringValue: 'title'}},
               {userEnteredValue: {stringValue: 'createdAt'}},
               {userEnteredValue: {stringValue: 'updatedAt'}},
-              {userEnteredValue: {formulaValue: '=ARRAYFORMULA(IF($A$1:$A <> "", ROW($A$1:$A), ""))'}},
+              {userEnteredValue: {formulaValue: ROW_NUMBER_FORMULA}},
             ],
           },
           {

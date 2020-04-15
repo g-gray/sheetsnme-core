@@ -46,7 +46,7 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
     CRYPTO_KEYLENGTH,
     user.externalToken,
   )
-  const token: t.GAuthToken = JSON.parse(decryptedToken)
+  const token: t.IGAuthToken = JSON.parse(decryptedToken)
 
   const scopes: string[] = (token.scope || '').split(' ')
   const isScopesDifferent: boolean = !fpx.every(
@@ -63,7 +63,7 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
     : true
 
   if (isExpired) {
-    const newToken: t.GAuthToken = await n.refreshToken(token)
+    const newToken: t.IGAuthToken = await n.refreshToken(token)
 
     const encryptedNewToken: string = u.encrypt(
       CRYPTO_ALGORITHM,

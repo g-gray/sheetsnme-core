@@ -27,21 +27,21 @@ export function generateAuthUrl(state?: string): string {
   })
 }
 
-export async function exchangeCodeForToken(code: string): Promise<t.GAuthToken> {
+export async function exchangeCodeForToken(code: string): Promise<t.IGAuthToken> {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client()
   return await oAuth2Client
     .getToken(code)
     .then(({tokens}) => tokens)
 }
 
-export async function refreshToken(token: t.GAuthToken): Promise<t.GAuthToken> {
+export async function refreshToken(token: t.IGAuthToken): Promise<t.IGAuthToken> {
   const oAuth2Client: t.GOAuth2Client = createOAuth2Client(token)
   return await oAuth2Client
     .refreshAccessToken()
     .then(({credentials}) => credentials)
 }
 
-export function createOAuth2Client(token?: t.GAuthToken): t.GOAuth2Client {
+export function createOAuth2Client(token?: t.IGAuthToken): t.GOAuth2Client {
   const oAuth2Client: t.GOAuth2Client = new google.auth.OAuth2(
     CLIENT_ID,
     CLIENT_SECRET,

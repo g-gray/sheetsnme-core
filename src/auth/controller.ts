@@ -55,7 +55,7 @@ export async function authCode (ctx: t.KContext): Promise<void> {
       throw new u.PublicError(400, t.AUTH_ERROR.CODE_REQUIRED)
   }
 
-  let newToken: t.GAuthToken = await n.exchangeCodeForToken(code)
+  let newToken: t.IGAuthToken = await n.exchangeCodeForToken(code)
   const client: t.GOAuth2Client = n.createOAuth2Client(newToken)
   const gUser: t.GUserRes | void = await un.fetchUserInfo(client)
   if (!gUser) {
@@ -77,7 +77,7 @@ export async function authCode (ctx: t.KContext): Promise<void> {
       CRYPTO_KEYLENGTH,
       user.externalToken,
       )
-      const token: t.GAuthToken = JSON.parse(decryptedToken)
+      const token: t.IGAuthToken = JSON.parse(decryptedToken)
       newToken = {...token, ...newToken}
   }
 

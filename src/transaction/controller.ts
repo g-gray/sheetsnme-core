@@ -14,7 +14,11 @@ export async function getTransactions(ctx: t.KContext): Promise<void> {
   const gSpreadsheetId: string = ctx.gSpreadsheetId
 
   const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId, filter)
-  const transactionsAmounts: t.TransactionsAmounts = await n.fetchTransactionsAmounts(client, gSpreadsheetId, filter)
+  const transactionsAmounts: t.TransactionsAmounts = await n.fetchTransactionsAmounts(
+    client,
+    gSpreadsheetId,
+    filter
+  )
   const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
 
   const limit: number = parseInt(filter.limit || '', 10)

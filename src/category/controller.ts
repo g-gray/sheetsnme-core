@@ -80,7 +80,12 @@ export async function deleteCategory(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transactions: t.Transactions = await tn.fetchTransactions(client, gSpreadsheetId, {categoryId: id})
+  const transactions: t.Transactions = await tn.fetchTransactions(
+    client,
+    gSpreadsheetId,
+    {categoryId: id}
+  )
+
   if (transactions.length) {
     throw new u.PublicError(400, t.CATEGORY_ERROR.THERE_ARE_RELATED_ENTITIES)
   }
