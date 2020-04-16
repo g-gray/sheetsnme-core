@@ -45,6 +45,6 @@ DB_PASSWORD=
 
 ```bash
 yarn
-yarn run db:repopulate
+yarn run db:migrate-up
 yarn run start
 ```
