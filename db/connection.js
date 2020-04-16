@@ -4,10 +4,10 @@ const pg = require('pg')
 require('dotenv').config({path: '.env.properties'})
 
 const properties = {
-  DB_HOST    : process.env.DB_HOST      || '',
-  DB_NAME    : process.env.DB_NAME      || '',
-  DB_USER    : process.env.DB_USER      || '',
-  DB_PASSWORD: process.env.DB_PASSWORD  || '',
+  DB_HOST    : process.env.DB_HOST     || '',
+  DB_NAME    : process.env.DB_NAME     || '',
+  DB_USER    : process.env.DB_USER     || '',
+  DB_PASSWORD: process.env.DB_PASSWORD || '',
   // Heroku specific
   DATABASE_URL: process.env.DATABASE_URL || '',
 }
