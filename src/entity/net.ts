@@ -1,95 +1,92 @@
 import * as t from '../types'
 
-// @ts-ignore
-import * as fpx from 'fpx'
+import uuid from 'uuid/v4'
 
 import * as sn from '../sheet/net'
 
-// TODO Probably replace generic by a common type for all key entities
-export async function queryEntityById<T extends t.Entity>(
+export async function queryEntityById<TR extends t.EntityResult>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
   id           : string,
-  rowToEntity  : (row: t.GQueryRow) => T,
-): Promise<void | T> {
+  rowToEntity  : (row: t.GQueryRow) => TR,
+): Promise<void | TR> {
   if (!id) {
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const query: string = `select * where A = '${id}'`
-  const entities: T[] = await queryEntities<T>(
+  const query: string = `SELECT * WHERE A = '${id}'`
+  const entities: TR[] = await queryEntities<TR>(
     client,
     spreadsheetId,
     sheetId,
     rowToEntity,
     query,
   )
-  const entity: void | T = fpx.first(entities)
-
+  const entity: void | TR = entities[0]
   return entity
 }
 
-// TODO Probably replace generic by a common type for all key entities
-export async function queryEntities<T>(
+export async function queryEntities<TR extends t.EntityResult>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
-  rowToEntity  : (row: t.GQueryRow) => T,
-  query?: string,
-): Promise<T[]> {
+  rowToEntity  : (row: t.GQueryRow) => TR,
+  query?       : string,
+): Promise<TR[]> {
   const table: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     sheetId,
-    query || `select * where A != 'id'`,
+    query || `SELECT * WHERE A != 'id'`,
   )
-  const entities: T[] = table
-    ? fpx.map(
-      table.rows,
-      (row: t.GQueryRow): T => rowToEntity(row)
-    )
-    : []
+  if (!table) {
+    return []
+  }
 
+  const entities: TR[] = table
+    ? table.rows.map((row: t.GQueryRow): TR => rowToEntity(row))
+    : []
   return entities
 }
 
-// TODO Probably replace generic by a common type for all key entities
 export async function queryEntitiesNumber(
   spreadsheetId: string,
   sheetId      : number,
-  query?: string,
+  query?       : string,
 ): Promise<number> {
   const table: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     sheetId,
-    query || `select count(A) where A != 'id'`,
+    query || `SELECT count(A) WHERE A != 'id'`,
   )
-
   const rows: t.GQueryRow[] = table
     ? table.rows
     : []
-  const row: void | t.GQueryRow = fpx.first(rows)
+  const row: void | t.GQueryRow = rows[0]
   const size: number = row && row.c[0] ? Number(row.c[0].v) : 0
 
   return size
 }
 
-// TODO Probably replace generic by a common type for all key entities
-export async function createEntity<T extends t.Entity>(
+export async function createEntity<TQ extends t.EntityQuery, TR extends t.EntityResult>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
   sheetId       : number,
-  entity        : T,
-  entityToRow   : (entity: T) => t.GRowData,
-  rowToEntity   : (row: t.GQueryRow) => T,
-): Promise<T> {
-  await sn.appendRow(client, spreadsheetId, sheetId, entityToRow(entity))
+  entity        : TQ,
+  entityToRow   : (entity: TQ) => t.GRowData,
+  rowToEntity   : (row: t.GQueryRow) => TR,
+): Promise<TR> {
+  const id: string = uuid()
+  await sn.appendRow(client, spreadsheetId, sheetId, entityToRow({
+    id,
+    ...entity,
+  }))
 
-  const created: void | T = await queryEntityById<T>(
+  const created: void | TR = await queryEntityById<TR>(
     client,
     spreadsheetId,
     sheetId,
-    entity.id,
+    id,
     rowToEntity,
   )
   if (!created) {
@@ -99,19 +96,18 @@ export async function createEntity<T extends t.Entity>(
   return created
 }
 
-// TODO Probably replace generic by a common type for all key entities
-export async function deleteEntityById<T extends t.Entity>(
+export async function deleteEntityById<TR extends t.EntityResult>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
   id           : string,
-  rowToEntity  : (row: t.GQueryRow) => T,
-): Promise<T> {
+  rowToEntity  : (row: t.GQueryRow) => TR,
+): Promise<TR> {
   if (!id) {
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const toDelete: void | T = await queryEntityById<T>(
+  const toDelete: void | TR = await queryEntityById<TR>(
     client,
     spreadsheetId,
     sheetId,
@@ -122,7 +118,7 @@ export async function deleteEntityById<T extends t.Entity>(
     throw new Error(t.ENTITY_ERROR.NOT_FOUND)
   }
 
-  const rowNumber: number = toDelete.row || 0
+  const rowNumber: number = toDelete.row
   if (!rowNumber) {
     throw new Error(t.ENTITY_ERROR.ROW_NUMBER_NOT_FOUND)
   }
@@ -132,21 +128,20 @@ export async function deleteEntityById<T extends t.Entity>(
   return toDelete
 }
 
-// TODO Probably replace generic by a common type for all key entities
-export async function updateEntityById<T extends t.Entity>(
+export async function updateEntityById<TQ extends t.EntityQuery, TR extends t.EntityResult>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
   sheetId       : number,
   id            : string,
-  entity        : T,
-  entityToRow   : (entity: T) => t.GRowData,
-  rowToEntity   : (row: t.GQueryRow) => T,
-): Promise<T> {
+  entity        : TQ,
+  entityToRow   : (entity: TQ) => t.GRowData,
+  rowToEntity   : (row: t.GQueryRow) => TR,
+): Promise<TR> {
   if (!id) {
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const toUpdate: void | T = await queryEntityById<T>(
+  const toUpdate: void | t.EntityResult = await queryEntityById<t.EntityResult>(
     client,
     spreadsheetId,
     sheetId,
@@ -157,18 +152,18 @@ export async function updateEntityById<T extends t.Entity>(
     throw new Error(t.ENTITY_ERROR.NOT_FOUND)
   }
 
-  const rowNumber: number = toUpdate.row || 0
+  const rowNumber: number = toUpdate.row
   if (!rowNumber) {
     throw new Error(t.ENTITY_ERROR.ROW_NUMBER_NOT_FOUND)
   }
 
   await sn.updateRow(client, spreadsheetId, sheetId, rowNumber, entityToRow(entity))
 
-  const updated: void | T = await queryEntityById<T>(
+  const updated: void | TR = await queryEntityById<TR>(
     client,
     spreadsheetId,
     sheetId,
-    entity.id,
+    id,
     rowToEntity,
   )
   if (!updated) {

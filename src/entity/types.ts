@@ -1,9 +1,15 @@
-export type Entity = {
-  id  : string,
-  row?: number,
+export type EntityQuery = {
+  id?       : string,
+  createdAt?: Date,
+  updatedAt?: Date,
 }
 
-
+export type EntityResult = {
+  id       : string,
+  row      : number,
+  createdAt: Date,
+  updatedAt: Date,
+}
 
 export enum ENTITY_ERROR {
   ID_REQUIRED          = 'ENTITY_ID_REQUIRED',
