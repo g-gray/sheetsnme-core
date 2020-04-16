@@ -2,9 +2,9 @@
 const {runMigration} = require('../connection')
 
 module.exports.up = () => runMigration(`
-  begin;
+  BEGIN;
 
-  insert into users
+  INSERT INTO users
     (
       external_id,
       email,
@@ -13,27 +13,27 @@ module.exports.up = () => runMigration(`
       last_name,
       role_id
     )
-  values
+  VALUES
     (
       '5f3b202a-90e8-47d2-85b1-74c4482184ec',
       'mail@example.com',
       true,
       'Foo',
       'Bar',
-      (select id from roles where sym = 'user')
+      (SELECT id FROM roles WHERE sym = 'user')
     );
 
-  commit;
+  COMMIT;
 `)
 
 module.exports.down = () => runMigration(`
-  begin;
+  BEGIN;
 
-  delete from sessions
-  where user_id = '5f3b202a-90e8-47d2-85b1-74c4482184ec';
+  DELETE FROM sessions
+  WHERE user_id = '5f3b202a-90e8-47d2-85b1-74c4482184ec';
 
-  delete from users
-  where id = '5f3b202a-90e8-47d2-85b1-74c4482184ec';
+  DELETE FROM users
+  WHERE id = '5f3b202a-90e8-47d2-85b1-74c4482184ec';
 
-  commit;
+  COMMIT;
 `)

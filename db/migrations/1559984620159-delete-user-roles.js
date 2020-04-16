@@ -2,39 +2,39 @@
 const {runMigration} = require('../connection')
 
 module.exports.up = () => runMigration(`
-  begin;
+  BEGIN;
 
-  alter table users
-  drop column role_id;
+  ALTER TABLE users
+  DROP COLUMN role_id;
 
-  drop table roles;
+  DROP TABLE roles;
 
-  commit;
+  COMMIT;
 `)
 
 module.exports.down = () => runMigration(`
-  begin;
+  BEGIN;
 
-  create table roles (
-    id                 uuid         primary key default gen_random_uuid(),
-    sym                text         not null unique check (sym <> ''),
-    name               text         not null check (name <> ''),
-    description        text         not null default ''
+  CREATE TABLE roles (
+    id             uuid    PRIMARY KEY DEFAULT gen_random_uuid(),
+    sym            text    NOT NULL UNIQUE CHECK (sym <> ''),
+    name           text    NOT NULL CHECK (name <> ''),
+    description    text    NOT NULL DEFAULT ''
   );
 
-  insert into roles
+  INSERT INTO roles
     (sym,     name)
-  values
+  VALUES
     ('admin', 'Admin'),
     ('user',  'User');
 
-  alter table users
-  add column role_id   uuid         references roles(id);
+  ALTER TABLE users
+  ADD COLUMN role_id uuid REFERENCES roles(id);
 
-  update users
-  set role_id = (select id from roles where sym='user');
+  UPDATE users
+  SET role_id = (SELECT id FROM roles WHERE sym='user');
 
-  alter table users alter column role_id set not null;
+  ALTER TABLE users ALTER COLUMN role_id SET NOT NULL;
 
-  commit;
+  COMMIT;
 `)

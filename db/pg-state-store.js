@@ -13,13 +13,16 @@ PgStore.prototype.load = async function (fn) {
   const client = await pool.connect()
 
   await client.query(`
-  create table if not exists migrations (
+  CREATE TABLE IF NOT EXISTS migrations (
     id          integer        PRIMARY KEY,
     data        jsonb          NOT NULL
   )
   `)
 
-  const {rows} = await client.query(`select data from migrations`)
+  const {rows} = await client.query(`
+  SELECT data
+  FROM migrations
+  `)
 
   await client.release()
 
@@ -36,18 +39,18 @@ PgStore.prototype.save = async function (set, fn) {
   const client = await pool.connect()
 
   await client.query(`
-  create table if not exists migrations (
+  CREATE TABLE IF NOT EXISTS migrations (
     id          integer        PRIMARY KEY,
     data        jsonb          NOT NULL
   )
   `)
 
   await client.query(`
-  insert into migrations
+  INSERT INTO migrations
     (id, data)
-  values
+  VALUES
     (1, $1)
-  on conflict (id) do update set
+  ON CONFLICT (id) DO UPDATE SET
     data = $1
   `,
   [{lastRun: set.lastRun, migrations: set.migrations}]

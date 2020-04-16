@@ -2,53 +2,53 @@
 const {runMigration} = require('../connection')
 
 module.exports.up = () => runMigration(`
-  begin;
+  BEGIN;
 
-  alter table users
-  add column external_token    text     default '';
+  ALTER TABLE users
+  ADD COLUMN external_token text DEFAULT '';
 
-  update users as u
-  set external_token = (
-    select external_token
-    from sessions as s
-    where s.user_id = u.id
-    order by created_at desc
-    limit 1
+  UPDATE users AS u
+  SET external_token = (
+    SELECT external_token
+    FROM sessions AS s
+    WHERE s.user_id = u.id
+    ORDER BY created_at DESC
+    LIMIT 1
   );
 
-  update users
-  set external_token = default
-  where external_token is null;
+  UPDATE users
+  SET external_token = DEFAULT
+  WHERE external_token IS NULL;
 
-  alter table users alter column external_token set not null;
+  ALTER TABLE users ALTER COLUMN external_token SET NOT NULL;
 
-  alter table sessions
-  drop column external_token;
+  ALTER TABLE sessions
+  DROP COLUMN external_token;
 
-  commit;
+  COMMIT;
 `)
 
 module.exports.down = () => runMigration(`
-  begin;
+  BEGIN;
 
-  alter table sessions
-  add column external_token    text     default '';
+  ALTER TABLE sessions
+  ADD COLUMN external_token text DEFAULT '';
 
-  update sessions as s
-  set external_token = (
-    select external_token
-    from users as u
-    where u.id = s.user_id
+  UPDATE sessions AS s
+  SET external_token = (
+    SELECT external_token
+    FROM users AS u
+    WHERE u.id = s.user_id
   );
 
-  update sessions
-  set external_token = default
-  where external_token is null;
+  UPDATE sessions
+  SET external_token = DEFAULT
+  WHERE external_token IS NULL;
 
-  alter table sessions alter column external_token set not null;
+  ALTER TABLE sessions ALTER COLUMN external_token SET NOT NULL;
 
-  alter table users
-  drop column external_token;
+  ALTER TABLE users
+  DROP COLUMN external_token;
 
-  commit;
+  COMMIT;
 `)

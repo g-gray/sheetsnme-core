@@ -2,13 +2,13 @@
 const {runMigration} = require('../connection')
 
 module.exports.up = () => runMigration(`
-  begin;
-  drop type gender;
-  commit;
+  BEGIN;
+  DROP TYPE gender;
+  COMMIT;
 `)
 
 module.exports.down = () => runMigration(`
-  begin;
-  create type gender as enum ('male', 'female');
-  commit;
+  BEGIN;
+  CREATE TYPE gender AS enum ('male', 'female');
+  COMMIT;
 `)
