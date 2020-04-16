@@ -11,32 +11,23 @@ import * as tn from '../transaction/net'
 import * as n from './net'
 
 export async function getAccounts(ctx: t.KContext): Promise<void> {
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const accounts: t.Accounts = await n.fetchAccounts(client, gSpreadsheetId)
-
-  const accountIds = fpx.map(accounts, (account: t.Account) => account.id)
-  const balances: t.BalancesById = await n.fetchBalancesByAccountIds(
+  const {client, gSpreadsheetId} = ctx
+  const accounts: t.AccountWithBalanceResult[] = await n.fetchAccountsWithBalance(
     client,
-    gSpreadsheetId,
-    accountIds
+    gSpreadsheetId
   )
 
-  ctx.body = fpx.map(accounts, (account: t.Account) => ({
-    ...n.accountToFields(account),
-    balance: balances[account.id] ? balances[account.id].balance : 0,
-  }))
+  const response: t.AccountWithBalanceRes[] = accounts.map(n.accountWithBalanceToFields)
+  ctx.body = response
 }
 
 export async function getAccount(ctx: t.KContext): Promise<void> {
-  const id: void | string = ctx.params.id
+  const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
   }
 
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: void | t.Account = await n.fetchAccount(
+  const account: void | t.AccountWithBalanceResult = await n.fetchAccountWithBalance(
     client,
     gSpreadsheetId,
     id
@@ -45,37 +36,30 @@ export async function getAccount(ctx: t.KContext): Promise<void> {
     throw new u.PublicError(404, 'Account not found')
   }
 
-  const balances: t.BalancesById = await n.fetchBalancesByAccountIds(
-    client,
-    gSpreadsheetId,
-    [account.id]
-  )
-
-  ctx.body = {
-    ...n.accountToFields(account),
-    balance: balances[account.id] ? balances[account.id].balance : 0,
-  }
+  const response: t.AccountRes = n.accountToFields(account)
+  ctx.body = response
 }
 
 export async function createAccount(ctx: t.KContext): Promise<void> {
-  const errors: t.ValidationErrors = n.validateAccountFields(ctx.request.body, ctx.lang)
+  const {request: {body}, client, gSpreadsheetId, lang} = ctx
+
+  const errors: t.ValidationErrors = n.validateAccountFields(body, lang)
   if (errors.length) {
     throw new u.ValidationError({errors})
   }
 
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: t.Account = await n.createAccount(
+  const account: t.AccountResult = await n.createAccount(
     client,
     gSpreadsheetId,
-    n.fieldsToAccount(ctx.request.body)
+    n.fieldsToAccount(body)
   )
 
-  ctx.body = n.accountToFields(account)
+  const response: t.AccountRes = n.accountToFields(account)
+  ctx.body = response
 }
 
 export async function updateAccount(ctx: t.KContext): Promise<void> {
-  const id: void | string = ctx.params.id
+  const {params: {id}, request: {body}, client, gSpreadsheetId, lang} = ctx
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
   }
@@ -84,25 +68,24 @@ export async function updateAccount(ctx: t.KContext): Promise<void> {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.CAN_NOT_CHANGE)
   }
 
-  const errors: t.ValidationErrors = n.validateAccountFields(ctx.request.body, ctx.lang)
+  const errors: t.ValidationErrors = n.validateAccountFields(body, lang)
   if (errors.length) {
     throw new u.ValidationError({errors})
   }
 
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: t.Account = await n.updateAccount(
+  const account: t.AccountResult = await n.updateAccount(
     client,
     gSpreadsheetId,
     id,
-    n.fieldsToAccount(ctx.request.body)
+    n.fieldsToAccount(body)
   )
 
-  ctx.body = n.accountToFields(account)
+  const response: t.AccountRes = n.accountToFields(account)
+  ctx.body = response
 }
 
 export async function deleteAccount(ctx: t.KContext): Promise<void> {
-  const id: void | string = ctx.params.id
+  const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
   }
@@ -111,8 +94,6 @@ export async function deleteAccount(ctx: t.KContext): Promise<void> {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.CAN_NOT_DELETE)
   }
 
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
   const transactions: t.Transactions = await tn.fetchTransactions(
     client,
     gSpreadsheetId,
@@ -122,6 +103,12 @@ export async function deleteAccount(ctx: t.KContext): Promise<void> {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.THERE_ARE_RELATED_ENTITIES)
   }
 
-  const account: t.Account = await n.deleteAccount(client, gSpreadsheetId, id)
-  ctx.body = n.accountToFields(account)
+  const account: t.AccountResult = await n.deleteAccount(
+    client,
+    gSpreadsheetId,
+    id
+  )
+
+  const response: t.AccountRes = n.accountToFields(account)
+  ctx.body = response
 }

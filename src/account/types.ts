@@ -1,15 +1,4 @@
-export type Account = {
-  id          : string,
-  title       : string,
-  currencyCode: string,
-  createdAt?  : string,
-  updatedAt?  : string,
-  row?        : number,
-}
-
-export type Accounts = Account[]
-
-export type AccountFields = {
+export type AccountReq = {
   id?          : string,
   title        : string,
   currencyCode?: string,
@@ -17,6 +6,38 @@ export type AccountFields = {
   updatedAt?   : string,
 }
 
+export type AccountRes = {
+  id          : string,
+  title       : string,
+  currencyCode: string,
+  createdAt   : string,
+  updatedAt   : string,
+}
+
+export type AccountWithBalanceRes = AccountRes & {
+  balance: number,
+}
+
+export type AccountQuery = {
+  id?         : string,
+  title       : string,
+  currencyCode: string,
+  createdAt?  : string,
+  updatedAt?  : string,
+}
+
+export type AccountResult = {
+  id          : string,
+  title       : string,
+  currencyCode: string,
+  createdAt   : string,
+  updatedAt   : string,
+  row         : number,
+}
+
+export type AccountWithBalanceResult = AccountResult & {
+  balance: number,
+}
 
 export type Balance = {
   accountId: string,

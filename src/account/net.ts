@@ -2,7 +2,6 @@ import * as t from '../types'
 
 // @ts-ignore
 import * as fpx from 'fpx'
-import uuid from 'uuid/v4'
 
 import * as u from '../utils'
 import * as tr from '../translations'
@@ -12,15 +11,41 @@ import * as sn from '../sheet/net'
 import * as en from '../entity/net'
 
 /**
- * Accounts
+ * Account
  */
+
+export async function fetchAccountWithBalance(
+  client       : t.GOAuth2Client,
+  spreadsheetId: string,
+  id           : string,
+): Promise<void | t.AccountWithBalanceResult> {
+  const account: void | t.AccountResult = await fetchAccount(
+    client,
+    spreadsheetId,
+    id
+  )
+  if (!account) {
+    return undefined
+  }
+
+  const balances: t.BalancesById = await fetchBalancesByAccountIds(
+    client,
+    spreadsheetId,
+    [account.id]
+  )
+  const accountWithBalance: t.AccountWithBalanceResult = {
+    ...account,
+    balance: balances[account.id] ? balances[account.id].balance : 0,
+  }
+  return accountWithBalance
+}
 
 export async function fetchAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<void | t.Account> {
-  const result: void | t.Account = await en.queryEntityById<t.Account>(
+): Promise<void | t.AccountResult> {
+  const result: void | t.AccountResult = await en.queryEntityById<t.AccountResult>(
     client,
     spreadsheetId,
     ss.ACCOUNTS_SHEET_ID,
@@ -33,9 +58,9 @@ export async function fetchAccount(
 export async function createAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  account      : t.Account,
-): Promise<t.Account> {
-  const result: t.Account = await en.createEntity<t.Account>(
+  account      : t.AccountQuery,
+): Promise<t.AccountResult> {
+  const result: t.AccountResult = await en.createEntity<t.AccountQuery, t.AccountResult>(
     client,
     spreadsheetId,
     ss.ACCOUNTS_SHEET_ID,
@@ -50,9 +75,9 @@ export async function updateAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  account      : t.Account,
-): Promise<t.Account> {
-  const result: t.Account = await en.updateEntityById<t.Account>(
+  account      : t.AccountQuery,
+): Promise<t.AccountResult> {
+  const result: t.AccountResult = await en.updateEntityById<t.AccountQuery, t.AccountResult>(
     client,
     spreadsheetId,
     ss.ACCOUNTS_SHEET_ID,
@@ -68,8 +93,8 @@ export async function deleteAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Account> {
-  const result: t.Account = await en.deleteEntityById<t.Account>(
+): Promise<t.AccountResult> {
+  const result: t.AccountResult = await en.deleteEntityById<t.AccountResult>(
     client,
     spreadsheetId,
     ss.ACCOUNTS_SHEET_ID,
@@ -79,25 +104,46 @@ export async function deleteAccount(
   return result
 }
 
+export async function fetchAccountsWithBalance(
+  client       : t.GOAuth2Client,
+  spreadsheetId: string,
+): Promise<t.AccountWithBalanceResult[]> {
+  const accounts: t.AccountResult[] = await fetchAccounts(client, spreadsheetId)
+  const accountIds: string[] = accounts.map((account: t.AccountResult) => account.id)
+  const balances: t.BalancesById = await fetchBalancesByAccountIds(
+    client,
+    spreadsheetId,
+    accountIds
+  )
+  const accountsWithBalance: t.AccountWithBalanceResult[] = fpx.map(
+    accounts,
+    (account: t.AccountResult) => ({
+      ...account,
+      balance: balances[account.id] ? balances[account.id].balance : 0,
+    })
+  )
+  return accountsWithBalance
+}
+
 export async function fetchAccounts(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-): Promise<t.Accounts> {
-  const result: t.Accounts = await en.queryEntities<t.Account>(
+): Promise<t.AccountResult[]> {
+  const result: t.AccountResult[] = await en.queryEntities<t.AccountResult>(
     client,
     spreadsheetId,
     ss.ACCOUNTS_SHEET_ID,
     rowToAccount,
     `
-    select *
-    where A != 'id' and A !='${ss.DEBT_ACCOUNT_ID}'
+    SELECT *
+    WHERE A != 'id' and A !='${ss.DEBT_ACCOUNT_ID}'
     `
   )
   return result
 }
 
 
-function rowToAccount(row: t.GQueryRow): t.Account {
+function rowToAccount(row: t.GQueryRow): t.AccountResult {
   return {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
@@ -108,7 +154,7 @@ function rowToAccount(row: t.GQueryRow): t.Account {
   }
 }
 
-function accountToRow(account: t.Account): t.GRowData {
+function accountToRow(account: t.AccountQuery): t.GRowData {
   const date: string = new Date().toJSON()
   const createdAt: string = account.createdAt
     ? new Date(account.createdAt).toJSON()
@@ -125,11 +171,17 @@ function accountToRow(account: t.Account): t.GRowData {
 }
 
 
+
+/**
+ * Balance
+ */
+
 export async function fetchBalancesByAccountIds(
-  client: t.GOAuth2Client,
+  client       : t.GOAuth2Client,
   spreadsheetId: string,
-  accountIds: string[],
+  accountIds   : string[],
 ): Promise<t.BalancesById> {
+  // TODO Remove the condition below
   const outcomeIdsCond: string = fpx.map(
     accountIds,
     (id: string) => `F = '${id}'`
@@ -138,9 +190,9 @@ export async function fetchBalancesByAccountIds(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
-    select F, sum(G)
-    where ${outcomeIdsCond}
-    group by F
+    SELECT F, sum(G)
+    WHERE ${outcomeIdsCond}
+    GROUP BY F
     `,
   )
   const outcomeBalances: t.BalancesById = outcomeTable
@@ -150,6 +202,7 @@ export async function fetchBalancesByAccountIds(
     )
     : {}
 
+  // TODO Remove the condition below
   const incomeIdsCond: string = fpx.map(
     accountIds,
     (id: string) => `H = '${id}'`
@@ -158,9 +211,9 @@ export async function fetchBalancesByAccountIds(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
-    select H, sum(I)
-    where ${incomeIdsCond}
-    group by H
+    SELECT H, sum(I)
+    WHERE ${incomeIdsCond}
+    GROUP BY H
     `,
   )
   const incomeBalances: t.BalancesById = incomeTable
@@ -169,7 +222,7 @@ export async function fetchBalancesByAccountIds(
       (balance: t.Balance) => balance.accountId)
     : {}
 
-  const ids = fpx.uniq(fpx.concat(fpx.keys(outcomeBalances), fpx.keys(incomeBalances)))
+  const ids: string[] = fpx.uniq(fpx.concat(fpx.keys(outcomeBalances), fpx.keys(incomeBalances)))
 
   const result: t.BalancesById = fpx.fold(
     ids,
@@ -201,6 +254,7 @@ function rowToBalance(row: t.GQueryRow): t.Balance {
 }
 
 
+
 export function validateAccountFields(fields: any, lang: t.Lang): t.ValidationErrors {
   const errors: t.ValidationErrors = []
   const {title} = fields
@@ -212,7 +266,27 @@ export function validateAccountFields(fields: any, lang: t.Lang): t.ValidationEr
   return errors
 }
 
-export function accountToFields(account: t.Account): t.AccountFields {
+export function accountWithBalanceToFields(account: t.AccountWithBalanceResult): t.AccountWithBalanceRes {
+  const {
+    id,
+    title,
+    currencyCode,
+    balance,
+    createdAt,
+    updatedAt,
+  } = account
+
+  return {
+    id,
+    title,
+    currencyCode,
+    balance,
+    createdAt,
+    updatedAt,
+  }
+}
+
+export function accountToFields(account: t.AccountResult): t.AccountRes {
   const {
     id,
     title,
@@ -230,17 +304,17 @@ export function accountToFields(account: t.Account): t.AccountFields {
   }
 }
 
-export function fieldsToAccount(fields: t.AccountFields): t.Account {
+export function fieldsToAccount(fields: t.AccountReq): t.AccountQuery {
   const {
     id,
     title,
     currencyCode,
     createdAt,
     updatedAt,
-  }: t.AccountFields = fields
+  }: t.AccountReq = fields
 
   return {
-    id          : id || uuid(),
+    id          : id || '',
     title       : title || '',
     currencyCode: currencyCode || '',
     createdAt,
