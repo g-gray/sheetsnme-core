@@ -70,6 +70,6 @@ export function setCookieExpired(ctx: t.KContext, name: string) {
   })
 }
 
-export function getCookie(ctx: t.KContext, name: string): string | void {
+export function getCookie(ctx: t.KContext, name: string): void | string {
   return ctx.cookies.get(name)
 }

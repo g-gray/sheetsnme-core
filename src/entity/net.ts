@@ -12,7 +12,7 @@ export async function queryEntityById<T extends t.Entity>(
   sheetId      : number,
   id           : string,
   rowToEntity  : (row: t.GQueryRow) => T,
-): Promise<T | void> {
+): Promise<void | T> {
   if (!id) {
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
@@ -25,7 +25,7 @@ export async function queryEntityById<T extends t.Entity>(
     rowToEntity,
     query,
   )
-  const entity: T | void = fpx.first(entities)
+  const entity: void | T = fpx.first(entities)
 
   return entity
 }
@@ -38,7 +38,7 @@ export async function queryEntities<T>(
   rowToEntity  : (row: t.GQueryRow) => T,
   query?: string,
 ): Promise<T[]> {
-  const table: t.GQueryTable | void = await sn.querySheet(
+  const table: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     sheetId,
     query || `select * where A != 'id'`,
@@ -59,7 +59,7 @@ export async function queryEntitiesNumber(
   sheetId      : number,
   query?: string,
 ): Promise<number> {
-  const table: t.GQueryTable | void = await sn.querySheet(
+  const table: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     sheetId,
     query || `select count(A) where A != 'id'`,
@@ -68,7 +68,7 @@ export async function queryEntitiesNumber(
   const rows: t.GQueryRow[] = table
     ? table.rows
     : []
-  const row: t.GQueryRow | void = fpx.first(rows)
+  const row: void | t.GQueryRow = fpx.first(rows)
   const size: number = row && row.c[0] ? Number(row.c[0].v) : 0
 
   return size
@@ -85,7 +85,7 @@ export async function createEntity<T extends t.Entity>(
 ): Promise<T> {
   await sn.appendRow(client, spreadsheetId, sheetId, entityToRow(entity))
 
-  const created: T | void = await queryEntityById<T>(
+  const created: void | T = await queryEntityById<T>(
     client,
     spreadsheetId,
     sheetId,
@@ -111,7 +111,7 @@ export async function deleteEntityById<T extends t.Entity>(
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const toDelete: T | void = await queryEntityById<T>(
+  const toDelete: void | T = await queryEntityById<T>(
     client,
     spreadsheetId,
     sheetId,
@@ -146,7 +146,7 @@ export async function updateEntityById<T extends t.Entity>(
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const toUpdate: T | void = await queryEntityById<T>(
+  const toUpdate: void | T = await queryEntityById<T>(
     client,
     spreadsheetId,
     sheetId,
@@ -164,7 +164,7 @@ export async function updateEntityById<T extends t.Entity>(
 
   await sn.updateRow(client, spreadsheetId, sheetId, rowNumber, entityToRow(entity))
 
-  const updated: T | void = await queryEntityById<T>(
+  const updated: void | T = await queryEntityById<T>(
     client,
     spreadsheetId,
     sheetId,

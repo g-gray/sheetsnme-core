@@ -30,14 +30,14 @@ export function authLogin(ctx: t.KContext, next: t.KNext): void {
 }
 
 export async function authLogout(ctx: t.KContext): Promise<void> {
-  const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
-  const cookieSessionId: string | void = n.getCookie(ctx, SESSION_COOKIE_NAME)
-  const sessionId: string | void = headerSessionId || cookieSessionId
+  const headerSessionId: void | string = ctx.headers[SESSION_HEADER_NAME]
+  const cookieSessionId: void | string = n.getCookie(ctx, SESSION_COOKIE_NAME)
+  const sessionId: void | string = headerSessionId || cookieSessionId
   if (!sessionId) {
     throw new u.PublicError(400, t.AUTH_ERROR.SESSION_ID_REQUIRED)
   }
 
-  const session: t.Session | void = await m.deleteSessionById(sessionId)
+  const session: void | t.Session = await m.deleteSessionById(sessionId)
   if (!session) {
     throw new u.PublicError(400, t.AUTH_ERROR.SESSION_NOT_FOUND)
   }
@@ -50,14 +50,14 @@ export async function authLogout(ctx: t.KContext): Promise<void> {
 
 export async function authCode (ctx: t.KContext): Promise<void> {
   // TODO Add checking of a CSRF token here got from ctx.state
-  const code: string | void = ctx.query.code
+  const code: void | string = ctx.query.code
   if (!code) {
       throw new u.PublicError(400, t.AUTH_ERROR.CODE_REQUIRED)
   }
 
   let newToken: t.IGAuthToken = await n.exchangeCodeForToken(code)
   const client: t.GOAuth2Client = n.createOAuth2Client(newToken)
-  const gUser: t.GUserRes | void = await un.fetchUserInfo(client)
+  const gUser: void | t.GUserRes = await un.fetchUserInfo(client)
   if (!gUser) {
       throw new u.PublicError(400, t.AUTH_ERROR.USER_NOT_FOUND)
   }
@@ -105,7 +105,7 @@ export async function authCode (ctx: t.KContext): Promise<void> {
 
   n.setCookie(ctx, SESSION_COOKIE_NAME, session.id)
 
-  const redirectTo: string | void = ctx.query.state
+  const redirectTo: void | string = ctx.query.state
   if (redirectTo) {
       ctx.redirect(decodeURIComponent(redirectTo))
       return

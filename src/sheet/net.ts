@@ -123,7 +123,7 @@ export async function deleteRow(
 export function fetchSpreadsheet(
   client: t.GOAuth2Client,
   options: t.GSpreadsheetsGetReq
-): Promise<t.GSpreadsheetRes | void> {
+): Promise<void | t.GSpreadsheetRes> {
   return google
     .sheets({version: 'v4', auth: client})
     .spreadsheets
@@ -161,7 +161,7 @@ export async function querySheet(
   spreadsheetId: string,
   sheetId: number,
   query?: string
-): Promise<t.GQueryTable | void> {
+): Promise<void | t.GQueryTable> {
   const queryString: string = qs.stringify({tq: query, gid: sheetId})
   const url: string = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${queryString}`
 

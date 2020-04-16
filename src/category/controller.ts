@@ -17,14 +17,14 @@ export async function getCategories(ctx: t.KContext): Promise<void> {
 }
 
 export async function getCategory(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const category: t.Category | void = await m.fetchCategory(client, gSpreadsheetId, id)
+  const category: void | t.Category = await m.fetchCategory(client, gSpreadsheetId, id)
   if (!category) {
     throw new u.PublicError(404, t.CATEGORY_ERROR.NOT_FOUND)
   }
@@ -50,7 +50,7 @@ export async function createCategory(ctx: t.KContext): Promise<void> {
 }
 
 export async function updateCategory(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
   }
@@ -73,7 +73,7 @@ export async function updateCategory(ctx: t.KContext): Promise<void> {
 }
 
 export async function deleteCategory(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
   }

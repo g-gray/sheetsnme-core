@@ -15,8 +15,8 @@ export async function fetchTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Transaction | void> {
-  const result: t.Transaction | void = await en.queryEntityById<t.Transaction>(
+): Promise<void | t.Transaction> {
+  const result: void | t.Transaction = await en.queryEntityById<t.Transaction>(
     client,
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
@@ -181,7 +181,7 @@ export async function fetchTransactionsAmounts(
 ): Promise<t.TransactionsAmounts> {
   const query: string = transactionsAmountsQuery(filter)
 
-  const table: t.GQueryTable | void = await sn.querySheet(
+  const table: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     query,
@@ -190,7 +190,7 @@ export async function fetchTransactionsAmounts(
   const rows: t.GQueryRow[] = table
     ? table.rows
     : []
-  const row: t.GQueryRow | void = fpx.first(rows)
+  const row: void | t.GQueryRow = fpx.first(rows)
 
   const outcomeAmount: number = row && row.c[0] ? Number(row.c[0].v) : 0
   const incomeAmount: number = row && row.c[1] ? Number(row.c[1].v) : 0

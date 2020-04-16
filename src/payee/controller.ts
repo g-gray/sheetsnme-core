@@ -23,14 +23,14 @@ export async function getPayees(ctx: t.KContext): Promise<void> {
 }
 
 export async function getPayee(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const payee: t.Payee | void = await n.fetchPayee(client, gSpreadsheetId, id)
+  const payee: void | t.Payee = await n.fetchPayee(client, gSpreadsheetId, id)
   if (!payee) {
     throw new u.PublicError(404, t.PAYEE_ERROR.NOT_FOUND)
   }
@@ -61,7 +61,7 @@ export async function createPayee(ctx: t.KContext): Promise<void> {
 }
 
 export async function updatePayee(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
   }
@@ -84,7 +84,7 @@ export async function updatePayee(ctx: t.KContext): Promise<void> {
 }
 
 export async function deletePayee(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
   }

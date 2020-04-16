@@ -29,14 +29,14 @@ export async function getAccounts(ctx: t.KContext): Promise<void> {
 }
 
 export async function getAccount(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const account: t.Account | void = await n.fetchAccount(
+  const account: void | t.Account = await n.fetchAccount(
     client,
     gSpreadsheetId,
     id
@@ -75,7 +75,7 @@ export async function createAccount(ctx: t.KContext): Promise<void> {
 }
 
 export async function updateAccount(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
   }
@@ -102,7 +102,7 @@ export async function updateAccount(ctx: t.KContext): Promise<void> {
 }
 
 export async function deleteAccount(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
   }

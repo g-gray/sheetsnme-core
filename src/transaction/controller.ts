@@ -42,14 +42,14 @@ export async function getTransactions(ctx: t.KContext): Promise<void> {
 }
 
 export async function getTransaction(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
   }
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction | void = await n.fetchTransaction(client, gSpreadsheetId, id)
+  const transaction: void | t.Transaction = await n.fetchTransaction(client, gSpreadsheetId, id)
   if (!transaction) {
     throw new u.PublicError(404, t.TRANSACTION_ERROR.NOT_FOUND)
   }
@@ -76,7 +76,7 @@ export async function createTransaction(ctx: t.KContext): Promise<void> {
 }
 
 export async function updateTransaction(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
   }
@@ -99,7 +99,7 @@ export async function updateTransaction(ctx: t.KContext): Promise<void> {
 }
 
 export async function deleteTransaction(ctx: t.KContext): Promise<void> {
-  const id: string | void = ctx.params.id
+  const id: void | string = ctx.params.id
   if (!id) {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
   }

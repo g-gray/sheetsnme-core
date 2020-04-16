@@ -14,8 +14,8 @@ export async function fetchCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Category | void> {
-  const result: t.Category | void = await en.queryEntityById<t.Category>(
+): Promise<void | t.Category> {
+  const result: void | t.Category = await en.queryEntityById<t.Category>(
     client,
     spreadsheetId,
     ss.CATEGORIES_SHEET_ID,

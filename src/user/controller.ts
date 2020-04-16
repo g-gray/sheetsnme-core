@@ -9,14 +9,14 @@ import * as m from './model'
 
 export async function getUser(ctx: t.KContext) {
   const sessionId: string = ctx.sessionId
-  const user: t.User | void = await m.userBySessionId(sessionId)
+  const user: void | t.User = await m.userBySessionId(sessionId)
   if (!user) {
     throw new u.PublicError(404, 'User not found')
   }
 
   const spreadsheets: t.Spreadsheets = await sm.spreadsheetsBySessionId(sessionId)
-  let spreadsheet: t.Spreadsheet | void = spreadsheets[0]
-  let gSpreadsheet: t.GSpreadsheetRes | void
+  let spreadsheet: void | t.Spreadsheet = spreadsheets[0]
+  let gSpreadsheet: void | t.GSpreadsheetRes
 
   const client: t.GOAuth2Client = ctx.client
 

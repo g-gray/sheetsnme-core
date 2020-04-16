@@ -5,7 +5,7 @@ import * as db from '../db'
 
 export async function sessionById(
   id: string
-): Promise<t.Session | void> {
+): Promise<void | t.Session> {
   const q: string = `
   select *
   from sessions
@@ -13,7 +13,7 @@ export async function sessionById(
   `
   const v: any[] = [id]
   const result: t.PGQueryResult = await db.query(q, v)
-  const row: t.PGQueryResultRow | void = result.rows[0]
+  const row: void | t.PGQueryResultRow = result.rows[0]
   if (!row) {
     return undefined
   }
@@ -56,7 +56,7 @@ export async function upsertSession(
 
 export async function deleteSessionById(
   id: string
-): Promise<t.Session | void> {
+): Promise<void | t.Session> {
   const q: string = `
   delete
   from sessions

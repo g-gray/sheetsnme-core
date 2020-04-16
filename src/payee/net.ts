@@ -15,8 +15,8 @@ export async function fetchPayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Payee | void> {
-  const result: t.Payee | void = await en.queryEntityById<t.Payee>(
+): Promise<void | t.Payee> {
+  const result: void | t.Payee = await en.queryEntityById<t.Payee>(
     client,
     spreadsheetId,
     ss.PAYEES_SHEET_ID,
@@ -122,7 +122,7 @@ export async function fetchDebtsByPayeeIds(
   spreadsheetId: string,
   payeeIds: string[],
 ): Promise<t.DebtsById> {
-  const loansTable: t.GQueryTable | void = await sn.querySheet(
+  const loansTable: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
@@ -138,7 +138,7 @@ export async function fetchDebtsByPayeeIds(
       )
     : {}
 
-  const borrowsTable: t.GQueryTable | void = await sn.querySheet(
+  const borrowsTable: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
@@ -160,10 +160,10 @@ export async function fetchDebtsByPayeeIds(
     ids,
     {},
     (acc: t.DebtsById, id: string) => {
-      const borrowDebt: t.Debt | void = borrowDebts[id]
+      const borrowDebt: void | t.Debt = borrowDebts[id]
       const borrowAmount = borrowDebt ? borrowDebt.debt : 0
 
-      const loanDebt: t.Debt | void = loanDebts[id]
+      const loanDebt: void | t.Debt = loanDebts[id]
       const loanAmount = loanDebt ? loanDebt.debt : 0
 
       return {

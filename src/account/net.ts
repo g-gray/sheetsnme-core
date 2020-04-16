@@ -19,8 +19,8 @@ export async function fetchAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Account | void> {
-  const result: t.Account | void = await en.queryEntityById<t.Account>(
+): Promise<void | t.Account> {
+  const result: void | t.Account = await en.queryEntityById<t.Account>(
     client,
     spreadsheetId,
     ss.ACCOUNTS_SHEET_ID,
@@ -134,7 +134,7 @@ export async function fetchBalancesByAccountIds(
     accountIds,
     (id: string) => `F = '${id}'`
   ).join(' OR ')
-  const outcomeTable: t.GQueryTable | void = await sn.querySheet(
+  const outcomeTable: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
@@ -154,7 +154,7 @@ export async function fetchBalancesByAccountIds(
     accountIds,
     (id: string) => `H = '${id}'`
   ).join(' OR ')
-  const incomeTable: t.GQueryTable | void = await sn.querySheet(
+  const incomeTable: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
@@ -175,9 +175,9 @@ export async function fetchBalancesByAccountIds(
     ids,
     {},
     (acc: t.BalancesById, id: string) => {
-      const incomeBalance: t.Balance | void = incomeBalances[id]
+      const incomeBalance: void | t.Balance = incomeBalances[id]
       const income = incomeBalance ? incomeBalance.balance : 0
-      const outcomeBalance: t.Balance | void = outcomeBalances[id]
+      const outcomeBalance: void | t.Balance = outcomeBalances[id]
       const outcome = outcomeBalance ? outcomeBalance.balance : 0
 
       return {

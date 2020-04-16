@@ -45,7 +45,7 @@ export async function upsertUser(
 
 export async function userByExternalId(
   externalId: string
-): Promise<t.User | void> {
+): Promise<void | t.User> {
   const q: string = `
   select *
   from users
@@ -53,7 +53,7 @@ export async function userByExternalId(
   `
   const v: any[] = [externalId]
   const result: t.PGQueryResult = await db.query(q, v)
-  const row: t.PGQueryResultRow | void = result.rows[0]
+  const row: void | t.PGQueryResultRow = result.rows[0]
   if (!row) {
     return undefined
   }
@@ -64,7 +64,7 @@ export async function userByExternalId(
 
 export async function userBySessionId(
   sessionId: string
-): Promise<t.User | void> {
+): Promise<void | t.User> {
   const q: string = `
   select *
   from users u
@@ -73,7 +73,7 @@ export async function userBySessionId(
   `
   const v: any[] = [sessionId]
   const result: t.PGQueryResult = await db.query(q, v)
-  const row: t.PGQueryResultRow | void = result.rows[0]
+  const row: void | t.PGQueryResultRow = result.rows[0]
   if (!row) {
     return undefined
   }

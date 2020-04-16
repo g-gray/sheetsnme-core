@@ -19,7 +19,7 @@ export async function jsonOnly(ctx: t.KContext, next: t.KNext): Promise<void> {
 }
 
 export async function setLang(ctx: t.KContext, next: t.KNext): Promise<void> {
-  const lang: string | void = ctx.headers[LANG_HEADER_NAME]
+  const lang: void | string = ctx.headers[LANG_HEADER_NAME]
 
   ctx.lang = u.AVAILABLE_LANGS[0]
   if (fpx.includes(u.AVAILABLE_LANGS), lang) {

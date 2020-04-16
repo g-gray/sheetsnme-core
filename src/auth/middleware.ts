@@ -22,19 +22,19 @@ const {
   } = e.properties
 
 export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void> {
-  const headerSessionId: string | void = ctx.headers[SESSION_HEADER_NAME]
-  const cookieSessionId: string | void = n.getCookie(ctx, SESSION_COOKIE_NAME)
-  const sessionId: string | void = headerSessionId || cookieSessionId
+  const headerSessionId: void | string = ctx.headers[SESSION_HEADER_NAME]
+  const cookieSessionId: void | string = n.getCookie(ctx, SESSION_COOKIE_NAME)
+  const sessionId: void | string = headerSessionId || cookieSessionId
   if (!sessionId) {
     throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
   }
 
-  const session: t.Session | void = await m.sessionById(sessionId)
+  const session: void | t.Session = await m.sessionById(sessionId)
   if (!session) {
     throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
   }
 
-  const user: t.User | void = await um.userBySessionId(session.id)
+  const user: void | t.User = await um.userBySessionId(session.id)
   if (!user) {
     throw new u.PublicError(400, t.AUTH_ERROR.SESSION_ID_REQUIRED)
   }
