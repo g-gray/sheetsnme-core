@@ -4,12 +4,12 @@ const pg = require('pg')
 require('dotenv').config({path: '.env.properties'})
 
 const properties = {
-  DB_NAME          : process.env.DB_NAME           || '',
-  DB_HOST          : process.env.DB_HOST           || '',
-  POSTGRES_USER    : process.env.POSTGRES_USER     || '',
-  POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD || '',
-  PGSCRIPT_DB_URL  : process.env.PGSCRIPT_DB_URL   || '',
-  DATABASE_URL     : process.env.DATABASE_URL      || '',
+  DB_HOST    : process.env.DB_HOST      || '',
+  DB_NAME    : process.env.DB_NAME      || '',
+  DB_USER    : process.env.DB_USER      || '',
+  DB_PASSWORD: process.env.DB_PASSWORD  || '',
+  // Heroku specific
+  DATABASE_URL: process.env.DATABASE_URL || '',
 }
 
 const config = properties.DATABASE_URL
@@ -17,8 +17,8 @@ const config = properties.DATABASE_URL
   : {
     host    : properties.DB_HOST,
     database: properties.DB_NAME,
-    user    : properties.POSTGRES_USER,
-    password: properties.POSTGRES_PASSWORD,
+    user    : properties.DB_USER,
+    password: properties.DB_PASSWORD,
   }
 
 const pool = new pg.Pool(config)

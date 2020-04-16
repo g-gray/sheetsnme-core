@@ -19,26 +19,30 @@ export * from './transaction/types'
  */
 
 export type EnvProperties = {
-  HOST               : string,
-  PORT               : number,
-  LOGOUT_URL         : string,
-  CLIENT_ID          : string,
-  CLIENT_SECRET      : string,
-  REDIRECT_URL       : string,
-  SPREADSHEET_NAME   : string,
-  DB_NAME            : string,
-  DB_HOST            : string,
-  POSTGRES_USER      : string,
-  POSTGRES_PASSWORD  : string,
-  PGSCRIPT_DB_URL    : string,
+  HOST: string,
+  PORT: number,
+
+  DB_NAME     : string,
+  DB_HOST     : string,
+  DB_USER     : string,
+  DB_PASSWORD : string,
+  DATABASE_URL: string,
+
+  CLIENT_ID    : string,
+  CLIENT_SECRET: string,
+  REDIRECT_URL : string,
+  LOGOUT_URL   : string,
+
+  CRYPTO_ALGORITHM: string,
+  CRYPTO_PASSWORD : string,
+  CRYPTO_SALT     : string,
+  CRYPTO_KEYLENGTH: number,
+
   SESSION_COOKIE_NAME: string,
   SESSION_HEADER_NAME: string,
   LANG_HEADER_NAME   : string,
-  CRYPTO_ALGORITHM   : string,
-  CRYPTO_PASSWORD    : string,
-  CRYPTO_SALT        : string,
-  CRYPTO_KEYLENGTH   : number,
-  DATABASE_URL       : string,
+
+  SPREADSHEET_NAME: string,
 }
 
 /**

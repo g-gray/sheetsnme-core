@@ -37,8 +37,8 @@ When launching the REPL in the future, connect to the app database right away:
 Change these properties:
 
 ```
-POSTGRES_USER=<your MacOS username>
-POSTGRES_PASSWORD=
+DB_USER=<your MacOS username>
+DB_PASSWORD=
 ```
 
 ## Run

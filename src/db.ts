@@ -7,8 +7,8 @@ import * as e from './env'
 const {
   DB_HOST,
   DB_NAME,
-  POSTGRES_USER,
-  POSTGRES_PASSWORD,
+  DB_USER,
+  DB_PASSWORD,
   DATABASE_URL,
 } = e.properties
 
@@ -17,8 +17,8 @@ const config: t.PGClientConfig = DATABASE_URL
   : {
     host    : DB_HOST,
     database: DB_NAME,
-    user    : POSTGRES_USER,
-    password: POSTGRES_PASSWORD,
+    user    : DB_USER,
+    password: DB_PASSWORD,
   }
 
 const pool: t.PGPool = new pg.Pool(config)
