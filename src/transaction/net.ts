@@ -404,7 +404,7 @@ export function fieldsToTransaction(fields: t.TransactionFields): t.Transaction 
 
       outcomeAccountId: ss.DEBT_ACCOUNT_ID,
       outcomeAmount   : incomeAmount || 0,
-      incomeAccountId : '',
+      incomeAccountId : incomeAccountId || '',
       incomeAmount    : incomeAmount || 0,
 
       comment         : comment || '',
