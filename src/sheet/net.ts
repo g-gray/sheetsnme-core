@@ -78,23 +78,39 @@ export async function updateRow(
   sheetId      : number,
   rowNumber    : number,
   row          : t.GRowData,
-): Promise<void> {
-  await batchUpdateSpreadsheet(client, {
-    spreadsheetId,
-    requestBody: {
-      requests: [{
-        updateCells: {
-          rows: [row],
-          start: {
-            sheetId,
-            rowIndex: rowNumber - 1,
-            columnIndex: 0,
+): Promise<t.GRowData> {
+  const result: t.GSpreadsheetsBatchUpdateRes = await batchUpdateSpreadsheet(
+    client,
+    {
+      spreadsheetId,
+      requestBody: {
+        includeSpreadsheetInResponse: true,
+        responseIncludeGridData: true,
+        responseRanges: [`${rowNumber}:${rowNumber}`],
+        requests: [{
+          updateCells: {
+            rows: [row],
+            start: {
+              sheetId,
+              rowIndex: rowNumber - 1,
+              columnIndex: 0,
+            },
+            fields: '*',
           },
-          fields: '*',
-        },
-      }],
-    },
-  })
+        }],
+      },
+    }
+  )
+
+  // @ts-ignore
+  const updatedRow: t.GRowData = result
+    .updatedSpreadsheet
+    .sheets[0]
+    .data[0]
+    .rowData[0]
+    .values
+
+  return updatedRow
 }
 
 export async function deleteRow(
