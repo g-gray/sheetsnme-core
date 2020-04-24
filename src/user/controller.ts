@@ -21,18 +21,10 @@ export async function getUser(ctx: t.KContext) {
   const client: t.GOAuth2Client = ctx.client
 
   if (spreadsheet) {
-    try {
-      gSpreadsheet = await sn.fetchSpreadsheet(
-        client,
-        {spreadsheetId: spreadsheet.externalId}
-      )
-    }
-    catch (error) {
-      if (error.code === 401) {
-        throw new u.PublicError(401, 'Unauthorized')
-      }
-      throw error
-    }
+    gSpreadsheet = await sn.fetchSpreadsheet(
+      client,
+      {spreadsheetId: spreadsheet.externalId}
+    )
   }
 
   if (!gSpreadsheet) {

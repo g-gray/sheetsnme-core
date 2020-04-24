@@ -90,6 +90,10 @@ export async function handleAuthError(_: t.KContext, next: t.KNext): Promise<voi
     await next()
   }
   catch (error) {
+    if (error.code === 401) {
+      throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
+    }
+
     if (error.message === t.AUTH_ERROR.G_INVALID_GRANT) {
       throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
     }
