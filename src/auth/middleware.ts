@@ -13,13 +13,13 @@ import * as n from './net'
 
 
 const {
-    SESSION_HEADER_NAME,
-    SESSION_COOKIE_NAME,
-    CRYPTO_ALGORITHM,
-    CRYPTO_PASSWORD,
-    CRYPTO_SALT,
-    CRYPTO_KEYLENGTH,
-  } = e.properties
+  SESSION_HEADER_NAME,
+  SESSION_COOKIE_NAME,
+  CRYPTO_ALGORITHM,
+  CRYPTO_PASSWORD,
+  CRYPTO_SALT,
+  CRYPTO_KEYLENGTH,
+} = e.properties
 
 export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void> {
   const headerSessionId: void | string = ctx.headers[SESSION_HEADER_NAME]

@@ -146,7 +146,9 @@ export function fetchSpreadsheet(
     .get(options)
     .then(({data}) => data)
     .catch(error => {
-      if (error.code === 404) return
+      if (error.code === 404) {
+        return undefined
+      }
       throw error
     })
 }
