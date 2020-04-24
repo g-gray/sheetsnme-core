@@ -33,7 +33,7 @@ export async function getAccount(ctx: t.KContext): Promise<void> {
     id
   )
   if (!account) {
-    throw new u.PublicError(404, 'Account not found')
+    throw new u.PublicError(404, t.ACCOUNT_ERROR.NOT_FOUND)
   }
 
   const response: t.AccountRes = n.accountToFields(account)
