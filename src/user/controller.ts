@@ -39,7 +39,7 @@ export async function getUser(ctx: t.KContext) {
     gSpreadsheet = await sn.createAppSpreadsheet(client, ctx.lang)
 
     if (!gSpreadsheet.spreadsheetId) {
-      throw new u.PublicError(400, 'Spreadsheet id required')
+      throw new u.PublicError(400, t.USER_ERROR.SPREADSHEET_ID_REQUIRED)
     }
 
     spreadsheet = await sm.createSpreadsheet(

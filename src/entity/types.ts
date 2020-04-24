@@ -1,14 +1,14 @@
 export type EntityQuery = {
   id?       : string,
-  createdAt?: Date,
-  updatedAt?: Date,
+  createdAt?: string,
+  updatedAt?: string,
 }
 
 export type EntityResult = {
   id       : string,
   row      : number,
-  createdAt: Date,
-  updatedAt: Date,
+  createdAt: string,
+  updatedAt: string,
 }
 
 export enum ENTITY_ERROR {
