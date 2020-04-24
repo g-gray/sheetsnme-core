@@ -1,28 +1,50 @@
+import * as t from '../types'
+
 import {oauth2_v2} from 'googleapis'
 
-export type User = {
+export type GetUserRes = UserRes & {
+  spreadsheets: t.SpreadsheetRes[],
+}
+
+export type UserRes = {
   id           : string,
-  externalId   : string,
   pictureUrl   : string,
   email        : string,
-  emailVerified: boolean,
   firstName    : string,
   lastName     : string,
-  externalToken: string,
   createdAt    : Date,
   updatedAt    : Date,
 }
 
-export type UserQueryFields = {
+export type UserQuery = {
   externalId   : string,
-  pictureUrl   : string,
+  externalToken: string,
   email        : string,
   emailVerified: boolean,
   firstName    : string,
   lastName     : string,
-  externalToken: string,
+  pictureUrl   : string,
   createdAt?   : Date,
   updatedAt?   : Date,
+}
+
+export type UserResult = {
+  id           : string,
+  externalId   : string,
+  externalToken: string,
+  email        : string,
+  emailVerified: boolean,
+  firstName    : string,
+  lastName     : string,
+  pictureUrl   : string,
+  createdAt    : Date,
+  updatedAt    : Date,
+}
+
+
+export enum USER_ERROR {
+  SPREADSHEET_ID_REQUIRED = 'SPREADSHEET_ID_REQUIRED',
+  NOT_FOUND = 'USER_NOT_FOUND',
 }
 
 

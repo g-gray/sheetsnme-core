@@ -68,7 +68,7 @@ export async function authCode (ctx: t.KContext): Promise<void> {
 
   const externalId: string = gUser.id
 
-  const user: void | t.User = await um.userByExternalId(externalId)
+  const user: void | t.UserResult = await um.userByExternalId(externalId)
   if (user) {
       const decryptedToken: string = u.decrypt(
       CRYPTO_ALGORITHM,
@@ -89,14 +89,14 @@ export async function authCode (ctx: t.KContext): Promise<void> {
       JSON.stringify(newToken)
   )
 
-  const upsertedUser: t.User = await um.upsertUser({
+  const upsertedUser: t.UserResult = await um.upsertUser({
       externalId,
-      pictureUrl   : gUser.picture        || '',
+      externalToken: encryptedNewToken,
       email        : gUser.email          || '',
       emailVerified: gUser.verified_email || false,
       firstName    : gUser.given_name     || '',
       lastName     : gUser.family_name    || '',
-      externalToken: encryptedNewToken,
+      pictureUrl   : gUser.picture        || '',
   })
 
   const session: t.Session = await m.upsertSession({userId: upsertedUser.id})

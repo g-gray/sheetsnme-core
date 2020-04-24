@@ -3,8 +3,8 @@ import * as t from '../types'
 import * as db from '../db'
 
 export async function upsertUser(
-  user: t.UserQueryFields
-): Promise<t.User> {
+  user: t.UserQuery
+): Promise<t.UserResult> {
   const q: string = `
   insert into users
     (
@@ -39,13 +39,13 @@ export async function upsertUser(
   ]
   const result: t.PGQueryResult = await db.query(q, v)
   const row: t.PGQueryResultRow = result.rows[0]
-  const upsertedUser: t.User = rowToUser(row)
+  const upsertedUser: t.UserResult = rowToUser(row)
   return upsertedUser
 }
 
 export async function userByExternalId(
   externalId: string
-): Promise<void | t.User> {
+): Promise<void | t.UserResult> {
   const q: string = `
   select *
   from users
@@ -58,13 +58,13 @@ export async function userByExternalId(
     return undefined
   }
 
-  const user: t.User = rowToUser(row)
+  const user: t.UserResult = rowToUser(row)
   return user
 }
 
 export async function userBySessionId(
   sessionId: string
-): Promise<void | t.User> {
+): Promise<void | t.UserResult> {
   const q: string = `
   select *
   from users u
@@ -78,21 +78,44 @@ export async function userBySessionId(
     return undefined
   }
 
-  const user: t.User = rowToUser(row)
+  const user: t.UserResult = rowToUser(row)
   return user
 }
 
-function rowToUser(row: t.PGQueryResultRow): t.User {
+function rowToUser(row: t.PGQueryResultRow): t.UserResult {
   return {
     id           : row.id             as string,
     externalId   : row.external_id    as string,
-    pictureUrl   : row.picture_url    as string,
+    externalToken: row.external_token as string,
     email        : row.email          as string,
     emailVerified: row.email_verified as boolean,
     firstName    : row.first_name     as string,
     lastName     : row.last_name      as string,
-    externalToken: row.external_token as string,
+    pictureUrl   : row.picture_url    as string,
     createdAt    : row.created_at     as Date,
     updatedAt    : row.updated_at     as Date,
+  }
+}
+
+
+export function userToFields(user: t.UserResult): t.UserRes {
+  const {
+    id,
+    pictureUrl,
+    email,
+    firstName,
+    lastName,
+    createdAt,
+    updatedAt,
+  } = user
+
+  return {
+    id,
+    pictureUrl,
+    email,
+    firstName,
+    lastName,
+    createdAt,
+    updatedAt,
   }
 }

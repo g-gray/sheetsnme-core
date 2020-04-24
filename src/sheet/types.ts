@@ -1,14 +1,16 @@
 import {drive_v3, sheets_v4} from 'googleapis'
 
-export type Spreadsheet = {
+export type SpreadsheetRes = {
+  id: string,
+}
+
+export type SpreadsheetResult = {
   id        : string,
   userId    : string,
   externalId: string,
   createdAt : Date,
   updatedAt : Date,
 }
-
-export type Spreadsheets = Spreadsheet[]
 
 
 

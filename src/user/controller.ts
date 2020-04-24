@@ -9,13 +9,13 @@ import * as m from './model'
 
 export async function getUser(ctx: t.KContext) {
   const sessionId: string = ctx.sessionId
-  const user: void | t.User = await m.userBySessionId(sessionId)
+  const user: void | t.UserResult = await m.userBySessionId(sessionId)
   if (!user) {
-    throw new u.PublicError(404, 'User not found')
+    throw new u.PublicError(404, t.USER_ERROR.NOT_FOUND)
   }
 
-  const spreadsheets: t.Spreadsheets = await sm.spreadsheetsBySessionId(sessionId)
-  let spreadsheet: void | t.Spreadsheet = spreadsheets[0]
+  const spreadsheets: t.SpreadsheetResult[] = await sm.spreadsheetsBySessionId(sessionId)
+  let spreadsheet: void | t.SpreadsheetResult = spreadsheets[0]
   let gSpreadsheet: void | t.GSpreadsheetRes
 
   const client: t.GOAuth2Client = ctx.client
@@ -40,5 +40,10 @@ export async function getUser(ctx: t.KContext) {
     )
   }
 
-  ctx.body = {...user, spreadsheets: [{id: spreadsheet.id}]}
+  // TODO Rethink
+  const response: t.GetUserRes = {
+    ...m.userToFields(user),
+    spreadsheets: [sm.spreadsheetToFields(spreadsheet)],
+  }
+  ctx.body = response
 }

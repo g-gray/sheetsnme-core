@@ -1,13 +1,10 @@
 import * as t from '../types'
 
-// @ts-ignore
-import * as fpx from 'fpx'
-
 import * as db from '../db'
 
 export async function spreadsheetsBySessionId(
   sessionId: string
-): Promise<t.Spreadsheets> {
+): Promise<t.SpreadsheetResult[]> {
 const q: string = `
   select sh.*
   from spreadsheets sh
@@ -19,14 +16,14 @@ const q: string = `
   const result: t.PGQueryResult = await db.query(q, v)
   const rows: t.PGQueryResultRow[] = result.rows
 
-  const spreadsheets = fpx.map(rows, rowToSpreadsheet)
+  const spreadsheets = rows.map(rowToSpreadsheet)
   return spreadsheets
 }
 
 export async function createSpreadsheet(
   sessionId: string,
   spreadsheetId: string
-): Promise<t.Spreadsheet> {
+): Promise<t.SpreadsheetResult> {
   const q: string = `
   with
       s as (select user_id from sessions where id = $1)
@@ -39,16 +36,27 @@ export async function createSpreadsheet(
   const v: any[] = [sessionId, spreadsheetId]
   const result: t.PGQueryResult = await db.query(q, v)
   const row: t.PGQueryResultRow = result.rows[0]
-  const spreadsheet: t.Spreadsheet = rowToSpreadsheet(row)
+  const spreadsheet = rowToSpreadsheet(row)
   return spreadsheet
 }
 
-function rowToSpreadsheet(row: t.PGQueryResultRow): t.Spreadsheet {
+function rowToSpreadsheet(row: t.PGQueryResultRow): t.SpreadsheetResult {
   return {
       id        : row.id          as string,
       userId    : row.user_id     as string,
       externalId: row.external_id as string,
       createdAt : row.created_at  as Date,
       updatedAt : row.updated_at  as Date,
+  }
+}
+
+
+export function spreadsheetToFields(user: t.SpreadsheetResult): t.SpreadsheetRes {
+  const {
+    id,
+  } = user
+
+  return {
+    id,
   }
 }

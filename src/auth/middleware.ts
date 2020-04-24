@@ -34,7 +34,7 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
     throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
   }
 
-  const user: void | t.User = await um.userBySessionId(session.id)
+  const user: void | t.UserResult = await um.userBySessionId(session.id)
   if (!user) {
     throw new u.PublicError(400, t.AUTH_ERROR.SESSION_ID_REQUIRED)
   }
