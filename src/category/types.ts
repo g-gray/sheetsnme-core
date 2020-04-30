@@ -1,21 +1,31 @@
-export type Category = {
-  id        : string,
-  title     : string,
-  createdAt?: string,
-  updatedAt?: string,
-  row?      : number,
-}
-
-export type Categories = Category[]
-
-export type CategoryFields = {
-  id        : string,
+export type CategoryReq = {
+  id?       : string,
   title     : string,
   createdAt?: string,
   updatedAt?: string,
 }
 
+export type CategoryRes = {
+  id       : string,
+  title    : string,
+  createdAt: string,
+  updatedAt: string,
+}
 
+export type CategoryQuery = {
+  id?       : string,
+  title     : string,
+  createdAt?: string,
+  updatedAt?: string,
+}
+
+export type CategoryResult = {
+  id       : string,
+  title    : string,
+  createdAt: string,
+  updatedAt: string,
+  row      : number,
+}
 
 export enum CATEGORY_ERROR {
   ID_REQUIRED                = 'CATEGORY_ID_REQUIRED',

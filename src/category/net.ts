@@ -14,8 +14,8 @@ export async function fetchCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<void | t.Category> {
-  const result: void | t.Category = await en.queryEntityById<t.Category>(
+): Promise<void | t.CategoryResult> {
+  const result: void | t.CategoryResult = await en.queryEntityById<t.CategoryResult>(
     client,
     spreadsheetId,
     ss.CATEGORIES_SHEET_ID,
@@ -28,9 +28,9 @@ export async function fetchCategory(
 export async function createCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  category     : t.Category,
-): Promise<t.Category> {
-  const result: t.Category = await en.createEntity<t.Category>(
+  category     : t.CategoryQuery,
+): Promise<t.CategoryResult> {
+  const result: t.CategoryResult = await en.createEntity<t.CategoryQuery, t.CategoryResult>(
     client,
     spreadsheetId,
     ss.CATEGORIES_SHEET_ID,
@@ -45,9 +45,9 @@ export async function updateCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  category     : t.Category,
-): Promise<t.Category> {
-  const result: t.Category = await en.updateEntityById<t.Category>(
+  category     : t.CategoryQuery,
+): Promise<t.CategoryResult> {
+  const result: t.CategoryResult = await en.updateEntityById<t.CategoryQuery, t.CategoryResult>(
     client,
     spreadsheetId,
     ss.CATEGORIES_SHEET_ID,
@@ -63,8 +63,8 @@ export async function deleteCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Category> {
-  const result: t.Category = await en.deleteEntityById<t.Category>(
+): Promise<t.CategoryResult> {
+  const result: t.CategoryResult = await en.deleteEntityById<t.CategoryResult>(
     client,
     spreadsheetId,
     ss.CATEGORIES_SHEET_ID,
@@ -77,8 +77,8 @@ export async function deleteCategory(
 export async function fetchCategories(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-): Promise<t.Categories> {
-  const result: t.Categories = await en.queryEntities<t.Category>(
+): Promise<t.CategoryResult[]> {
+  const result: t.CategoryResult[] = await en.queryEntities<t.CategoryResult>(
     client,
     spreadsheetId,
     ss.CATEGORIES_SHEET_ID,
@@ -89,7 +89,7 @@ export async function fetchCategories(
 }
 
 
-function rowToCategory(row: t.GQueryRow): t.Category {
+function rowToCategory(row: t.GQueryRow): t.CategoryResult {
   return {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
@@ -99,7 +99,7 @@ function rowToCategory(row: t.GQueryRow): t.Category {
   }
 }
 
-function categoryToRow(category: t.Category): t.GRowData {
+function categoryToRow(category: t.CategoryQuery): t.GRowData {
   return {
     values: [
       {userEnteredValue: {stringValue: category.id}},
@@ -122,7 +122,7 @@ export function validateCategoryFields(fields: any, lang: t.Lang): t.ValidationE
   return errors
 }
 
-export function categoryToFields(category: t.Category): t.CategoryFields {
+export function categoryToFields(category: t.CategoryResult): t.CategoryRes {
   const {
     id,
     title,
@@ -138,13 +138,13 @@ export function categoryToFields(category: t.Category): t.CategoryFields {
   }
 }
 
-export function fieldsToCategory(fields: t.CategoryFields): t.Category {
+export function fieldsToCategory(fields: t.CategoryReq): t.CategoryQuery {
   const {
     id,
     title,
     createdAt,
     updatedAt,
-  }: t.CategoryFields = fields
+  } = fields
 
   return {
     id,
