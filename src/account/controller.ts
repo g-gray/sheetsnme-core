@@ -10,18 +10,18 @@ import * as tn from '../transaction/net'
 
 import * as n from './net'
 
-export async function getAccounts(ctx: t.KContext): Promise<void> {
+export async function getAccounts(ctx: t.KContext): Promise<t.AccountWithBalanceRes[]> {
   const {client, gSpreadsheetId} = ctx
   const accounts: t.AccountWithBalanceResult[] = await n.fetchAccountsWithBalance(
     client,
     gSpreadsheetId
   )
 
-  const response: t.AccountWithBalanceRes[] = accounts.map(n.accountWithBalanceToFields)
-  ctx.body = response
+  const response = accounts.map(n.accountWithBalanceToFields)
+  return response
 }
 
-export async function getAccount(ctx: t.KContext): Promise<void> {
+export async function getAccount(ctx: t.KContext): Promise<t.AccountRes> {
   const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
@@ -36,11 +36,11 @@ export async function getAccount(ctx: t.KContext): Promise<void> {
     throw new u.PublicError(404, t.ACCOUNT_ERROR.NOT_FOUND)
   }
 
-  const response: t.AccountRes = n.accountToFields(account)
-  ctx.body = response
+  const response = n.accountToFields(account)
+  return response
 }
 
-export async function createAccount(ctx: t.KContext): Promise<void> {
+export async function createAccount(ctx: t.KContext): Promise<t.AccountRes> {
   const {request: {body}, client, gSpreadsheetId, lang} = ctx
 
   const errors: t.ValidationErrors = n.validateAccountFields(body, lang)
@@ -54,11 +54,11 @@ export async function createAccount(ctx: t.KContext): Promise<void> {
     n.fieldsToAccount(body)
   )
 
-  const response: t.AccountRes = n.accountToFields(account)
-  ctx.body = response
+  const response = n.accountToFields(account)
+  return response
 }
 
-export async function updateAccount(ctx: t.KContext): Promise<void> {
+export async function updateAccount(ctx: t.KContext): Promise<t.AccountRes> {
   const {params: {id}, request: {body}, client, gSpreadsheetId, lang} = ctx
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
@@ -80,11 +80,11 @@ export async function updateAccount(ctx: t.KContext): Promise<void> {
     n.fieldsToAccount(body)
   )
 
-  const response: t.AccountRes = n.accountToFields(account)
-  ctx.body = response
+  const response = n.accountToFields(account)
+  return response
 }
 
-export async function deleteAccount(ctx: t.KContext): Promise<void> {
+export async function deleteAccount(ctx: t.KContext): Promise<t.AccountRes> {
   const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
@@ -109,6 +109,6 @@ export async function deleteAccount(ctx: t.KContext): Promise<void> {
     id
   )
 
-  const response: t.AccountRes = n.accountToFields(account)
-  ctx.body = response
+  const response = n.accountToFields(account)
+  return response
 }

@@ -1,7 +1,7 @@
 import Router from 'koa-router'
 import Koa from 'koa'
 
-import {setLang, jsonOnly} from './middleware'
+import {setLang, jsonOnly, bodyAsResponse} from './middleware'
 
 import {authRequired} from './auth/middleware'
 import {authRoutes, authAllowedMethods} from './auth/router'
@@ -29,6 +29,7 @@ apiRouter
 
 apiRouter
   .use(spreadsheetIdRequired)
+  .use(bodyAsResponse)
   .use(accountsRoutes).use(accountsAllowedMethods)
   .use(categoriesRoutes).use(categoriesAllowedMethods)
   .use(payeesRoutes).use(payeesAllowedMethods)
@@ -42,10 +43,8 @@ const apiAllowedMethods = apiRouter.allowedMethods()
 const appRouter: Router<Koa.DefaultState, Koa.Context> = new Router<Koa.DefaultState, Koa.Context>()
 
 appRouter
-  .use(authRoutes)
-  .use(authAllowedMethods)
-  .use(apiRoutes)
-  .use(apiAllowedMethods)
+  .use(authRoutes).use(authAllowedMethods)
+  .use(apiRoutes).use(apiAllowedMethods)
 
 export const appRoutes = appRouter.routes()
 export const appAllowedMethods = appRouter.allowedMethods()

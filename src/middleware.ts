@@ -29,6 +29,13 @@ export async function setLang(ctx: t.KContext, next: t.KNext): Promise<void> {
   await next()
 }
 
+export async function bodyAsResponse(ctx: t.KContext, next: t.KNext): Promise<void> {
+  const body = await next()
+  if (body) {
+    ctx.body = body
+  }
+}
+
 export async function handlePublicError(ctx: t.KContext, next: t.KNext): Promise<void> {
   try {
     await next()
