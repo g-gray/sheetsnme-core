@@ -27,7 +27,7 @@ export async function getAccount(ctx: t.KContext): Promise<void> {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.ID_REQUIRED)
   }
 
-  const account: void | t.AccountWithBalanceResult = await n.fetchAccountWithBalance(
+  const account: void | t.AccountResult = await n.fetchAccount(
     client,
     gSpreadsheetId,
     id
