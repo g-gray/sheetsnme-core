@@ -109,10 +109,6 @@ function rowToTransaction(row: t.GQueryRow): t.Transaction {
 }
 
 function transactionToRow(transaction: t.Transaction): t.GRowData {
-  const date: string = new Date().toJSON()
-  const createdAt: string = transaction.createdAt
-    ? new Date(transaction.createdAt).toJSON()
-    : date
   return {
     values: [
       {userEnteredValue: {stringValue: transaction.id}},
@@ -124,8 +120,8 @@ function transactionToRow(transaction: t.Transaction): t.GRowData {
       {userEnteredValue: {numberValue: transaction.outcomeAmount}},
       {userEnteredValue: {stringValue: transaction.incomeAccountId}},
       {userEnteredValue: {numberValue: transaction.incomeAmount}},
-      {userEnteredValue: {stringValue: createdAt}},
-      {userEnteredValue: {stringValue: date}},
+      {userEnteredValue: {stringValue: transaction.createdAt}},
+      {userEnteredValue: {stringValue: transaction.updatedAt}},
     ],
   }
 }
@@ -358,94 +354,79 @@ export function fieldsToTransaction(fields: t.TransactionFields): t.Transaction 
   // TODO Think how to split t.Transaction on t.IncomeTransaction, t.OutcomeTransaction, etc.
   if (type === t.TRANSACTION_TYPE.INCOME) {
     return {
-      id              : id || uuid(),
+      id,
       date            : date || '',
-
       categoryId      : categoryId || '',
       payeeId         : payeeId || '',
-
-      outcomeAccountId : '',
-      outcomeAmount    : 0,
+      outcomeAccountId: '',
+      outcomeAmount   : 0,
       incomeAccountId : incomeAccountId || '',
       incomeAmount    : incomeAmount || 0,
-
       comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
+      createdAt,
+      updatedAt,
     }
   }
 
   if (type === t.TRANSACTION_TYPE.LOAN) {
     return {
-      id              : id || uuid(),
+      id,
       date            : date || '',
-
       categoryId      : '',
       payeeId         : payeeId || '',
-
       outcomeAccountId: outcomeAccountId || '',
       outcomeAmount   : outcomeAmount || 0,
       incomeAccountId : ss.DEBT_ACCOUNT_ID,
       incomeAmount    : outcomeAmount || 0,
-
       comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
+      createdAt,
+      updatedAt,
     }
   }
 
   if (type === t.TRANSACTION_TYPE.BORROW) {
     return {
-      id              : id || uuid(),
+      id,
       date            : date || '',
-
       categoryId      : '',
       payeeId         : payeeId || '',
-
       outcomeAccountId: ss.DEBT_ACCOUNT_ID,
       outcomeAmount   : incomeAmount || 0,
       incomeAccountId : incomeAccountId || '',
       incomeAmount    : incomeAmount || 0,
-
       comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
+      createdAt,
+      updatedAt,
     }
   }
 
   if (type === t.TRANSACTION_TYPE.TRANSFER) {
     return {
-      id              : id || uuid(),
+      id,
       date            : date || '',
-
       categoryId      : '',
       payeeId         : '',
-
       outcomeAccountId: outcomeAccountId || '',
       outcomeAmount   : outcomeAmount || 0,
       incomeAccountId : incomeAccountId || '',
       incomeAmount    : incomeAmount || 0,
-
       comment         : comment || '',
-      createdAt       : createdAt || '',
-      updatedAt       : updatedAt || '',
+      createdAt,
+      updatedAt,
     }
   }
 
   return {
-    id              : id || uuid(),
+    id,
     date            : date || '',
-
     categoryId      : categoryId || '',
     payeeId         : payeeId || '',
-
     outcomeAccountId: outcomeAccountId || '',
     outcomeAmount   : outcomeAmount || 0,
     incomeAccountId : '',
     incomeAmount    : 0,
-
     comment         : comment || '',
-    createdAt       : createdAt || '',
-    updatedAt       : updatedAt || '',
+    createdAt,
+    updatedAt,
   }
 }

@@ -77,9 +77,12 @@ export async function createEntity<TQ extends t.EntityQuery, TR extends t.Entity
   rowToEntity   : (row: t.GQueryRow) => TR,
 ): Promise<TR> {
   const id: string = uuid()
+  const date: string = new Date().toJSON()
   await sn.appendRow(client, spreadsheetId, sheetId, entityToRow({
-    id,
     ...entity,
+    id,
+    createdAt: date,
+    updatedAt: date,
   }))
 
   const created: void | TR = await queryEntityById<TR>(
@@ -157,7 +160,20 @@ export async function updateEntityById<TQ extends t.EntityQuery, TR extends t.En
     throw new Error(t.ENTITY_ERROR.ROW_NUMBER_NOT_FOUND)
   }
 
-  await sn.updateRow(client, spreadsheetId, sheetId, rowNumber, entityToRow(entity))
+  const date: string = new Date().toJSON()
+
+  await sn.updateRow(
+    client,
+    spreadsheetId,
+    sheetId,
+    rowNumber,
+    entityToRow({
+      ...entity,
+      id,
+      createdAt: toUpdate.createdAt,
+      updatedAt: date,
+    })
+  )
 
   const updated: void | TR = await queryEntityById<TR>(
     client,

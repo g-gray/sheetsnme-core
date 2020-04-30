@@ -102,16 +102,12 @@ function rowToPayee(row: t.GQueryRow): t.Payee {
 }
 
 function payeeToRow(payee: t.Payee): t.GRowData {
-  const date: string = new Date().toJSON()
-  const createdAt: string = payee.createdAt
-    ? new Date(payee.createdAt).toJSON()
-    : date
   return {
     values: [
       {userEnteredValue: {stringValue: payee.id}},
       {userEnteredValue: {stringValue: payee.title}},
-      {userEnteredValue: {stringValue: createdAt}},
-      {userEnteredValue: {stringValue: date}},
+      {userEnteredValue: {stringValue: payee.createdAt}},
+      {userEnteredValue: {stringValue: payee.updatedAt}},
     ],
   }
 }
@@ -217,10 +213,14 @@ export function fieldsToPayee(fields: t.PayeeFields): t.Payee {
   const {
     id,
     title,
+    createdAt,
+    updatedAt,
   }: t.PayeeFields = fields
 
   return {
-    id   : id || uuid(),
+    id,
     title: title || '',
+    createdAt,
+    updatedAt,
   }
 }

@@ -155,17 +155,13 @@ function rowToAccount(row: t.GQueryRow): t.AccountResult {
 }
 
 function accountToRow(account: t.AccountQuery): t.GRowData {
-  const date: string = new Date().toJSON()
-  const createdAt: string = account.createdAt
-    ? new Date(account.createdAt).toJSON()
-    : date
   return {
     values: [
       {userEnteredValue: {stringValue: account.id}},
       {userEnteredValue: {stringValue: account.title}},
       {userEnteredValue: {stringValue: account.currencyCode}},
-      {userEnteredValue: {stringValue: createdAt}},
-      {userEnteredValue: {stringValue: date}},
+      {userEnteredValue: {stringValue: account.createdAt}},
+      {userEnteredValue: {stringValue: account.updatedAt}},
     ],
   }
 }
@@ -314,7 +310,7 @@ export function fieldsToAccount(fields: t.AccountReq): t.AccountQuery {
   }: t.AccountReq = fields
 
   return {
-    id          : id || '',
+    id,
     title       : title || '',
     currencyCode: currencyCode || '',
     createdAt,

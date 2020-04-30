@@ -100,16 +100,12 @@ function rowToCategory(row: t.GQueryRow): t.Category {
 }
 
 function categoryToRow(category: t.Category): t.GRowData {
-  const date: string = new Date().toJSON()
-  const createdAt: string = category.createdAt
-    ? new Date(category.createdAt).toJSON()
-    : date
   return {
     values: [
       {userEnteredValue: {stringValue: category.id}},
       {userEnteredValue: {stringValue: category.title}},
-      {userEnteredValue: {stringValue: createdAt}},
-      {userEnteredValue: {stringValue: date}},
+      {userEnteredValue: {stringValue: category.createdAt}},
+      {userEnteredValue: {stringValue: category.updatedAt}},
     ],
   }
 }
@@ -146,10 +142,14 @@ export function fieldsToCategory(fields: t.CategoryFields): t.Category {
   const {
     id,
     title,
+    createdAt,
+    updatedAt,
   }: t.CategoryFields = fields
 
   return {
-    id   : id || uuid(),
+    id,
     title: title || '',
+    createdAt,
+    updatedAt,
   }
 }
