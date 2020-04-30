@@ -105,7 +105,7 @@ function payeeToRow(payee: t.Payee): t.GRowData {
   return {
     values: [
       {userEnteredValue: {stringValue: payee.id}},
-      {userEnteredValue: {stringValue: payee.title}},
+      {userEnteredValue: {stringValue: payee.title || ''}},
       {userEnteredValue: {stringValue: payee.createdAt}},
       {userEnteredValue: {stringValue: payee.updatedAt}},
     ],

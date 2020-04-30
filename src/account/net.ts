@@ -158,8 +158,8 @@ function accountToRow(account: t.AccountQuery): t.GRowData {
   return {
     values: [
       {userEnteredValue: {stringValue: account.id}},
-      {userEnteredValue: {stringValue: account.title}},
-      {userEnteredValue: {stringValue: account.currencyCode}},
+      {userEnteredValue: {stringValue: account.title || ''}},
+      {userEnteredValue: {stringValue: account.currencyCode || t.CURRENCY.RUB}},
       {userEnteredValue: {stringValue: account.createdAt}},
       {userEnteredValue: {stringValue: account.updatedAt}},
     ],

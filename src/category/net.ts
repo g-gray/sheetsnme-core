@@ -103,7 +103,7 @@ function categoryToRow(category: t.Category): t.GRowData {
   return {
     values: [
       {userEnteredValue: {stringValue: category.id}},
-      {userEnteredValue: {stringValue: category.title}},
+      {userEnteredValue: {stringValue: category.title || ''}},
       {userEnteredValue: {stringValue: category.createdAt}},
       {userEnteredValue: {stringValue: category.updatedAt}},
     ],

@@ -65,7 +65,6 @@ export async function createTransaction(ctx: t.KContext): Promise<void> {
 
   const client: t.GOAuth2Client = ctx.client
   const gSpreadsheetId: string = ctx.gSpreadsheetId
-
   const transaction: t.Transaction = await n.createTransaction(
     client,
     gSpreadsheetId,

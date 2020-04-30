@@ -17,6 +17,7 @@ export type UserRes = {
 }
 
 export type UserQuery = {
+  id?          : string,
   externalId   : string,
   externalToken: string,
   email        : string,

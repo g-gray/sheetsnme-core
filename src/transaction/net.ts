@@ -113,13 +113,13 @@ function transactionToRow(transaction: t.Transaction): t.GRowData {
     values: [
       {userEnteredValue: {stringValue: transaction.id}},
       {userEnteredValue: {stringValue: transaction.date}},
-      {userEnteredValue: {stringValue: transaction.categoryId}},
-      {userEnteredValue: {stringValue: transaction.payeeId}},
-      {userEnteredValue: {stringValue: transaction.comment}},
-      {userEnteredValue: {stringValue: transaction.outcomeAccountId}},
-      {userEnteredValue: {numberValue: transaction.outcomeAmount}},
-      {userEnteredValue: {stringValue: transaction.incomeAccountId}},
-      {userEnteredValue: {numberValue: transaction.incomeAmount}},
+      {userEnteredValue: {stringValue: transaction.categoryId       || ''}},
+      {userEnteredValue: {stringValue: transaction.payeeId          || ''}},
+      {userEnteredValue: {stringValue: transaction.comment          || ''}},
+      {userEnteredValue: {stringValue: transaction.outcomeAccountId || ''}},
+      {userEnteredValue: {numberValue: transaction.outcomeAmount    || 0}},
+      {userEnteredValue: {stringValue: transaction.incomeAccountId  || ''}},
+      {userEnteredValue: {numberValue: transaction.incomeAmount     || 0}},
       {userEnteredValue: {stringValue: transaction.createdAt}},
       {userEnteredValue: {stringValue: transaction.updatedAt}},
     ],
@@ -351,82 +351,59 @@ export function fieldsToTransaction(fields: t.TransactionFields): t.Transaction 
     updatedAt,
   }: t.TransactionFields = fields
 
-  // TODO Think how to split t.Transaction on t.IncomeTransaction, t.OutcomeTransaction, etc.
+  const transaction: t.Transaction = {
+    id,
+    date            : date             || '',
+    categoryId      : categoryId       || '',
+    payeeId         : payeeId          || '',
+    outcomeAccountId: outcomeAccountId || '',
+    outcomeAmount   : outcomeAmount    || 0,
+    incomeAccountId : incomeAccountId  || '',
+    incomeAmount    : incomeAmount     || 0,
+    comment         : comment          || '',
+    createdAt,
+    updatedAt,
+  }
+
   if (type === t.TRANSACTION_TYPE.INCOME) {
     return {
-      id,
-      date            : date || '',
-      categoryId      : categoryId || '',
-      payeeId         : payeeId || '',
+      ...transaction,
       outcomeAccountId: '',
       outcomeAmount   : 0,
       incomeAccountId : incomeAccountId || '',
-      incomeAmount    : incomeAmount || 0,
-      comment         : comment || '',
-      createdAt,
-      updatedAt,
+      incomeAmount    : incomeAmount    || 0,
     }
   }
 
   if (type === t.TRANSACTION_TYPE.LOAN) {
     return {
-      id,
-      date            : date || '',
-      categoryId      : '',
-      payeeId         : payeeId || '',
+      ...transaction,
       outcomeAccountId: outcomeAccountId || '',
-      outcomeAmount   : outcomeAmount || 0,
+      outcomeAmount   : outcomeAmount    || 0,
       incomeAccountId : ss.DEBT_ACCOUNT_ID,
       incomeAmount    : outcomeAmount || 0,
-      comment         : comment || '',
-      createdAt,
-      updatedAt,
     }
   }
 
   if (type === t.TRANSACTION_TYPE.BORROW) {
     return {
-      id,
-      date            : date || '',
-      categoryId      : '',
-      payeeId         : payeeId || '',
+      ...transaction,
       outcomeAccountId: ss.DEBT_ACCOUNT_ID,
-      outcomeAmount   : incomeAmount || 0,
+      outcomeAmount   : incomeAmount    || 0,
       incomeAccountId : incomeAccountId || '',
-      incomeAmount    : incomeAmount || 0,
-      comment         : comment || '',
-      createdAt,
-      updatedAt,
+      incomeAmount    : incomeAmount    || 0,
     }
   }
 
   if (type === t.TRANSACTION_TYPE.TRANSFER) {
     return {
-      id,
-      date            : date || '',
-      categoryId      : '',
-      payeeId         : '',
+      ...transaction,
       outcomeAccountId: outcomeAccountId || '',
-      outcomeAmount   : outcomeAmount || 0,
-      incomeAccountId : incomeAccountId || '',
-      incomeAmount    : incomeAmount || 0,
-      comment         : comment || '',
-      createdAt,
-      updatedAt,
+      outcomeAmount   : outcomeAmount    || 0,
+      incomeAccountId : incomeAccountId  || '',
+      incomeAmount    : incomeAmount     || 0,
     }
   }
 
-  return {
-    id,
-    date            : date || '',
-    categoryId      : categoryId || '',
-    payeeId         : payeeId || '',
-    outcomeAccountId: outcomeAccountId || '',
-    outcomeAmount   : outcomeAmount || 0,
-    incomeAccountId : '',
-    incomeAmount    : 0,
-    comment         : comment || '',
-    createdAt,
-    updatedAt,
-  }
+  return transaction
 }

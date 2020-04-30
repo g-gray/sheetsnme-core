@@ -105,7 +105,7 @@ export function createAccountsSheet(lang: t.Lang): t.GSheet {
             values: [
               {userEnteredValue: {stringValue: DEBT_ACCOUNT_ID}},
               {userEnteredValue: {stringValue: 'Debt'}},
-              {userEnteredValue: {stringValue: 'RUB'}},
+              {userEnteredValue: {stringValue: t.CURRENCY.RUB}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -114,7 +114,7 @@ export function createAccountsSheet(lang: t.Lang): t.GSheet {
             values: [
               {userEnteredValue: {stringValue: CARD_ACCOUNT_ID}},
               {userEnteredValue: {stringValue: u.xln(lang, tr.CARD)}},
-              {userEnteredValue: {stringValue: 'RUB'}},
+              {userEnteredValue: {stringValue: t.CURRENCY.RUB}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -123,7 +123,7 @@ export function createAccountsSheet(lang: t.Lang): t.GSheet {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
               {userEnteredValue: {stringValue: u.xln(lang, tr.CASH)}},
-              {userEnteredValue: {stringValue: 'RUB'}},
+              {userEnteredValue: {stringValue: t.CURRENCY.RUB}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],
@@ -132,7 +132,7 @@ export function createAccountsSheet(lang: t.Lang): t.GSheet {
             values: [
               {userEnteredValue: {stringValue: uuid()}},
               {userEnteredValue: {stringValue: u.xln(lang, tr.DEPOSIT)}},
-              {userEnteredValue: {stringValue: 'RUB'}},
+              {userEnteredValue: {stringValue: t.CURRENCY.RUB}},
               {userEnteredValue: {stringValue: date.toJSON()}},
               {userEnteredValue: {stringValue: date.toJSON()}},
             ],

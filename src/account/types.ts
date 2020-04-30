@@ -1,3 +1,7 @@
+export enum CURRENCY {
+  RUB = 'RUB',
+}
+
 export type AccountReq = {
   id?          : string,
   title        : string,
