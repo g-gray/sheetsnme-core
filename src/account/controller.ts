@@ -1,8 +1,5 @@
 import * as t from '../types'
 
-// @ts-ignore
-import * as fpx from 'fpx'
-
 import * as u from '../utils'
 
 import * as s from '../sheet/sheets'
@@ -12,12 +9,23 @@ import * as n from './net'
 
 export async function getAccounts(ctx: t.KContext): Promise<t.AccountWithBalanceRes[]> {
   const {client, gSpreadsheetId} = ctx
-  const accounts: t.AccountWithBalanceResult[] = await n.fetchAccountsWithBalance(
+
+  const accounts: t.AccountResult[] = await n.fetchAccounts(client, gSpreadsheetId)
+  const accountIds: string[] = accounts.map((account) => account.id)
+  const balances: t.BalancesById = await n.fetchBalancesByAccountIds(
     client,
-    gSpreadsheetId
+    gSpreadsheetId,
+    accountIds
   )
 
-  const response = accounts.map(n.accountWithBalanceToFields)
+  const response = accounts.map(
+    (account) => ({
+      ...n.accountToFields(account),
+      balance: balances[account.id]
+        ? balances[account.id].balance
+        : 0,
+    })
+  )
   return response
 }
 

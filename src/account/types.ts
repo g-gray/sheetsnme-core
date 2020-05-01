@@ -2,6 +2,10 @@ export enum CURRENCY {
   RUB = 'RUB',
 }
 
+export type AccountWithBalanceRes = AccountRes & {
+  balance: number,
+}
+
 export type AccountReq = {
   id?          : string,
   title        : string,
@@ -18,19 +22,25 @@ export type AccountRes = {
   updatedAt   : string,
 }
 
-export type AccountWithBalanceRes = AccountRes & {
-  balance: number,
-}
-
 export type AccountQuery = {
-  id?         : string,
-  title       : string,
-  currencyCode: string,
-  createdAt?  : string,
-  updatedAt?  : string,
+  id?          : string,
+  title        : string,
+  currencyCode?: string,
+  createdAt?   : string,
+  updatedAt?   : string,
 }
 
-export type AccountResult = {
+export type AccountResult = AccountRowDataResult
+
+export type AccountRowDataQuery = {
+  id           : string,
+  title        : string,
+  currencyCode?: string,
+  createdAt    : string,
+  updatedAt    : string,
+}
+
+export type AccountRowDataResult = {
   id          : string,
   title       : string,
   currencyCode: string,
@@ -39,9 +49,7 @@ export type AccountResult = {
   row         : number,
 }
 
-export type AccountWithBalanceResult = AccountResult & {
-  balance: number,
-}
+
 
 export type Balance = {
   accountId: string,
@@ -49,6 +57,8 @@ export type Balance = {
 }
 
 export type BalancesById = {[key: string]: Balance}
+
+
 
 export enum ACCOUNT_ERROR {
   ID_REQUIRED                = 'ACCOUNT_ID_REQUIRED',

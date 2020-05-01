@@ -14,32 +14,6 @@ import * as en from '../entity/net'
  * Account
  */
 
-export async function fetchAccountWithBalance(
-  client       : t.GOAuth2Client,
-  spreadsheetId: string,
-  id           : string,
-): Promise<void | t.AccountWithBalanceResult> {
-  const account: void | t.AccountResult = await fetchAccount(
-    client,
-    spreadsheetId,
-    id
-  )
-  if (!account) {
-    return undefined
-  }
-
-  const balances: t.BalancesById = await fetchBalancesByAccountIds(
-    client,
-    spreadsheetId,
-    [account.id]
-  )
-  const accountWithBalance: t.AccountWithBalanceResult = {
-    ...account,
-    balance: balances[account.id] ? balances[account.id].balance : 0,
-  }
-  return accountWithBalance
-}
-
 export async function fetchAccount(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
@@ -104,27 +78,6 @@ export async function deleteAccount(
   return result
 }
 
-export async function fetchAccountsWithBalance(
-  client       : t.GOAuth2Client,
-  spreadsheetId: string,
-): Promise<t.AccountWithBalanceResult[]> {
-  const accounts: t.AccountResult[] = await fetchAccounts(client, spreadsheetId)
-  const accountIds: string[] = accounts.map((account: t.AccountResult) => account.id)
-  const balances: t.BalancesById = await fetchBalancesByAccountIds(
-    client,
-    spreadsheetId,
-    accountIds
-  )
-  const accountsWithBalance: t.AccountWithBalanceResult[] = fpx.map(
-    accounts,
-    (account: t.AccountResult) => ({
-      ...account,
-      balance: balances[account.id] ? balances[account.id].balance : 0,
-    })
-  )
-  return accountsWithBalance
-}
-
 export async function fetchAccounts(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
@@ -143,7 +96,7 @@ export async function fetchAccounts(
 }
 
 
-function rowToAccount(row: t.GQueryRow): t.AccountResult {
+function rowToAccount(row: t.GQueryRow): t.AccountRowDataResult {
   return {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
@@ -154,14 +107,14 @@ function rowToAccount(row: t.GQueryRow): t.AccountResult {
   }
 }
 
-function accountToRow(account: t.AccountQuery): t.GRowData {
+function accountToRow(rowData: t.AccountRowDataQuery): t.GRowData {
   return {
     values: [
-      {userEnteredValue: {stringValue: account.id}},
-      {userEnteredValue: {stringValue: account.title || ''}},
-      {userEnteredValue: {stringValue: account.currencyCode || t.CURRENCY.RUB}},
-      {userEnteredValue: {stringValue: account.createdAt}},
-      {userEnteredValue: {stringValue: account.updatedAt}},
+      {userEnteredValue: {stringValue: rowData.id}},
+      {userEnteredValue: {stringValue: rowData.title}},
+      {userEnteredValue: {stringValue: rowData.currencyCode || t.CURRENCY.RUB}},
+      {userEnteredValue: {stringValue: rowData.createdAt}},
+      {userEnteredValue: {stringValue: rowData.updatedAt}},
     ],
   }
 }
@@ -262,26 +215,6 @@ export function validateAccountFields(fields: any, lang: t.Lang): t.ValidationEr
   return errors
 }
 
-export function accountWithBalanceToFields(account: t.AccountWithBalanceResult): t.AccountWithBalanceRes {
-  const {
-    id,
-    title,
-    currencyCode,
-    balance,
-    createdAt,
-    updatedAt,
-  } = account
-
-  return {
-    id,
-    title,
-    currencyCode,
-    balance,
-    createdAt,
-    updatedAt,
-  }
-}
-
 export function accountToFields(account: t.AccountResult): t.AccountRes {
   const {
     id,
@@ -311,8 +244,8 @@ export function fieldsToAccount(fields: t.AccountReq): t.AccountQuery {
 
   return {
     id,
-    title       : title || '',
-    currencyCode: currencyCode || '',
+    title,
+    currencyCode,
     createdAt,
     updatedAt,
   }
