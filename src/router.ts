@@ -23,13 +23,13 @@ apiRouter
   .use(setLang)
   .use(jsonOnly)
   .use(authRequired)
+  .use(bodyAsResponse)
 
 apiRouter
   .use(userRoutes).use(userAllowedMethods)
 
 apiRouter
   .use(spreadsheetIdRequired)
-  .use(bodyAsResponse)
   .use(accountsRoutes).use(accountsAllowedMethods)
   .use(categoriesRoutes).use(categoriesAllowedMethods)
   .use(payeesRoutes).use(payeesAllowedMethods)

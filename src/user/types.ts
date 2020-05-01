@@ -2,7 +2,7 @@ import * as t from '../types'
 
 import {oauth2_v2} from 'googleapis'
 
-export type GetUserRes = UserRes & {
+export type UserWithSpreadsheeetsRes = UserRes & {
   spreadsheets: t.SpreadsheetRes[],
 }
 

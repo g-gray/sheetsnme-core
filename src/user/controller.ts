@@ -7,7 +7,7 @@ import * as sn from '../sheet/net'
 
 import * as m from './model'
 
-export async function getUser(ctx: t.KContext) {
+export async function getUser(ctx: t.KContext): Promise<t.UserWithSpreadsheeetsRes> {
   const sessionId: string = ctx.sessionId
   const user: void | t.UserResult = await m.userBySessionId(sessionId)
   if (!user) {
@@ -41,9 +41,9 @@ export async function getUser(ctx: t.KContext) {
   }
 
   // TODO Rethink
-  const response: t.GetUserRes = {
+  const response: t.UserWithSpreadsheeetsRes = {
     ...m.userToFields(user),
     spreadsheets: [sm.spreadsheetToFields(spreadsheet)],
   }
-  ctx.body = response
+  return response
 }
