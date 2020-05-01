@@ -1,10 +1,10 @@
-export type EntityQuery = {
-  id?       : string,
-  createdAt?: string,
-  updatedAt?: string,
+export type EntityRowDataReq<T> = T & {
+  id       : string,
+  createdAt: string,
+  updatedAt: string,
 }
 
-export type EntityResult = {
+export type EntityRowDataRes = {
   id       : string,
   row      : number,
   createdAt: string,

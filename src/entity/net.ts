@@ -4,36 +4,36 @@ import uuid from 'uuid/v4'
 
 import * as sn from '../sheet/net'
 
-export async function queryEntityById<TR extends t.EntityResult>(
+export async function queryEntityById<R extends t.EntityRowDataRes>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
   id           : string,
-  rowToEntity  : (row: t.GQueryRow) => TR,
-): Promise<void | TR> {
+  rowToEntity  : (row: t.GQueryRow) => R,
+): Promise<void | R> {
   if (!id) {
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
   const query: string = `SELECT * WHERE A = '${id}'`
-  const entities: TR[] = await queryEntities<TR>(
+  const entities: R[] = await queryEntities<R>(
     client,
     spreadsheetId,
     sheetId,
     rowToEntity,
     query,
   )
-  const entity: void | TR = entities[0]
+  const entity: void | R = entities[0]
   return entity
 }
 
-export async function queryEntities<TR extends t.EntityResult>(
+export async function queryEntities<R extends t.EntityRowDataRes>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
-  rowToEntity  : (row: t.GQueryRow) => TR,
+  rowToEntity  : (row: t.GQueryRow) => R,
   query?       : string,
-): Promise<TR[]> {
+): Promise<R[]> {
   const table: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     sheetId,
@@ -43,8 +43,8 @@ export async function queryEntities<TR extends t.EntityResult>(
     return []
   }
 
-  const entities: TR[] = table
-    ? table.rows.map((row: t.GQueryRow): TR => rowToEntity(row))
+  const entities: R[] = table
+    ? table.rows.map((row: t.GQueryRow): R => rowToEntity(row))
     : []
   return entities
 }
@@ -68,14 +68,14 @@ export async function queryEntitiesNumber(
   return size
 }
 
-export async function createEntity<TQ extends t.EntityQuery, TR extends t.EntityResult>(
+export async function createEntity<Q, R extends t.EntityRowDataRes>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
   sheetId       : number,
-  entity        : TQ,
-  entityToRow   : (entity: TQ) => t.GRowData,
-  rowToEntity   : (row: t.GQueryRow) => TR,
-): Promise<TR> {
+  entity        : Q,
+  entityToRow   : (entity: t.EntityRowDataReq<Q>) => t.GRowData,
+  rowToEntity   : (row: t.GQueryRow) => R,
+): Promise<R> {
   const id: string = uuid()
   const date: string = new Date().toJSON()
   await sn.appendRow(client, spreadsheetId, sheetId, entityToRow({
@@ -85,7 +85,7 @@ export async function createEntity<TQ extends t.EntityQuery, TR extends t.Entity
     updatedAt: date,
   }))
 
-  const created: void | TR = await queryEntityById<TR>(
+  const created: void | R = await queryEntityById<R>(
     client,
     spreadsheetId,
     sheetId,
@@ -99,18 +99,18 @@ export async function createEntity<TQ extends t.EntityQuery, TR extends t.Entity
   return created
 }
 
-export async function deleteEntityById<TR extends t.EntityResult>(
+export async function deleteEntityById<R extends t.EntityRowDataRes>(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   sheetId      : number,
   id           : string,
-  rowToEntity  : (row: t.GQueryRow) => TR,
-): Promise<TR> {
+  rowToEntity  : (row: t.GQueryRow) => R,
+): Promise<R> {
   if (!id) {
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const toDelete: void | TR = await queryEntityById<TR>(
+  const toDelete: void | R = await queryEntityById<R>(
     client,
     spreadsheetId,
     sheetId,
@@ -131,20 +131,20 @@ export async function deleteEntityById<TR extends t.EntityResult>(
   return toDelete
 }
 
-export async function updateEntityById<TQ extends t.EntityQuery, TR extends t.EntityResult>(
+export async function updateEntityById<Q, R extends t.EntityRowDataRes>(
   client        : t.GOAuth2Client,
   spreadsheetId : string,
   sheetId       : number,
   id            : string,
-  entity        : TQ,
-  entityToRow   : (entity: TQ) => t.GRowData,
-  rowToEntity   : (row: t.GQueryRow) => TR,
-): Promise<TR> {
+  entity        : Q,
+  entityToRow   : (entity: t.EntityRowDataReq<Q>) => t.GRowData,
+  rowToEntity   : (row: t.GQueryRow) => R,
+): Promise<R> {
   if (!id) {
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const toUpdate: void | t.EntityResult = await queryEntityById<t.EntityResult>(
+  const toUpdate: void | t.EntityRowDataRes = await queryEntityById<t.EntityRowDataRes>(
     client,
     spreadsheetId,
     sheetId,
@@ -175,7 +175,7 @@ export async function updateEntityById<TQ extends t.EntityQuery, TR extends t.En
     })
   )
 
-  const updated: void | TR = await queryEntityById<TR>(
+  const updated: void | R = await queryEntityById<R>(
     client,
     spreadsheetId,
     sheetId,
