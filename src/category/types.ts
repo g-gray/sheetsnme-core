@@ -19,13 +19,24 @@ export type CategoryQuery = {
   updatedAt?: string,
 }
 
-export type CategoryResult = {
-  id       : string,
-  title    : string,
-  createdAt: string,
-  updatedAt: string,
-  row      : number,
+export type CategoryResult = CategoryRowDataResult
+
+export type CategoryRowDataQuery = {
+  id           : string,
+  title        : string,
+  createdAt    : string,
+  updatedAt    : string,
 }
+
+export type CategoryRowDataResult = {
+  id          : string,
+  title       : string,
+  createdAt   : string,
+  updatedAt   : string,
+  row         : number,
+}
+
+
 
 export enum CATEGORY_ERROR {
   ID_REQUIRED                = 'CATEGORY_ID_REQUIRED',

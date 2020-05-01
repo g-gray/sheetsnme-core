@@ -2,7 +2,6 @@ import * as t from '../types'
 
 // @ts-ignore
 import * as fpx from 'fpx'
-import uuid from 'uuid/v4'
 
 import * as u from '../utils'
 import * as tr from '../translations'
@@ -89,7 +88,7 @@ export async function fetchCategories(
 }
 
 
-function rowToCategory(row: t.GQueryRow): t.CategoryResult {
+function rowToCategory(row: t.GQueryRow): t.CategoryRowDataResult {
   return {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
@@ -99,13 +98,13 @@ function rowToCategory(row: t.GQueryRow): t.CategoryResult {
   }
 }
 
-function categoryToRow(category: t.CategoryQuery): t.GRowData {
+function categoryToRow(rowData: t.CategoryRowDataQuery): t.GRowData {
   return {
     values: [
-      {userEnteredValue: {stringValue: category.id}},
-      {userEnteredValue: {stringValue: category.title || ''}},
-      {userEnteredValue: {stringValue: category.createdAt}},
-      {userEnteredValue: {stringValue: category.updatedAt}},
+      {userEnteredValue: {stringValue: rowData.id}},
+      {userEnteredValue: {stringValue: rowData.title}},
+      {userEnteredValue: {stringValue: rowData.createdAt}},
+      {userEnteredValue: {stringValue: rowData.updatedAt}},
     ],
   }
 }
@@ -148,7 +147,7 @@ export function fieldsToCategory(fields: t.CategoryReq): t.CategoryQuery {
 
   return {
     id,
-    title: title || '',
+    title,
     createdAt,
     updatedAt,
   }
