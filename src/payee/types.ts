@@ -1,18 +1,43 @@
-export type Payee = {
-  id        : string,
-  title     : string,
-  createdAt?: string,
-  updatedAt?: string,
-  row?      : number,
+export type PayeeWithDebtRes = PayeeRes & {
+  debt: number,
 }
 
-export type Payees = Payee[]
-
-export type PayeeFields = {
+export type PayeeReq = {
   id?       : string,
   title     : string,
   createdAt?: string,
   updatedAt?: string,
+}
+
+export type PayeeRes = {
+  id       : string,
+  title    : string,
+  createdAt: string,
+  updatedAt: string,
+}
+
+export type PayeeQuery = {
+  id?       : string,
+  title     : string,
+  createdAt?: string,
+  updatedAt?: string,
+}
+
+export type PayeeResult = PayeeRowDataResult
+
+export type PayeeRowDataQuery = {
+  id           : string,
+  title        : string,
+  createdAt    : string,
+  updatedAt    : string,
+}
+
+export type PayeeRowDataResult = {
+  id          : string,
+  title       : string,
+  createdAt   : string,
+  updatedAt   : string,
+  row         : number,
 }
 
 

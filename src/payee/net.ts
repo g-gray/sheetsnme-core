@@ -15,8 +15,8 @@ export async function fetchPayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<void | t.Payee> {
-  const result: void | t.Payee = await en.queryEntityById<t.Payee>(
+): Promise<void | t.PayeeResult> {
+  const result: void | t.PayeeResult = await en.queryEntityById<t.PayeeResult>(
     client,
     spreadsheetId,
     ss.PAYEES_SHEET_ID,
@@ -29,10 +29,10 @@ export async function fetchPayee(
 export async function createPayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  payee        : t.Payee
-): Promise<t.Payee> {
+  payee        : t.PayeeQuery
+): Promise<t.PayeeResult> {
 
-  const result: t.Payee = await en.createEntity<t.Payee>(
+  const result: t.PayeeResult = await en.createEntity<t.PayeeQuery, t.PayeeResult>(
     client,
     spreadsheetId,
     ss.PAYEES_SHEET_ID,
@@ -47,9 +47,9 @@ export async function updatePayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  payee        : t.Payee
-): Promise<t.Payee> {
-  const result: t.Payee = await en.updateEntityById<t.Payee>(
+  payee        : t.PayeeQuery
+): Promise<t.PayeeResult> {
+  const result: t.PayeeResult = await en.updateEntityById<t.PayeeReq, t.PayeeResult>(
     client,
     spreadsheetId,
     ss.PAYEES_SHEET_ID,
@@ -65,8 +65,8 @@ export async function deletePayee(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Payee> {
-  const result: t.Payee = await en.deleteEntityById<t.Payee>(
+): Promise<t.PayeeResult> {
+  const result: t.PayeeResult = await en.deleteEntityById<t.PayeeResult>(
     client,
     spreadsheetId,
     ss.PAYEES_SHEET_ID,
@@ -79,8 +79,8 @@ export async function deletePayee(
 export async function fetchPayees(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-): Promise<t.Payees> {
-  const result: t.Payees = await en.queryEntities<t.Payee>(
+): Promise<t.PayeeResult[]> {
+  const result: t.PayeeResult[] = await en.queryEntities<t.PayeeResult>(
     client,
     spreadsheetId,
     ss.PAYEES_SHEET_ID,
@@ -91,7 +91,7 @@ export async function fetchPayees(
 }
 
 
-function rowToPayee(row: t.GQueryRow): t.Payee {
+function rowToPayee(row: t.GQueryRow): t.PayeeRowDataResult {
   return {
     id          : row.c[0] ? String(row.c[0].v) : '',
     title       : row.c[1] ? String(row.c[1].v) : '',
@@ -101,13 +101,13 @@ function rowToPayee(row: t.GQueryRow): t.Payee {
   }
 }
 
-function payeeToRow(payee: t.Payee): t.GRowData {
+function payeeToRow(rowData: t.PayeeRowDataQuery): t.GRowData {
   return {
     values: [
-      {userEnteredValue: {stringValue: payee.id}},
-      {userEnteredValue: {stringValue: payee.title || ''}},
-      {userEnteredValue: {stringValue: payee.createdAt}},
-      {userEnteredValue: {stringValue: payee.updatedAt}},
+      {userEnteredValue: {stringValue: rowData.id}},
+      {userEnteredValue: {stringValue: rowData.title}},
+      {userEnteredValue: {stringValue: rowData.createdAt}},
+      {userEnteredValue: {stringValue: rowData.updatedAt}},
     ],
   }
 }
@@ -193,7 +193,7 @@ export function validatePayeeFields(fields: any, lang: t.Lang): t.ValidationErro
   return errors
 }
 
-export function payeeToFields(payee: t.Payee): t.PayeeFields {
+export function payeeToFields(payee: t.PayeeResult): t.PayeeRes {
   const {
     id,
     title,
@@ -209,17 +209,17 @@ export function payeeToFields(payee: t.Payee): t.PayeeFields {
   }
 }
 
-export function fieldsToPayee(fields: t.PayeeFields): t.Payee {
+export function fieldsToPayee(fields: t.PayeeReq): t.PayeeQuery {
   const {
     id,
     title,
     createdAt,
     updatedAt,
-  }: t.PayeeFields = fields
+  } = fields
 
   return {
     id,
-    title: title || '',
+    title,
     createdAt,
     updatedAt,
   }
