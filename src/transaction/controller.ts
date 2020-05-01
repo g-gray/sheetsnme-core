@@ -1,8 +1,5 @@
 import * as t from '../types'
 
-// @ts-ignore
-import * as fpx from 'fpx'
-
 import * as u from '../utils'
 
 import * as n from './net'
@@ -10,17 +7,14 @@ import * as n from './net'
 export async function getTransactions(ctx: t.KContext): Promise<t.TransactionListRes> {
   const {query, client, gSpreadsheetId} = ctx
 
-  // TODO Add validation of filter values
   const filter: t.TransactionsFilter = query
-  const limit: number = parseInt(filter.limit || '', 10)
-  if (filter.limit && (!fpx.isInteger(limit) || limit < 0)) {
-    throw new u.PublicError(400, t.TRANSACTION_ERROR.LIMIT_MUST_BE_A_POSITIVE_INTEGER)
+  const errors: t.ValidationErrors = n.validateTransactionsFilter(filter)
+  if (errors.length) {
+    throw new u.ValidationError({errors})
   }
 
-  const offset: number = parseInt(filter.offset || '', 10)
-  if (filter.offset && (!fpx.isInteger(offset) || offset < 0)) {
-    throw new u.PublicError(400, t.TRANSACTION_ERROR.OFFSET_MUST_BE_A_POSITIVE_INTEGER)
-  }
+  const limit: number = parseInt(filter.limit || '')
+  const offset: number = parseInt(filter.offset || '')
 
   const transactionsNumber: number = await n.fetchTransactionsNumber(
     client,

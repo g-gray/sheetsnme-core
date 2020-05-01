@@ -90,6 +90,39 @@ export async function fetchTransactions(
   return result
 }
 
+function transactionsQuery(filter: t.TransactionsFilter): string {
+  const where = transactionsWhere(filter)
+
+  const limit: number = parseInt(filter.limit || '', 10) || u.DEFAULT_LIMIT
+  const offset: number = parseInt(filter.offset || '', 10)
+
+  const query: string = fpx.compact([
+    `select *`,
+    `where ${where}`,
+    `order by B desc, J desc`,
+    limit  ? `limit ${limit}`   : undefined,
+    offset ? `offset ${offset}` : undefined,
+  ]).join(' ')
+
+  return query
+}
+
+function transactionsWhere(filter: t.TransactionsFilter): string {
+  return fpx.compact([
+    `A != 'id'`,
+    filter.id         ? `A = '${filter.id}'`                                       : undefined,
+    filter.dateFrom   ? `B >= '${filter.dateFrom}'`                                : undefined,
+    filter.dateTo     ? `B <= '${filter.dateTo}'`                                  : undefined,
+    filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
+    filter.payeeId    ? `D = '${filter.payeeId}'`                                  : undefined,
+    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
+    filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : undefined,
+    filter.amountFrom ? `G >= ${filter.amountFrom}`                                : undefined,
+    filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
+  ]).join(' and ')
+}
+
+
 function rowToTransaction(row: t.GQueryRow): t.TransactionRowDataResult {
   return {
     id              : row.c[0]  ? String(row.c[0].v)  : '',
@@ -123,23 +156,6 @@ function transactionToRow(rowData: t.TransactionRowDataQuery): t.GRowData {
       {userEnteredValue: {stringValue: rowData.updatedAt}},
     ],
   }
-}
-
-function transactionsQuery(filter: t.TransactionsFilter): string {
-  const where = transactionsWhere(filter)
-
-  const limit: number = parseInt(filter.limit || '', 10) || u.DEFAULT_LIMIT
-  const offset: number = parseInt(filter.offset || '', 10)
-
-  const query: string = fpx.compact([
-    `select *`,
-    `where ${where}`,
-    `order by B desc, J desc`,
-    limit  ? `limit ${limit}`   : undefined,
-    offset ? `offset ${offset}` : undefined,
-  ]).join(' ')
-
-  return query
 }
 
 
@@ -214,21 +230,6 @@ function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
 }
 
 
-function transactionsWhere(filter: t.TransactionsFilter): string {
-  return fpx.compact([
-    `A != 'id'`,
-    filter.id         ? `A = '${filter.id}'`                                       : undefined,
-    filter.dateFrom   ? `B >= '${filter.dateFrom}'`                                : undefined,
-    filter.dateTo     ? `B <= '${filter.dateTo}'`                                  : undefined,
-    filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
-    filter.payeeId    ? `D = '${filter.payeeId}'`                                  : undefined,
-    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
-    filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : undefined,
-    filter.amountFrom ? `G >= ${filter.amountFrom}`                                : undefined,
-    filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
-  ]).join(' and ')
-}
-
 export function validateTransactionFields(fields: any, lang: t.Lang): t.ValidationErrors {
   const errors: t.ValidationErrors = []
   const transactionTypes: t.TRANSACTION_TYPE[] = fpx.values(t.TRANSACTION_TYPE)
@@ -288,21 +289,6 @@ export function validateTransactionFields(fields: any, lang: t.Lang): t.Validati
   return errors
 }
 
-function defTransactionType(transaction: t.TransactionResult): t.TRANSACTION_TYPE {
-  const {outcomeAccountId, incomeAccountId} = transaction
-  return outcomeAccountId && !incomeAccountId
-    ? t.TRANSACTION_TYPE.OUTCOME
-    : outcomeAccountId && incomeAccountId === ss.DEBT_ACCOUNT_ID
-    ? t.TRANSACTION_TYPE.LOAN
-    : incomeAccountId && !outcomeAccountId
-    ? t.TRANSACTION_TYPE.INCOME
-    : incomeAccountId && outcomeAccountId === ss.DEBT_ACCOUNT_ID
-    ? t.TRANSACTION_TYPE.BORROW
-    : outcomeAccountId && incomeAccountId
-    ? t.TRANSACTION_TYPE.TRANSFER
-    : t.TRANSACTION_TYPE.OUTCOME
-}
-
 export function transactionToFields(transaction: t.TransactionResult): t.TransactionRes {
   const {
     id,
@@ -332,6 +318,21 @@ export function transactionToFields(transaction: t.TransactionResult): t.Transac
     createdAt,
     updatedAt,
   }
+}
+
+function defTransactionType(transaction: t.TransactionResult): t.TRANSACTION_TYPE {
+  const {outcomeAccountId, incomeAccountId} = transaction
+  return outcomeAccountId && !incomeAccountId
+    ? t.TRANSACTION_TYPE.OUTCOME
+    : outcomeAccountId && incomeAccountId === ss.DEBT_ACCOUNT_ID
+    ? t.TRANSACTION_TYPE.LOAN
+    : incomeAccountId && !outcomeAccountId
+    ? t.TRANSACTION_TYPE.INCOME
+    : incomeAccountId && outcomeAccountId === ss.DEBT_ACCOUNT_ID
+    ? t.TRANSACTION_TYPE.BORROW
+    : outcomeAccountId && incomeAccountId
+    ? t.TRANSACTION_TYPE.TRANSFER
+    : t.TRANSACTION_TYPE.OUTCOME
 }
 
 export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuery {
@@ -405,4 +406,21 @@ export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuer
   }
 
   return transaction
+}
+
+export function validateTransactionsFilter(filter: any,): t.ValidationErrors {
+  // TODO Add validation of filter values
+  const errors: t.ValidationErrors = []
+
+  const limit: number = parseInt(filter.limit || '')
+  if (filter.limit && (!fpx.isInteger(limit) || limit < 0)) {
+    errors.push({text: t.TRANSACTION_ERROR.LIMIT_MUST_BE_A_POSITIVE_INTEGER})
+  }
+
+  const offset: number = parseInt(filter.offset || '')
+  if (filter.offset && (!fpx.isInteger(offset) || offset < 0)) {
+    errors.push({text: t.TRANSACTION_ERROR.OFFSET_MUST_BE_A_POSITIVE_INTEGER})
+  }
+
+  return errors
 }
