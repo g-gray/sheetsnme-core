@@ -102,7 +102,7 @@ export async function deleteAccount(ctx: t.KContext): Promise<t.AccountRes> {
     throw new u.PublicError(400, t.ACCOUNT_ERROR.CAN_NOT_DELETE)
   }
 
-  const transactions: t.Transactions = await tn.fetchTransactions(
+  const transactions: t.TransactionResult[] = await tn.fetchTransactions(
     client,
     gSpreadsheetId,
     {accountId: id}

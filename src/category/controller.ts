@@ -82,7 +82,7 @@ export async function deleteCategory(ctx: t.KContext): Promise<t.CategoryRes> {
     throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
-  const transactions: t.Transactions = await tn.fetchTransactions(
+  const transactions: t.TransactionResult[] = await tn.fetchTransactions(
     client,
     gSpreadsheetId,
     {categoryId: id}

@@ -2,7 +2,6 @@ import * as t from '../types'
 
 // @ts-ignore
 import * as fpx from 'fpx'
-import uuid from 'uuid/v4'
 
 import * as u from '../utils'
 import * as tr from '../translations'
@@ -15,8 +14,8 @@ export async function fetchTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<void | t.Transaction> {
-  const result: void | t.Transaction = await en.queryEntityById<t.Transaction>(
+): Promise<void | t.TransactionResult> {
+  const result: void | t.TransactionResult = await en.queryEntityById<t.TransactionResult>(
     client,
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
@@ -29,9 +28,9 @@ export async function fetchTransaction(
 export async function createTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
-  transaction  : t.Transaction,
-): Promise<t.Transaction> {
-  const result: t.Transaction = await en.createEntity<t.Transaction>(
+  transaction  : t.TransactionQuery,
+): Promise<t.TransactionResult> {
+  const result: t.TransactionResult = await en.createEntity<t.TransactionQuery, t.TransactionResult>(
     client,
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
@@ -46,9 +45,9 @@ export async function updateTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-  transaction  : t.Transaction,
-): Promise<t.Transaction> {
-  const result: t.Transaction = await en.updateEntityById<t.Transaction>(
+  transaction  : t.TransactionQuery,
+): Promise<t.TransactionResult> {
+  const result: t.TransactionResult = await en.updateEntityById<t.TransactionQuery, t.TransactionResult>(
     client,
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
@@ -64,8 +63,8 @@ export async function deleteTransaction(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   id           : string,
-): Promise<t.Transaction> {
-  const result: t.Transaction = await en.deleteEntityById<t.Transaction>(
+): Promise<t.TransactionResult> {
+  const result: t.TransactionResult = await en.deleteEntityById<t.TransactionResult>(
     client,
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
@@ -79,9 +78,9 @@ export async function fetchTransactions(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
   filter       : t.TransactionsFilter,
-): Promise<t.Transactions> {
+): Promise<t.TransactionResult[]> {
   const query: string = transactionsQuery(filter)
-  const result: t.Transactions = await en.queryEntities<t.Transaction>(
+  const result: t.TransactionResult[] = await en.queryEntities<t.TransactionResult>(
     client,
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
@@ -91,7 +90,7 @@ export async function fetchTransactions(
   return result
 }
 
-function rowToTransaction(row: t.GQueryRow): t.Transaction {
+function rowToTransaction(row: t.GQueryRow): t.TransactionRowDataResult {
   return {
     id              : row.c[0]  ? String(row.c[0].v)  : '',
     date            : row.c[1]  ? String(row.c[1].v)  : '',
@@ -108,20 +107,20 @@ function rowToTransaction(row: t.GQueryRow): t.Transaction {
   }
 }
 
-function transactionToRow(transaction: t.Transaction): t.GRowData {
+function transactionToRow(rowData: t.TransactionRowDataQuery): t.GRowData {
   return {
     values: [
-      {userEnteredValue: {stringValue: transaction.id}},
-      {userEnteredValue: {stringValue: transaction.date}},
-      {userEnteredValue: {stringValue: transaction.categoryId       || ''}},
-      {userEnteredValue: {stringValue: transaction.payeeId          || ''}},
-      {userEnteredValue: {stringValue: transaction.comment          || ''}},
-      {userEnteredValue: {stringValue: transaction.outcomeAccountId || ''}},
-      {userEnteredValue: {numberValue: transaction.outcomeAmount    || 0}},
-      {userEnteredValue: {stringValue: transaction.incomeAccountId  || ''}},
-      {userEnteredValue: {numberValue: transaction.incomeAmount     || 0}},
-      {userEnteredValue: {stringValue: transaction.createdAt}},
-      {userEnteredValue: {stringValue: transaction.updatedAt}},
+      {userEnteredValue: {stringValue: rowData.id}},
+      {userEnteredValue: {stringValue: rowData.date}},
+      {userEnteredValue: {stringValue: rowData.categoryId}},
+      {userEnteredValue: {stringValue: rowData.payeeId}},
+      {userEnteredValue: {stringValue: rowData.comment}},
+      {userEnteredValue: {stringValue: rowData.outcomeAccountId}},
+      {userEnteredValue: {numberValue: rowData.outcomeAmount}},
+      {userEnteredValue: {stringValue: rowData.incomeAccountId}},
+      {userEnteredValue: {numberValue: rowData.incomeAmount}},
+      {userEnteredValue: {stringValue: rowData.createdAt}},
+      {userEnteredValue: {stringValue: rowData.updatedAt}},
     ],
   }
 }
@@ -289,7 +288,7 @@ export function validateTransactionFields(fields: any, lang: t.Lang): t.Validati
   return errors
 }
 
-function defTransactionType(transaction: t.Transaction): t.TRANSACTION_TYPE {
+function defTransactionType(transaction: t.TransactionResult): t.TRANSACTION_TYPE {
   const {outcomeAccountId, incomeAccountId} = transaction
   return outcomeAccountId && !incomeAccountId
     ? t.TRANSACTION_TYPE.OUTCOME
@@ -304,7 +303,7 @@ function defTransactionType(transaction: t.Transaction): t.TRANSACTION_TYPE {
     : t.TRANSACTION_TYPE.OUTCOME
 }
 
-export function transactionToFields(transaction: t.Transaction): t.TransactionFields {
+export function transactionToFields(transaction: t.TransactionResult): t.TransactionRes {
   const {
     id,
     date,
@@ -335,7 +334,7 @@ export function transactionToFields(transaction: t.Transaction): t.TransactionFi
   }
 }
 
-export function fieldsToTransaction(fields: t.TransactionFields): t.Transaction {
+export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuery {
   const {
     id,
     type,
@@ -349,11 +348,11 @@ export function fieldsToTransaction(fields: t.TransactionFields): t.Transaction 
     comment,
     createdAt,
     updatedAt,
-  }: t.TransactionFields = fields
+  } = fields
 
-  const transaction: t.Transaction = {
+  const transaction: t.TransactionQuery = {
     id,
-    date            : date             || '',
+    date,
     categoryId      : categoryId       || '',
     payeeId         : payeeId          || '',
     outcomeAccountId: outcomeAccountId || '',

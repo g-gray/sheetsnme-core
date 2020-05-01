@@ -7,20 +7,11 @@ import * as u from '../utils'
 
 import * as n from './net'
 
-export async function getTransactions(ctx: t.KContext): Promise<void> {
-  const client: t.GOAuth2Client = ctx.client
+export async function getTransactions(ctx: t.KContext): Promise<t.TransactionListRes> {
+  const {query, client, gSpreadsheetId} = ctx
+
   // TODO Add validation of filter values
-  const filter: t.TransactionsFilter = ctx.query
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-
-  const transactionsNumber: number = await n.fetchTransactionsNumber(client, gSpreadsheetId, filter)
-  const transactionsAmounts: t.TransactionsAmounts = await n.fetchTransactionsAmounts(
-    client,
-    gSpreadsheetId,
-    filter
-  )
-  const transactions: t.Transactions = await n.fetchTransactions(client, gSpreadsheetId, filter)
-
+  const filter: t.TransactionsFilter = query
   const limit: number = parseInt(filter.limit || '', 10)
   if (filter.limit && (!fpx.isInteger(limit) || limit < 0)) {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.LIMIT_MUST_BE_A_POSITIVE_INTEGER)
@@ -31,80 +22,104 @@ export async function getTransactions(ctx: t.KContext): Promise<void> {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.OFFSET_MUST_BE_A_POSITIVE_INTEGER)
   }
 
-  ctx.body = {
+  const transactionsNumber: number = await n.fetchTransactionsNumber(
+    client,
+    gSpreadsheetId,
+    filter
+  )
+  const transactionsAmounts: t.TransactionsAmounts = await n.fetchTransactionsAmounts(
+    client,
+    gSpreadsheetId,
+    filter
+  )
+  const transactions: t.TransactionResult[] = await n.fetchTransactions(
+    client,
+    gSpreadsheetId,
+    filter
+  )
+
+  const response = {
     limit: limit || u.DEFAULT_LIMIT,
     offset: offset || 0,
     total: transactionsNumber,
-    items: fpx.map(transactions, n.transactionToFields),
+    items: transactions.map(n.transactionToFields),
     outcomeAmount: transactionsAmounts.outcomeAmount,
     incomeAmount: transactionsAmounts.incomeAmount,
   }
+  return response
 }
 
-export async function getTransaction(ctx: t.KContext): Promise<void> {
-  const id: void | string = ctx.params.id
+export async function getTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
+  const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
   }
 
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: void | t.Transaction = await n.fetchTransaction(client, gSpreadsheetId, id)
+  const transaction: void | t.TransactionResult = await n.fetchTransaction(
+    client,
+    gSpreadsheetId,
+    id
+  )
   if (!transaction) {
     throw new u.PublicError(404, t.TRANSACTION_ERROR.NOT_FOUND)
   }
 
-  ctx.body = n.transactionToFields(transaction)
+  const response = n.transactionToFields(transaction)
+  return response
 }
 
-export async function createTransaction(ctx: t.KContext): Promise<void> {
-  const errors: t.ValidationErrors = n.validateTransactionFields(ctx.request.body, ctx.lang)
+export async function createTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
+  const {request: {body}, client, gSpreadsheetId, lang} = ctx
+
+  const errors: t.ValidationErrors = n.validateTransactionFields(body, lang)
   if (errors.length) {
     throw new u.ValidationError({errors})
   }
 
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction = await n.createTransaction(
+  const transaction: t.TransactionResult = await n.createTransaction(
     client,
     gSpreadsheetId,
-    n.fieldsToTransaction(ctx.request.body)
+    n.fieldsToTransaction(body)
   )
 
-  ctx.body = n.transactionToFields(transaction)
+  const response = n.transactionToFields(transaction)
+  return response
 }
 
-export async function updateTransaction(ctx: t.KContext): Promise<void> {
-  const id: void | string = ctx.params.id
+export async function updateTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
+  const {params: {id}, request: {body}, client, gSpreadsheetId, lang} = ctx
   if (!id) {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
   }
 
-  const errors: t.ValidationErrors = n.validateTransactionFields(ctx.request.body, ctx.lang)
+  const errors: t.ValidationErrors = n.validateTransactionFields(body, lang)
   if (errors.length) {
     throw new u.ValidationError({errors})
   }
 
-  const client: t.GOAuth2Client = ctx.client
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const transaction: t.Transaction = await n.updateTransaction(
+  const transaction: t.TransactionResult = await n.updateTransaction(
     client,
     gSpreadsheetId,
     id,
-    n.fieldsToTransaction(ctx.request.body)
+    n.fieldsToTransaction(body)
   )
 
-  ctx.body = n.transactionToFields(transaction)
+  const response = n.transactionToFields(transaction)
+  return response
 }
 
-export async function deleteTransaction(ctx: t.KContext): Promise<void> {
-  const id: void | string = ctx.params.id
+export async function deleteTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
+  const {paras: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
   }
 
-  const gSpreadsheetId: string = ctx.gSpreadsheetId
-  const client: t.GOAuth2Client = ctx.client
-  const transaction: t.Transaction = await n.deleteTransaction(client, gSpreadsheetId, id)
-  ctx.body = transaction
+  const transaction: t.TransactionResult = await n.deleteTransaction(
+    client,
+    gSpreadsheetId,
+    id
+  )
+
+  const response = n.transactionToFields(transaction)
+  return response
 }

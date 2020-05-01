@@ -1,8 +1,5 @@
 import * as t from '../types'
 
-// @ts-ignore
-import * as fpx from 'fpx'
-
 import * as u from '../utils'
 import * as tn from '../transaction/net'
 
@@ -94,7 +91,7 @@ export async function deletePayee(ctx: t.KContext): Promise<t.PayeeRes> {
     throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
   }
 
-  const transactions: t.Transactions = await tn.fetchTransactions(
+  const transactions: t.TransactionResult[] = await tn.fetchTransactions(
     client,
     gSpreadsheetId,
     {payeeId: id}
