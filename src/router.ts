@@ -23,17 +23,16 @@ apiRouter
   .use(setLang)
   .use(jsonOnly)
   .use(authRequired)
-  .use(bodyAsResponse)
 
 apiRouter
-  .use(userRoutes).use(userAllowedMethods)
+  .use(bodyAsResponse, userRoutes).use(userAllowedMethods)
 
 apiRouter
   .use(spreadsheetIdRequired)
-  .use(accountsRoutes).use(accountsAllowedMethods)
-  .use(categoriesRoutes).use(categoriesAllowedMethods)
-  .use(payeesRoutes).use(payeesAllowedMethods)
-  .use(transactionsRoutes).use(transactionsAllowedMethods)
+  .use(bodyAsResponse, accountsRoutes).use(accountsAllowedMethods)
+  .use(bodyAsResponse, categoriesRoutes).use(categoriesAllowedMethods)
+  .use(bodyAsResponse, payeesRoutes).use(payeesAllowedMethods)
+  .use(bodyAsResponse, transactionsRoutes).use(transactionsAllowedMethods)
 
 const apiRoutes = apiRouter.routes()
 const apiAllowedMethods = apiRouter.allowedMethods()
