@@ -42,33 +42,6 @@ export function round(num: number, decimals: number = 0): number {
 }
 
 
-/**
- * Errors
- */
-
-export class PublicError extends Error implements t.IPublicError {
-  status: number
-  body: any
-
-  constructor(status: number, message: string, body?: any) {
-    super(...arguments)
-    PublicError.captureStackTrace(this, this.constructor)
-    this.name = 'PublicError'
-    this.message = message
-    this.status = status
-    this.body = body
-  }
-}
-
-export class ValidationError extends PublicError implements t.IValidationError {
-  body: any
-
-  constructor(body?: t.ValidationErrorBody) {
-    super(400, 'ValidationError', body)
-    this.name = 'ValidationError'
-  }
-}
-
 
 /**
  * Net

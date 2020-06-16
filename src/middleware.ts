@@ -5,6 +5,7 @@ import * as fpx from 'fpx'
 
 import * as e from './env'
 import * as u from './utils'
+import * as err from './error'
 
 const {
   LANG_HEADER_NAME,
@@ -12,7 +13,7 @@ const {
 
 export async function jsonOnly(ctx: t.KContext, next: t.KNext): Promise<void> {
   if (!ctx.accepts('application/json')) {
-    throw new u.PublicError(406, t.APP_ERROR.NOT_ACCEPTABLE)
+    throw new err.NotAcceptable(t.APP_ERROR.NOT_ACCEPTABLE)
   }
 
   await next()
@@ -33,24 +34,5 @@ export async function bodyAsResponse(ctx: t.KContext, next: t.KNext): Promise<vo
   const body = await next()
   if (body) {
     ctx.body = body
-  }
-}
-
-export async function handlePublicError(ctx: t.KContext, next: t.KNext): Promise<void> {
-  try {
-    await next()
-  }
-  catch (error) {
-    if (error instanceof u.PublicError) {
-      ctx.status = error.status
-      ctx.body = error.message
-      if (error.body) {
-        ctx.body = error.body
-      }
-
-      ctx.app.emit('error', error, ctx)
-      return
-    }
-    throw error
   }
 }

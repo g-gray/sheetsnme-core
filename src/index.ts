@@ -6,16 +6,16 @@ import bodyParser from 'koa-bodyparser'
 import * as e from './env'
 
 import * as am from './auth/middleware'
+import * as errm from './error/middleware'
 
 import * as r from './router'
-import * as m from './middleware'
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/36161
 const app: Koa<Koa.DefaultState, t.CustomContext> = new Koa<Koa.DefaultState, t.CustomContext>()
 app
   .use(bodyParser())
   .use(am.handleAuthError)
-  .use(m.handlePublicError)
+  .use(errm.handlePublicError)
   .use(r.appRoutes)
   .use(r.appAllowedMethods)
 

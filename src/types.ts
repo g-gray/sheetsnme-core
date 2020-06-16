@@ -14,6 +14,8 @@ export * from './category/types'
 export * from './payee/types'
 export * from './transaction/types'
 
+export * from './error/types'
+
 /**
  * Env
  */
@@ -104,41 +106,4 @@ export type Lang = 'en' | 'ru'
 export type Translations = {
   en: string,
   ru: string,
-}
-
-/**
- * Errors
- */
-
-
-
-export interface IPublicError extends Error {
-  status: number
-  body: any
-}
-
-export interface IPublicErrorConstructor extends ErrorConstructor {
-  new (status: number, message: string, body?: any): IPublicError
-  (status: number, message: string, body?: any): IPublicError
-  readonly prototype: IPublicError
-}
-
-export type ValidationError = {
-  text: string,
-}
-
-export type ValidationErrors = ValidationError[]
-
-export type ValidationErrorBody = {errors: ValidationErrors}
-
-export interface IValidationError extends IPublicError {}
-
-export interface IValidationErrorConstructor extends IPublicErrorConstructor {
-  new (body?: ValidationErrorBody): IValidationError
-  (body?: ValidationErrorBody): IValidationError
-  readonly prototype: IValidationError
-}
-
-export enum APP_ERROR {
-  NOT_ACCEPTABLE = 'NOT_ACCEPTABLE',
 }

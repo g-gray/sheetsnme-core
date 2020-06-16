@@ -5,6 +5,7 @@ import * as fpx from 'fpx'
 
 import * as e from '../env'
 import * as u from '../utils'
+import * as err from '../error'
 
 import * as um from '../user/model'
 
@@ -26,17 +27,17 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
   const cookieSessionId: void | string = n.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: void | string = headerSessionId || cookieSessionId
   if (!sessionId) {
-    throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
+    throw new err.Unauthorized(t.AUTH_ERROR.UNAUTHORIZED)
   }
 
   const session: void | t.Session = await m.sessionById(sessionId)
   if (!session) {
-    throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
+    throw new err.Unauthorized(t.AUTH_ERROR.UNAUTHORIZED)
   }
 
   const user: void | t.UserResult = await um.userBySessionId(session.id)
   if (!user) {
-    throw new u.PublicError(400, t.AUTH_ERROR.SESSION_ID_REQUIRED)
+    throw new err.BadRequest(t.AUTH_ERROR.SESSION_ID_REQUIRED)
   }
 
   const decryptedToken: string = u.decrypt(
@@ -55,7 +56,7 @@ export async function authRequired(ctx: t.KContext, next: t.KNext): Promise<void
   )
 
   if (isScopesDifferent) {
-    throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
+    throw new err.Unauthorized(t.AUTH_ERROR.UNAUTHORIZED)
   }
 
   const isExpired: boolean = token.expiry_date
@@ -90,13 +91,14 @@ export async function handleAuthError(_: t.KContext, next: t.KNext): Promise<voi
     await next()
   }
   catch (error) {
-    if (error.code === 401) {
-      throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
+    if (error.code === t.HTTP_STATUS_CODES.UNAUTHORIZED) {
+      throw new err.Unauthorized(t.AUTH_ERROR.UNAUTHORIZED)
     }
 
     if (error.message === t.AUTH_ERROR.G_INVALID_GRANT) {
-      throw new u.PublicError(401, t.AUTH_ERROR.UNAUTHORIZED)
+      throw new err.Unauthorized(t.AUTH_ERROR.UNAUTHORIZED)
     }
+
     throw error
   }
 }

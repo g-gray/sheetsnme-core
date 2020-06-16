@@ -2,6 +2,7 @@ import * as t from '../types'
 
 import * as e from '../env'
 import * as u from '../utils'
+import * as err from '../error'
 
 import * as um from '../user/model'
 import * as un from '../user/net'
@@ -34,12 +35,12 @@ export async function authLogout(ctx: t.KContext): Promise<void> {
   const cookieSessionId: void | string = n.getCookie(ctx, SESSION_COOKIE_NAME)
   const sessionId: void | string = headerSessionId || cookieSessionId
   if (!sessionId) {
-    throw new u.PublicError(400, t.AUTH_ERROR.SESSION_ID_REQUIRED)
+    throw new err.BadRequest(t.AUTH_ERROR.SESSION_ID_REQUIRED)
   }
 
   const session: void | t.Session = await m.deleteSessionById(sessionId)
   if (!session) {
-    throw new u.PublicError(400, t.AUTH_ERROR.SESSION_NOT_FOUND)
+    throw new err.BadRequest(t.AUTH_ERROR.SESSION_NOT_FOUND)
   }
 
   await m.deleteExpiredSessions(session.userId)
@@ -52,18 +53,18 @@ export async function authCode (ctx: t.KContext): Promise<void> {
   // TODO Add checking of a CSRF token here got from ctx.state
   const code: void | string = ctx.query.code
   if (!code) {
-      throw new u.PublicError(400, t.AUTH_ERROR.CODE_REQUIRED)
+    throw new err.BadRequest(t.AUTH_ERROR.CODE_REQUIRED)
   }
 
   let newToken: t.IGAuthToken = await n.exchangeCodeForToken(code)
   const client: t.GOAuth2Client = n.createOAuth2Client(newToken)
   const gUser: void | t.GUserRes = await un.fetchUserInfo(client)
   if (!gUser) {
-      throw new u.PublicError(400, t.AUTH_ERROR.USER_NOT_FOUND)
+    throw new err.BadRequest(t.AUTH_ERROR.USER_NOT_FOUND)
   }
 
   if (!gUser.id) {
-      throw new u.PublicError(400, t.AUTH_ERROR.USER_ID_REQUIRED)
+    throw new err.BadRequest(t.AUTH_ERROR.USER_ID_REQUIRED)
   }
 
   const externalId: string = gUser.id

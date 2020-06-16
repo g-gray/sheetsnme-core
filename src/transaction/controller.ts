@@ -1,6 +1,7 @@
 import * as t from '../types'
 
 import * as u from '../utils'
+import * as err from '../error'
 
 import * as n from './net'
 
@@ -10,7 +11,7 @@ export async function getTransactions(ctx: t.KContext): Promise<t.TransactionLis
   const filter: t.TransactionsFilter = query
   const errors: t.ValidationErrors = n.validateTransactionsFilter(filter)
   if (errors.length) {
-    throw new u.ValidationError({errors})
+    throw new err.ValidationError({errors})
   }
 
   const limit: number = parseInt(filter.limit || '')
@@ -46,7 +47,7 @@ export async function getTransactions(ctx: t.KContext): Promise<t.TransactionLis
 export async function getTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
   const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.TRANSACTION_ERROR.ID_REQUIRED)
   }
 
   const transaction: void | t.TransactionResult = await n.fetchTransaction(
@@ -55,7 +56,7 @@ export async function getTransaction(ctx: t.KContext): Promise<t.TransactionRes>
     id
   )
   if (!transaction) {
-    throw new u.PublicError(404, t.TRANSACTION_ERROR.NOT_FOUND)
+    throw new err.NotFound(t.TRANSACTION_ERROR.NOT_FOUND)
   }
 
   const response = n.transactionToFields(transaction)
@@ -67,7 +68,7 @@ export async function createTransaction(ctx: t.KContext): Promise<t.TransactionR
 
   const errors: t.ValidationErrors = n.validateTransactionFields(body, lang)
   if (errors.length) {
-    throw new u.ValidationError({errors})
+    throw new err.ValidationError({errors})
   }
 
   const transaction: t.TransactionResult = await n.createTransaction(
@@ -83,12 +84,12 @@ export async function createTransaction(ctx: t.KContext): Promise<t.TransactionR
 export async function updateTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
   const {params: {id}, request: {body}, client, gSpreadsheetId, lang} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.TRANSACTION_ERROR.ID_REQUIRED)
   }
 
   const errors: t.ValidationErrors = n.validateTransactionFields(body, lang)
   if (errors.length) {
-    throw new u.ValidationError({errors})
+    throw new err.ValidationError({errors})
   }
 
   const transaction: t.TransactionResult = await n.updateTransaction(
@@ -105,7 +106,7 @@ export async function updateTransaction(ctx: t.KContext): Promise<t.TransactionR
 export async function deleteTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
   const {paras: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.TRANSACTION_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.TRANSACTION_ERROR.ID_REQUIRED)
   }
 
   const transaction: t.TransactionResult = await n.deleteTransaction(

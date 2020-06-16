@@ -1,6 +1,6 @@
 import * as t from '../types'
 
-import * as u from '../utils'
+import * as err from '../error'
 import * as tn from '../transaction/net'
 
 import * as n from './net'
@@ -29,7 +29,7 @@ export async function getPayees(ctx: t.KContext): Promise<t.PayeeWithDebtRes[]> 
 export async function getPayee(ctx: t.KContext): Promise<t.PayeeRes> {
   const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.PAYEE_ERROR.ID_REQUIRED)
   }
 
   const payee: void | t.PayeeResult = await n.fetchPayee(
@@ -38,7 +38,7 @@ export async function getPayee(ctx: t.KContext): Promise<t.PayeeRes> {
     id
   )
   if (!payee) {
-    throw new u.PublicError(404, t.PAYEE_ERROR.NOT_FOUND)
+    throw new err.NotFound(t.PAYEE_ERROR.NOT_FOUND)
   }
 
   const response = n.payeeToFields(payee)
@@ -50,7 +50,7 @@ export async function createPayee(ctx: t.KContext): Promise<t.PayeeRes> {
 
   const errors: t.ValidationErrors = n.validatePayeeFields(body, lang)
   if (errors.length) {
-    throw new u.ValidationError({errors})
+    throw new err.ValidationError({errors})
   }
 
   const payee: t.PayeeResult = await n.createPayee(
@@ -66,12 +66,12 @@ export async function createPayee(ctx: t.KContext): Promise<t.PayeeRes> {
 export async function updatePayee(ctx: t.KContext): Promise<t.PayeeRes> {
   const {params: {id}, request: {body}, client, gSpreadsheetId, lang} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.PAYEE_ERROR.ID_REQUIRED)
   }
 
   const errors: t.ValidationErrors = n.validatePayeeFields(body, lang)
   if (errors.length) {
-    throw new u.ValidationError({errors})
+    throw new err.ValidationError({errors})
   }
 
   const payee: t.PayeeResult = await n.updatePayee(
@@ -88,7 +88,7 @@ export async function updatePayee(ctx: t.KContext): Promise<t.PayeeRes> {
 export async function deletePayee(ctx: t.KContext): Promise<t.PayeeRes> {
   const {paras: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.PAYEE_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.PAYEE_ERROR.ID_REQUIRED)
   }
 
   const transactions: t.TransactionResult[] = await tn.fetchTransactions(
@@ -97,7 +97,7 @@ export async function deletePayee(ctx: t.KContext): Promise<t.PayeeRes> {
     {payeeId: id}
   )
   if (transactions.length) {
-    throw new u.PublicError(400, t.PAYEE_ERROR.THERE_ARE_RELATED_ENTITIES)
+    throw new err.BadRequest(t.PAYEE_ERROR.THERE_ARE_RELATED_ENTITIES)
   }
 
   const response = await n.deletePayee(client, gSpreadsheetId, id)

@@ -1,6 +1,6 @@
 import * as t from '../types'
 
-import * as u from '../utils'
+import * as err from '../error'
 
 import * as tn from '../transaction/net'
 
@@ -20,7 +20,7 @@ export async function getCategories(ctx: t.KContext): Promise<t.CategoryRes[]> {
 export async function getCategory(ctx: t.KContext): Promise<t.CategoryRes> {
   const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
   const category: void | t.CategoryResult = await m.fetchCategory(
@@ -29,7 +29,7 @@ export async function getCategory(ctx: t.KContext): Promise<t.CategoryRes> {
     id
   )
   if (!category) {
-    throw new u.PublicError(404, t.CATEGORY_ERROR.NOT_FOUND)
+    throw new err.NotFound(t.CATEGORY_ERROR.NOT_FOUND)
   }
 
   const response = m.categoryToFields(category)
@@ -41,7 +41,7 @@ export async function createCategory(ctx: t.KContext): Promise<t.CategoryRes> {
 
   const errors: t.ValidationErrors = m.validateCategoryFields(body, lang)
   if (errors.length) {
-    throw new u.ValidationError({errors})
+    throw new err.ValidationError({errors})
   }
 
   const category: t.CategoryResult = await m.createCategory(
@@ -57,12 +57,12 @@ export async function createCategory(ctx: t.KContext): Promise<t.CategoryRes> {
 export async function updateCategory(ctx: t.KContext): Promise<t.CategoryRes> {
   const {params: {id}, request: {body}, client, gSpreadsheetId, lang} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
   const errors: t.ValidationErrors = m.validateCategoryFields(body, lang)
   if (errors.length) {
-    throw new u.ValidationError({errors})
+    throw new err.ValidationError({errors})
   }
 
   const category: t.CategoryResult = await m.updateCategory(
@@ -79,7 +79,7 @@ export async function updateCategory(ctx: t.KContext): Promise<t.CategoryRes> {
 export async function deleteCategory(ctx: t.KContext): Promise<t.CategoryRes> {
   const {paras: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
-    throw new u.PublicError(400, t.CATEGORY_ERROR.ID_REQUIRED)
+    throw new err.BadRequest(t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
   const transactions: t.TransactionResult[] = await tn.fetchTransactions(
@@ -88,7 +88,7 @@ export async function deleteCategory(ctx: t.KContext): Promise<t.CategoryRes> {
     {categoryId: id}
   )
   if (transactions.length) {
-    throw new u.PublicError(400, t.CATEGORY_ERROR.THERE_ARE_RELATED_ENTITIES)
+    throw new err.BadRequest(t.CATEGORY_ERROR.THERE_ARE_RELATED_ENTITIES)
   }
 
   const category: t.CategoryResult = await m.deleteCategory(

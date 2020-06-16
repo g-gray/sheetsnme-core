@@ -1,6 +1,6 @@
 import * as t from '../types'
 
-import * as u from '../utils'
+import * as err from '../error'
 
 import * as sm from '../sheet/model'
 import * as sn from '../sheet/net'
@@ -11,7 +11,7 @@ export async function getUser(ctx: t.KContext): Promise<t.UserWithSpreadsheeetsR
   const sessionId: string = ctx.sessionId
   const user: void | t.UserResult = await m.userBySessionId(sessionId)
   if (!user) {
-    throw new u.PublicError(404, t.USER_ERROR.NOT_FOUND)
+    throw new err.NotFound(t.USER_ERROR.NOT_FOUND)
   }
 
   const spreadsheets: t.SpreadsheetResult[] = await sm.spreadsheetsBySessionId(sessionId)
@@ -31,7 +31,7 @@ export async function getUser(ctx: t.KContext): Promise<t.UserWithSpreadsheeetsR
     gSpreadsheet = await sn.createAppSpreadsheet(client, ctx.lang)
 
     if (!gSpreadsheet.spreadsheetId) {
-      throw new u.PublicError(400, t.USER_ERROR.SPREADSHEET_ID_REQUIRED)
+      throw new err.BadRequest(t.USER_ERROR.SPREADSHEET_ID_REQUIRED)
     }
 
     spreadsheet = await sm.createSpreadsheet(
