@@ -1,4 +1,4 @@
-import * as t from './types'
+import * as t from '../types'
 
 export const TITLE_MUST_BE_NON_EMPTY_STRING: t.Translations = {
   en: 'Title must be non empty string',

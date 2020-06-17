@@ -3,8 +3,7 @@ import * as t from '../types'
 // @ts-ignore
 import * as fpx from 'fpx'
 
-import * as u from '../utils'
-import * as tr from '../translations'
+import * as i18n from '../i18n'
 
 import * as ss from '../sheet/sheets'
 import * as en from '../entity/net'
@@ -115,7 +114,7 @@ export function validateCategoryFields(fields: any, lang: t.Lang): t.ValidationE
   const {title} = fields
 
   if (!fpx.isString(title) || !title.length) {
-    errors.push({text: u.xln(lang, tr.TITLE_MUST_BE_NON_EMPTY_STRING)})
+    errors.push({text: i18n.xln(lang, i18n.TITLE_MUST_BE_NON_EMPTY_STRING)})
   }
 
   return errors

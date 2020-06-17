@@ -2,6 +2,10 @@ import * as Koa from 'koa'
 import * as pg from 'pg'
 
 import {GOAuth2Client} from './auth/types'
+import {Lang} from './i18n/types'
+
+export * from './error/types'
+export * from './i18n/types'
 export * from './auth/types'
 
 export * from './user/types'
@@ -13,8 +17,6 @@ export * from './account/types'
 export * from './category/types'
 export * from './payee/types'
 export * from './transaction/types'
-
-export * from './error/types'
 
 /**
  * Env
@@ -95,15 +97,4 @@ export type XHttpResponse = {
   headers   : {[key: string]: string},
   body      : (object | string),
   params    : XHttpParams,
-}
-
-/**
- * i18n
- */
-
-export type Lang = 'en' | 'ru'
-
-export type Translations = {
-  en: string,
-  ru: string,
 }

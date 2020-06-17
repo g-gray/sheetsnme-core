@@ -1,9 +1,10 @@
 import Router from 'koa-router'
 import Koa from 'koa'
 
-import {setLang, jsonOnly, bodyAsResponse} from './middleware'
+import {jsonOnly, bodyAsResponse} from './middleware'
 
 import {authRequired} from './auth/middleware'
+import {setLang} from './i18n/middleware'
 import {authRoutes, authAllowedMethods} from './auth/router'
 
 import {userRoutes, userAllowedMethods} from './user/router'

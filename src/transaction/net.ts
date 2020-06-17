@@ -4,7 +4,7 @@ import * as t from '../types'
 import * as fpx from 'fpx'
 
 import * as u from '../utils'
-import * as tr from '../translations'
+import * as i18n from '../i18n'
 
 import * as ss from '../sheet/sheets'
 import * as sn from '../sheet/net'
@@ -244,11 +244,11 @@ export function validateTransactionFields(fields: any, lang: t.Lang): t.Validati
   } = fields
 
   if (!fpx.includes(transactionTypes, type)) {
-    errors.push({text: `${u.xln(lang, tr.TYPE_MUST_BE_ONE_OF)}: [${transactionTypes.join(', ')}]`})
+    errors.push({text: `${i18n.xln(lang, i18n.TYPE_MUST_BE_ONE_OF)}: [${transactionTypes.join(', ')}]`})
   }
 
   if (!date || !fpx.isValidDate(new Date(date))) {
-    errors.push({text: u.xln(lang, tr.DATE_MUST_BE_NON_EMPTY_AND_VALID)})
+    errors.push({text: i18n.xln(lang, i18n.DATE_MUST_BE_NON_EMPTY_AND_VALID)})
   }
 
   if (fpx.includes([
@@ -257,11 +257,11 @@ export function validateTransactionFields(fields: any, lang: t.Lang): t.Validati
     t.TRANSACTION_TYPE.LOAN,
   ], type)) {
     if (!outcomeAccountId) {
-      errors.push({text: u.xln(lang, tr.OUTCOME_ACCOUNT_REQUIRED)})
+      errors.push({text: i18n.xln(lang, i18n.OUTCOME_ACCOUNT_REQUIRED)})
     }
 
     if (!fpx.isNumber(outcomeAmount)) {
-      errors.push({text: u.xln(lang, tr.OUTCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
+      errors.push({text: i18n.xln(lang, i18n.OUTCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
     }
   }
 
@@ -271,11 +271,11 @@ export function validateTransactionFields(fields: any, lang: t.Lang): t.Validati
     t.TRANSACTION_TYPE.BORROW,
   ], type)) {
     if (!incomeAccountId) {
-      errors.push({text: u.xln(lang, tr.INCOME_ACCOUNT_REQUIRED)})
+      errors.push({text: i18n.xln(lang, i18n.INCOME_ACCOUNT_REQUIRED)})
     }
 
     if (!fpx.isNumber(incomeAmount)) {
-      errors.push({text: u.xln(lang, tr.INCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
+      errors.push({text: i18n.xln(lang, i18n.INCOME_AMOUNT_MUST_BE_A_VALID_NUMBER)})
     }
   }
 
@@ -283,7 +283,7 @@ export function validateTransactionFields(fields: any, lang: t.Lang): t.Validati
     t.TRANSACTION_TYPE.LOAN,
     t.TRANSACTION_TYPE.BORROW,
   ], type) && !payeeId) {
-    errors.push({text: u.xln(lang, tr.PAYEE_REQUIRED)})
+    errors.push({text: i18n.xln(lang, i18n.PAYEE_REQUIRED)})
   }
 
   return errors
