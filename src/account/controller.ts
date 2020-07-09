@@ -7,7 +7,9 @@ import * as tn from '../transaction/net'
 
 import * as n from './net'
 
-export async function getAccounts(ctx: t.KContext): Promise<t.AccountWithBalanceRes[]> {
+export async function getAccountsWithBalances(
+  ctx: t.KContext
+): Promise<t.AccountWithBalanceRes[]> {
   const {client, gSpreadsheetId} = ctx
 
   const accounts = await n.fetchAccounts(client, gSpreadsheetId)

@@ -6,12 +6,8 @@ export const accountRouter: Router = new Router({
   prefix: '/accounts'
 })
 
-/**
- * GET
- */
-
 accountRouter
-  .get('/',    c.getAccounts)
+  .get('/',    c.getAccountsWithBalances)
   .get('/:id', c.getAccount)
 
   .post('/',   c.createAccount)
