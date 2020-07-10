@@ -48,6 +48,7 @@ export async function getPayee(ctx: t.KContext): Promise<t.PayeeRes> {
 export async function createPayee(ctx: t.KContext): Promise<t.PayeeRes> {
   const {request: {body}, client, gSpreadsheetId, lang} = ctx
 
+  // TODO Replace validation by parsing with error throwing
   const errors: t.ValidationErrors = n.validatePayeeFields(body, lang)
   if (errors.length) {
     throw new err.ValidationError({errors})
@@ -69,6 +70,7 @@ export async function updatePayee(ctx: t.KContext): Promise<t.PayeeRes> {
     throw new err.BadRequest(t.PAYEE_ERROR.ID_REQUIRED)
   }
 
+  // TODO Replace validation by parsing with error throwing
   const errors: t.ValidationErrors = n.validatePayeeFields(body, lang)
   if (errors.length) {
     throw new err.ValidationError({errors})

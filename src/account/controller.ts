@@ -48,6 +48,7 @@ export async function getAccount(ctx: t.KContext): Promise<t.AccountRes> {
 export async function createAccount(ctx: t.KContext): Promise<t.AccountRes> {
   const {request: {body}, client, gSpreadsheetId, lang} = ctx
 
+  // TODO Replace validation by parsing with error throwing
   const errors: t.ValidationErrors = n.validateAccountFields(body, lang)
   if (errors.length) {
     throw new err.ValidationError({errors})
@@ -73,6 +74,7 @@ export async function updateAccount(ctx: t.KContext): Promise<t.AccountRes> {
     throw new err.BadRequest(t.ACCOUNT_ERROR.CAN_NOT_CHANGE)
   }
 
+  // TODO Replace validation by parsing with error throwing
   const errors: t.ValidationErrors = n.validateAccountFields(body, lang)
   if (errors.length) {
     throw new err.ValidationError({errors})

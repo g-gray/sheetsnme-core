@@ -39,7 +39,8 @@ export async function getCategory(ctx: t.KContext): Promise<t.CategoryRes> {
 export async function createCategory(ctx: t.KContext): Promise<t.CategoryRes> {
   const {request: {body}, client, gSpreadsheetId, lang} = ctx
 
-  const errors: t.ValidationErrors = m.validateCategoryFields(body, lang)
+  // TODO Replace validation by parsing with error throwing
+  const errors: t.ValidationErrors = n.validateCategoryFields(body, lang)
   if (errors.length) {
     throw new err.ValidationError({errors})
   }
@@ -60,7 +61,8 @@ export async function updateCategory(ctx: t.KContext): Promise<t.CategoryRes> {
     throw new err.BadRequest(t.CATEGORY_ERROR.ID_REQUIRED)
   }
 
-  const errors: t.ValidationErrors = m.validateCategoryFields(body, lang)
+  // TODO Replace validation by parsing with error throwing
+  const errors: t.ValidationErrors = n.validateCategoryFields(body, lang)
   if (errors.length) {
     throw new err.ValidationError({errors})
   }

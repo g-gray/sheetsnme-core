@@ -2,8 +2,11 @@ import * as t from '../types'
 
 export const AVAILABLE_LANGS: t.Lang[] = ['en', 'ru']
 
-export function xln(lang: t.Lang, translations: t.Translations, args: any[] = []): string {
-
+export function xln(
+  lang: t.Lang,
+  translations: t.Translations,
+  args: any[] = []
+): string {
   if (translations == null) return ''
 
   let translation: void | string | ((...args: any[]) => string)

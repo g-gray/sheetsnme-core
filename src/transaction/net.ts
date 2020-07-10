@@ -230,7 +230,10 @@ function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
 }
 
 
-export function validateTransactionFields(fields: any, lang: t.Lang): t.ValidationErrors {
+export function validateTransactionFields(
+  fields: any,
+  lang: t.Lang
+): t.ValidationErrors {
   const errors: t.ValidationErrors = []
   const transactionTypes: t.TRANSACTION_TYPE[] = fpx.values(t.TRANSACTION_TYPE)
   const {
@@ -408,17 +411,36 @@ export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuer
   return transaction
 }
 
-export function validateTransactionsFilter(filter: any,): t.ValidationErrors {
-  // TODO Add validation of filter values
+export function validateTransactionsFilter(filter: any): t.ValidationErrors {
   const errors: t.ValidationErrors = []
 
-  const limit: number = parseInt(filter.limit || '')
-  if (filter.limit && (!fpx.isInteger(limit) || limit < 0)) {
+  if (filter.dateFrom && !fpx.isValidDate(new Date(filter.dateFrom))) {
+    errors.push({text: t.TRANSACTION_ERROR.DATE_FROM_MUST_BE_A_VALID_DATE})
+  }
+
+  if (filter.dateTo && !fpx.isValidDate(new Date(filter.dateTo))) {
+    errors.push({text: t.TRANSACTION_ERROR.DATE_TO_MUST_BE_A_VALID_DATE})
+  }
+
+  if (filter.amountFrom) {
+    const amountFrom: number = parseFloat(filter.amountFrom || '')
+    if (!fpx.isFinite(amountFrom) || amountFrom < 0) {
+      errors.push({text: t.TRANSACTION_ERROR.AMOUNT_FROM_MUST_BE_A_POSTITIVE_NUMBER})
+    }
+  }
+
+  if (filter.amountTo) {
+    const amountTo: number = parseFloat(filter.amountTo || '')
+    if (!fpx.isFinite(amountTo) || amountTo < 0) {
+      errors.push({text: t.TRANSACTION_ERROR.AMOUNT_TO_MUST_BE_A_POSTITIVE_NUMBER})
+    }
+  }
+
+  if (filter.limit && !fpx.isNatural(parseInt(filter.limit || ''))) {
     errors.push({text: t.TRANSACTION_ERROR.LIMIT_MUST_BE_A_POSITIVE_INTEGER})
   }
 
-  const offset: number = parseInt(filter.offset || '')
-  if (filter.offset && (!fpx.isInteger(offset) || offset < 0)) {
+  if (filter.offset && !fpx.isNatural(parseInt(filter.offset || ''))) {
     errors.push({text: t.TRANSACTION_ERROR.OFFSET_MUST_BE_A_POSITIVE_INTEGER})
   }
 
