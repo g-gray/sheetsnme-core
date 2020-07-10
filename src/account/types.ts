@@ -56,7 +56,7 @@ export type Balance = {
   balance  : number,
 }
 
-export type BalancesById = {[key: string]: Balance}
+export type BalancesByCategoryId = {[key: string]: Balance}
 
 
 

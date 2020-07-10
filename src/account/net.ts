@@ -125,67 +125,61 @@ function accountToRow(rowData: t.AccountRowDataQuery): t.GRowData {
  * Balance
  */
 
-export async function fetchBalancesByAccountIds(
-  client       : t.GOAuth2Client,
+export async function fetchBalancesByAccountId(
   spreadsheetId: string,
-  accountIds   : string[],
-): Promise<t.BalancesById> {
-  // TODO Remove the condition below
-  const outcomeIdsCond: string = fpx.map(
-    accountIds,
-    (id: string) => `F = '${id}'`
-  ).join(' OR ')
-  const outcomeTable: void | t.GQueryTable = await sn.querySheet(
+): Promise<t.BalancesByCategoryId> {
+  const outcomeBalancesTable: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
     SELECT F, sum(G)
-    WHERE ${outcomeIdsCond}
     GROUP BY F
     `,
   )
-  const outcomeBalances: t.BalancesById = outcomeTable
-    ? fpx.keyBy(
-      fpx.map(outcomeTable.rows, rowToBalance),
+  let outcomeBalancesByCategoryId: t.BalancesByCategoryId = {}
+  if (outcomeBalancesTable) {
+    outcomeBalancesByCategoryId = fpx.keyBy(
+      outcomeBalancesTable.rows.map(rowToBalance),
       (balance: t.Balance) => balance.accountId
     )
-    : {}
+  }
 
-  // TODO Remove the condition below
-  const incomeIdsCond: string = fpx.map(
-    accountIds,
-    (id: string) => `H = '${id}'`
-  ).join(' OR ')
-  const incomeTable: void | t.GQueryTable = await sn.querySheet(
+  const incomeBalancesTable: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
     SELECT H, sum(I)
-    WHERE ${incomeIdsCond}
     GROUP BY H
     `,
   )
-  const incomeBalances: t.BalancesById = incomeTable
-    ? fpx.keyBy(
-      fpx.map(incomeTable.rows, rowToBalance),
-      (balance: t.Balance) => balance.accountId)
-    : {}
+  let incomeBalancesById: t.BalancesByCategoryId = {}
+  if (incomeBalancesTable) {
+    incomeBalancesById = fpx.keyBy(
+      incomeBalancesTable.rows.map(rowToBalance),
+      (balance: t.Balance) => balance.accountId
+    )
+  }
 
-  const ids: string[] = fpx.uniq(fpx.concat(fpx.keys(outcomeBalances), fpx.keys(incomeBalances)))
+  const accountIds: string[] = fpx.uniq(fpx.concat(
+    fpx.keys(outcomeBalancesByCategoryId),
+    fpx.keys(incomeBalancesById)
+  ))
 
-  const result: t.BalancesById = fpx.fold(
-    ids,
+  const result: t.BalancesByCategoryId = fpx.fold(
+    accountIds,
     {},
-    (acc: t.BalancesById, id: string) => {
-      const incomeBalance: void | t.Balance = incomeBalances[id]
-      const income = incomeBalance ? incomeBalance.balance : 0
-      const outcomeBalance: void | t.Balance = outcomeBalances[id]
-      const outcome = outcomeBalance ? outcomeBalance.balance : 0
+    (acc: t.BalancesByCategoryId, accountId: string) => {
+      const income = incomeBalancesById[accountId]
+        ? incomeBalancesById[accountId].balance
+        : 0
+      const outcome = outcomeBalancesByCategoryId[accountId]
+        ? outcomeBalancesByCategoryId[accountId].balance
+        : 0
 
       return {
         ...acc,
-        [id]: {
-          accountId: id,
+        [accountId]: {
+          accountId,
           balance: u.round(income - outcome, 2),
         },
       }

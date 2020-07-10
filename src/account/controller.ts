@@ -10,19 +10,14 @@ import * as n from './net'
 export async function getAccounts(ctx: t.KContext): Promise<t.AccountWithBalanceRes[]> {
   const {client, gSpreadsheetId} = ctx
 
-  const accounts: t.AccountResult[] = await n.fetchAccounts(client, gSpreadsheetId)
-  const accountIds: string[] = accounts.map((account) => account.id)
-  const balances: t.BalancesById = await n.fetchBalancesByAccountIds(
-    client,
-    gSpreadsheetId,
-    accountIds
-  )
+  const accounts = await n.fetchAccounts(client, gSpreadsheetId)
+  const balancesByAccountId = await n.fetchBalancesByAccountId(gSpreadsheetId)
 
   const response = accounts.map(
     (account) => ({
       ...n.accountToFields(account),
-      balance: balances[account.id]
-        ? balances[account.id].balance
+      balance: balancesByAccountId[account.id]
+        ? balancesByAccountId[account.id].balance
         : 0,
     })
   )
