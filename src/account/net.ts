@@ -89,7 +89,7 @@ export async function fetchAccounts(
     rowToAccount,
     `
     SELECT *
-    WHERE A != 'id' and A !='${ss.DEBT_ACCOUNT_ID}'
+    WHERE A != 'id' AND A !='${ss.DEBT_ACCOUNT_ID}'
     `
   )
   return result
@@ -132,10 +132,11 @@ export async function fetchBalancesByAccountId(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
-    SELECT F, sum(G)
+    SELECT F, SUM(G)
     GROUP BY F
     `,
   )
+
   let outcomeBalancesByCategoryId: t.BalancesByCategoryId = {}
   if (outcomeBalancesTable) {
     outcomeBalancesByCategoryId = fpx.keyBy(
@@ -148,10 +149,11 @@ export async function fetchBalancesByAccountId(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
-    SELECT H, sum(I)
+    SELECT H, SUM(I)
     GROUP BY H
     `,
   )
+
   let incomeBalancesById: t.BalancesByCategoryId = {}
   if (incomeBalancesTable) {
     incomeBalancesById = fpx.keyBy(

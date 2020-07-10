@@ -47,9 +47,9 @@ export async function userByExternalId(
   externalId: string
 ): Promise<void | t.UserResult> {
   const q: string = `
-  select *
-  from users
-  where external_id = $1
+  SELECT *
+  FROM users
+  WHERE external_id = $1
   `
   const v: any[] = [externalId]
   const result: t.PGQueryResult = await db.query(q, v)
@@ -66,10 +66,10 @@ export async function userBySessionId(
   sessionId: string
 ): Promise<void | t.UserResult> {
   const q: string = `
-  select *
-  from users u
-  left join sessions s on s.user_id = u.id
-  where s.id = $1
+  SELECT *
+  FROM users u
+  LEFT JOIN sessions s ON s.user_id = u.id
+  WHERE s.id = $1
   `
   const v: any[] = [sessionId]
   const result: t.PGQueryResult = await db.query(q, v)

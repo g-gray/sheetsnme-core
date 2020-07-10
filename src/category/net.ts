@@ -81,7 +81,7 @@ export async function fetchCategories(
     spreadsheetId,
     ss.CATEGORIES_SHEET_ID,
     rowToCategory,
-    `select * where A != 'id' order by B`
+    `SELECT * WHERE A != 'id' ORDER BY B`
   )
   return result
 }

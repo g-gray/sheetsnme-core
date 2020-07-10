@@ -7,9 +7,9 @@ export async function sessionById(
   id: string
 ): Promise<void | t.Session> {
   const q: string = `
-  select *
-  from sessions
-  where id = $1
+  SELECT *
+  FROM sessions
+  WHERE id = $1
   `
   const v: any[] = [id]
   const result: t.PGQueryResult = await db.query(q, v)
@@ -26,24 +26,24 @@ export async function upsertSession(
   session: t.SessionQueryFields
 ): Promise<t.Session> {
   let q: string = `
-  insert into sessions
+  INSERT INTO sessions
     (user_id)
-  values
+  VALUES
     ($1)
-  returning *
+  RETURNING *
   `
   let v: any[] = [session.userId]
 
   if (session.id) {
     q = `
-    insert into sessions
+    INSERT INTO sessions
       (id, user_id)
-    values
+    VALUES
       ($1, $2)
-    on conflict (id) do update set
+    ON CONFLICT (id) DO UPDATE SET
       user_id    = $2,
       updated_at = current_timestamp
-    returning *
+    RETURNING *
     `
     v = [session.id, session.userId]
   }
@@ -58,10 +58,10 @@ export async function deleteSessionById(
   id: string
 ): Promise<void | t.Session> {
   const q: string = `
-  delete
-  from sessions
-  where id = $1
-  returning *
+  DELETE
+  FROM sessions
+  WHERE id = $1
+  RETURNING *
   `
   const v: any[] = [id]
   const result: t.PGQueryResult = await db.query(q, v)
@@ -78,11 +78,11 @@ export async function deleteExpiredSessions(
   userId: string
 ): Promise<void> {
   const q: string = `
-  delete
-  from sessions
-  where
+  DELETE
+  FROM sessions
+  WHERE
     user_id = $1
-    and (extract(epoch from (select localtimestamp)) - extract(epoch from created_at)) * 1000 >= $2
+    AND (EXTRACT(EPOCH FROM (SELECT LOCALTIMESTAMP)) - EXTRACT(EPOCH FROM created_at)) * 1000 >= $2
   `
   const v: any[] = [userId, u.WEEK]
 

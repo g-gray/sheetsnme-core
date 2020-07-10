@@ -84,7 +84,7 @@ export async function fetchPayees(
     spreadsheetId,
     ss.PAYEES_SHEET_ID,
     rowToPayee,
-    `select * where A != 'id' order by B`
+    `SELECT * WHERE A != 'id' ORDER BY B`
   )
   return result
 }
@@ -121,9 +121,9 @@ export async function fetchDebtsByPayeeIds(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
-    select D, sum(G)
-    where F = '${ss.DEBT_ACCOUNT_ID}'
-    group by D
+    SELECT D, SUM(G)
+    WHERE F = '${ss.DEBT_ACCOUNT_ID}'
+    GROUP BY D
     `,
   )
   const loanDebts: t.DebtsById = loansTable
@@ -137,9 +137,9 @@ export async function fetchDebtsByPayeeIds(
     spreadsheetId,
     ss.TRANSACTIONS_SHEET_ID,
     `
-    select D, sum(I)
-    where H = '${ss.DEBT_ACCOUNT_ID}'
-    group by D
+    SELECT D, SUM(I)
+    WHERE H = '${ss.DEBT_ACCOUNT_ID}'
+    GROUP BY D
     `,
   )
   const borrowDebts: t.DebtsById = borrowsTable

@@ -57,7 +57,7 @@ export async function queryEntitiesNumber(
   const table: void | t.GQueryTable = await sn.querySheet(
     spreadsheetId,
     sheetId,
-    query || `SELECT count(A) WHERE A != 'id'`,
+    query || `SELECT COUNT(A) WHERE A != 'id'`,
   )
   const rows: t.GQueryRow[] = table
     ? table.rows

@@ -97,11 +97,11 @@ function transactionsQuery(filter: t.TransactionsFilter): string {
   const offset: number = parseInt(filter.offset || '', 10)
 
   const query: string = fpx.compact([
-    `select *`,
-    `where ${where}`,
-    `order by B desc, J desc`,
-    limit  ? `limit ${limit}`   : undefined,
-    offset ? `offset ${offset}` : undefined,
+    `SELECT *`,
+    `WHERE ${where}`,
+    `ORDER BY B DESC, J DESC`,
+    limit  ? `LIMIT ${limit}`   : '',
+    offset ? `OFFSET ${offset}` : '',
   ]).join(' ')
 
   return query
@@ -110,16 +110,16 @@ function transactionsQuery(filter: t.TransactionsFilter): string {
 function transactionsWhere(filter: t.TransactionsFilter): string {
   return fpx.compact([
     `A != 'id'`,
-    filter.id         ? `A = '${filter.id}'`                                       : undefined,
-    filter.dateFrom   ? `B >= '${filter.dateFrom}'`                                : undefined,
-    filter.dateTo     ? `B <= '${filter.dateTo}'`                                  : undefined,
-    filter.categoryId ? `C = '${filter.categoryId}'`                               : undefined,
-    filter.payeeId    ? `D = '${filter.payeeId}'`                                  : undefined,
-    filter.comment    ? `lower(E) like lower('%${filter.comment}%')`               : undefined,
-    filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : undefined,
-    filter.amountFrom ? `G >= ${filter.amountFrom}`                                : undefined,
-    filter.amountTo   ? `I <= ${filter.amountTo}`                                  : undefined,
-  ]).join(' and ')
+    filter.id         ? `A = '${filter.id}'`                                       : '',
+    filter.dateFrom   ? `B >= '${filter.dateFrom}'`                                : '',
+    filter.dateTo     ? `B <= '${filter.dateTo}'`                                  : '',
+    filter.categoryId ? `C = '${filter.categoryId}'`                               : '',
+    filter.payeeId    ? `D = '${filter.payeeId}'`                                  : '',
+    filter.comment    ? `LOWER(E) LIKE LOWER('%${filter.comment}%')`               : '',
+    filter.accountId  ? `(F = '${filter.accountId}' OR H = '${filter.accountId}')` : '',
+    filter.amountFrom ? `G >= ${filter.amountFrom}`                                : '',
+    filter.amountTo   ? `I <= ${filter.amountTo}`                                  : '',
+  ]).join(' AND ')
 }
 
 
@@ -177,8 +177,8 @@ function transactionsNumberQuery(filter: t.TransactionsFilter): string {
   const where = transactionsWhere(filter)
 
   const query: string = fpx.compact([
-    `select count(A)`,
-    `where ${where}`,
+    `SELECT COUNT(A)`,
+    `WHERE ${where}`,
   ]).join(' ')
 
   return query
@@ -216,14 +216,14 @@ function transactionsAmountsQuery(filter: t.TransactionsFilter): string {
   const where = transactionsWhere(filter)
 
   const query: string = fpx.compact([
-    `select sum(G), sum(I)`,
-    `where ${[
+    `SELECT SUM(G), SUM(I)`,
+    `WHERE ${[
       // Ignore debts
-      `(F != '${ss.DEBT_ACCOUNT_ID}' and H != '${ss.DEBT_ACCOUNT_ID}')`,
+      `(F != '${ss.DEBT_ACCOUNT_ID}' AND H != '${ss.DEBT_ACCOUNT_ID}')`,
       // Ignore transfers
-      `((F != '' and H = '') or (F = '' and H != ''))`,
+      `((F != '' AND H = '') or (F = '' AND H != ''))`,
       where,
-    ].join(' and ')}`,
+    ].join(' AND ')}`,
   ]).join(' ')
 
   return query

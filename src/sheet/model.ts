@@ -6,11 +6,11 @@ export async function spreadsheetsBySessionId(
   sessionId: string
 ): Promise<t.SpreadsheetResult[]> {
 const q: string = `
-  select sh.*
-  from spreadsheets sh
-  left join sessions s on s.user_id = sh.user_id
-  where s.id = $1
-  order by created_at desc
+  SELECT sh.*
+  FROM spreadsheets sh
+  LEFT JOIN sessions s ON s.user_id = sh.user_id
+  WHERE s.id = $1
+  ORDER BY created_at DESC
   `
   const v: any[] = [sessionId]
   const result: t.PGQueryResult = await db.query(q, v)
@@ -25,13 +25,13 @@ export async function createSpreadsheet(
   spreadsheetId: string
 ): Promise<t.SpreadsheetResult> {
   const q: string = `
-  with
-      s as (select user_id from sessions where id = $1)
-  insert into spreadsheets
+  WITH
+      s AS (SELECT user_id FROM sessions WHERE id = $1)
+  INSERT INTO spreadsheets
       (user_id, external_id)
-  values
-      ((select user_id from s), $2)
-  returning *
+  VALUES
+      ((SELECT user_id FROM s), $2)
+  RETURNING *
   `
   const v: any[] = [sessionId, spreadsheetId]
   const result: t.PGQueryResult = await db.query(q, v)
