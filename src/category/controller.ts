@@ -77,7 +77,7 @@ export async function updateCategory(ctx: t.KContext): Promise<t.CategoryRes> {
 }
 
 export async function deleteCategory(ctx: t.KContext): Promise<t.CategoryRes> {
-  const {paras: {id}, client, gSpreadsheetId} = ctx
+  const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new err.BadRequest(t.CATEGORY_ERROR.ID_REQUIRED)
   }

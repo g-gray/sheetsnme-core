@@ -86,7 +86,7 @@ export async function updatePayee(ctx: t.KContext): Promise<t.PayeeRes> {
 }
 
 export async function deletePayee(ctx: t.KContext): Promise<t.PayeeRes> {
-  const {paras: {id}, client, gSpreadsheetId} = ctx
+  const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new err.BadRequest(t.PAYEE_ERROR.ID_REQUIRED)
   }

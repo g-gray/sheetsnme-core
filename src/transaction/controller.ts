@@ -104,7 +104,7 @@ export async function updateTransaction(ctx: t.KContext): Promise<t.TransactionR
 }
 
 export async function deleteTransaction(ctx: t.KContext): Promise<t.TransactionRes> {
-  const {paras: {id}, client, gSpreadsheetId} = ctx
+  const {params: {id}, client, gSpreadsheetId} = ctx
   if (!id) {
     throw new err.BadRequest(t.TRANSACTION_ERROR.ID_REQUIRED)
   }
