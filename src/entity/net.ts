@@ -15,7 +15,10 @@ export async function queryEntityById<R extends t.EntityRowDataRes>(
     throw new Error(t.ENTITY_ERROR.ID_REQUIRED)
   }
 
-  const query: string = `SELECT * WHERE A = '${id}'`
+  const query: string = `
+    SELECT *
+    WHERE A = '${id}'
+  `
   const entities: R[] = await queryEntities<R>(
     client,
     spreadsheetId,

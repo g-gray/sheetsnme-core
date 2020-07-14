@@ -11,6 +11,12 @@ export type EntityRowDataRes = {
   updatedAt: string,
 }
 
+
+
+/**
+ * Errors
+ */
+
 export enum ENTITY_ERROR {
   ID_REQUIRED          = 'ENTITY_ID_REQUIRED',
   NOT_FOUND            = 'ENTITY_NOT_FOUND',
