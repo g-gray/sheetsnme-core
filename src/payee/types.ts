@@ -41,14 +41,25 @@ export type PayeeRowDataResult = {
 }
 
 
+
+/**
+ * Debts
+ */
+
 export type Debt = {
   payeeId: string,
-  debt: number,
+  debt   : number,
 }
 
-export type DebtsById = {[key: string]: Debt}
+export type DebtsByPayeeId = {[key: string]: Debt}
+
+export type PayeesDebtsRes = DebtsByPayeeId
 
 
+
+/**
+ * Errors
+ */
 
 export enum PAYEE_ERROR {
   ID_REQUIRED                = 'PAYEE_ID_REQUIRED',

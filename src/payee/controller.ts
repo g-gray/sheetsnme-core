@@ -1,28 +1,30 @@
 import * as t from '../types'
 
+// @ts-ignore
+import * as fpx from 'fpx'
+
+import * as u from '../utils'
 import * as err from '../error'
+
 import * as tn from '../transaction/net'
 
 import * as n from './net'
 
-export async function getPayees(ctx: t.KContext): Promise<t.PayeeWithDebtRes[]> {
+export async function getPayeesWithDebts(
+  ctx: t.KContext
+): Promise<t.PayeeWithDebtRes[]> {
   const {client, gSpreadsheetId} = ctx
-  const payees: t.PayeeResult[] = await n.fetchPayees(
-    client,
-    gSpreadsheetId
-  )
 
-  const payeeIds = payees.map((payee) => payee.id)
-  const debts: t.DebtsById = await n.fetchDebtsByPayeeIds(
-    client,
-    gSpreadsheetId,
-    payeeIds
-  )
+  const payees: t.PayeeResult[] = await n.fetchPayees(client, gSpreadsheetId)
+  const debtsByPayeeId: t.DebtsByPayeeId = await n.fetchDebtsByPayeeIds(gSpreadsheetId)
 
-  const response = payees.map((payee) => ({
+  const response: t.PayeeWithDebtRes[] = payees.map((payee) => ({
     ...n.payeeToFields(payee),
-    debt: debts[payee.id] ? debts[payee.id].debt : 0,
+    debt: debtsByPayeeId[payee.id]
+      ? debtsByPayeeId[payee.id].debt
+      : 0,
   }))
+
   return response
 }
 
@@ -103,5 +105,36 @@ export async function deletePayee(ctx: t.KContext): Promise<t.PayeeRes> {
   }
 
   const response = await n.deletePayee(client, gSpreadsheetId, id)
+  return response
+}
+
+
+
+/**
+ * Debts
+ */
+
+export async function getPayeesDebts(
+  ctx: t.KContext
+): Promise<t.PayeesDebtsRes> {
+  const {client, gSpreadsheetId} = ctx
+
+  const payees: t.PayeeResult[] = await n.fetchPayees(client, gSpreadsheetId)
+  const debtsByPayeeId: t.DebtsByPayeeId = await n.fetchDebtsByPayeeIds(gSpreadsheetId)
+
+  const response: t.PayeesDebtsRes = fpx.keyBy(
+    payees.map((payee) => {
+      const debt = debtsByPayeeId[payee.id]
+        ? debtsByPayeeId[payee.id].debt
+        : 0
+
+      return {
+        payeeId: payee.id,
+        debt: u.round(debt, 2),
+      }
+    }),
+    (debt: t.Debt) => debt.payeeId
+  )
+
   return response
 }

@@ -7,7 +7,9 @@ export const payeeRouter: Router = new Router({
 })
 
 payeeRouter
-  .get('/',     c.getPayees)
+  .get('/debts', c.getPayeesDebts)
+
+  .get('/',     c.getPayeesWithDebts)
   .get('/:id',  c.getPayee)
 
   .post('/',    c.createPayee)

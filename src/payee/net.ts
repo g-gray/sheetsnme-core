@@ -112,75 +112,6 @@ function payeeToRow(rowData: t.PayeeRowDataQuery): t.GRowData {
 }
 
 
-export async function fetchDebtsByPayeeIds(
-  client: t.GOAuth2Client,
-  spreadsheetId: string,
-  payeeIds: string[],
-): Promise<t.DebtsById> {
-  const loansTable: void | t.GQueryTable = await sn.querySheet(
-    spreadsheetId,
-    ss.TRANSACTIONS_SHEET_ID,
-    `
-    SELECT D, SUM(G)
-    WHERE F = '${ss.DEBT_ACCOUNT_ID}'
-    GROUP BY D
-    `,
-  )
-  const loanDebts: t.DebtsById = loansTable
-    ? fpx.keyBy(
-        fpx.map(loansTable.rows, rowToDebt),
-        (debt: t.Debt) => debt.payeeId
-      )
-    : {}
-
-  const borrowsTable: void | t.GQueryTable = await sn.querySheet(
-    spreadsheetId,
-    ss.TRANSACTIONS_SHEET_ID,
-    `
-    SELECT D, SUM(I)
-    WHERE H = '${ss.DEBT_ACCOUNT_ID}'
-    GROUP BY D
-    `,
-  )
-  const borrowDebts: t.DebtsById = borrowsTable
-    ? fpx.keyBy(
-        fpx.map(borrowsTable.rows, rowToDebt),
-        (debt: t.Debt) => debt.payeeId
-      )
-    : {}
-
-  const ids = fpx.uniq(fpx.concat(fpx.keys(loanDebts), fpx.keys(borrowDebts)))
-
-  const result: t.DebtsById = fpx.fold(
-    ids,
-    {},
-    (acc: t.DebtsById, id: string) => {
-      const borrowDebt: void | t.Debt = borrowDebts[id]
-      const borrowAmount = borrowDebt ? borrowDebt.debt : 0
-
-      const loanDebt: void | t.Debt = loanDebts[id]
-      const loanAmount = loanDebt ? loanDebt.debt : 0
-
-      return {
-        ...acc,
-        [id]: {
-          payeeId: id,
-          debt: u.round(loanAmount - borrowAmount, 2),
-        },
-      }
-    })
-
-  return result
-}
-
-function rowToDebt(row: t.GQueryRow): t.Debt {
-  return {
-    payeeId: row.c[0]  ? String(row.c[0].v)  : '',
-    debt   : row.c[1]  ? Number(row.c[1].v)  : 0,
-  }
-}
-
-
 export function validatePayeeFields(fields: any, lang: t.Lang): t.ValidationErrors {
   const errors: t.ValidationErrors = []
   const {title} = fields
@@ -221,5 +152,77 @@ export function fieldsToPayee(fields: t.PayeeReq): t.PayeeQuery {
     title,
     createdAt,
     updatedAt,
+  }
+}
+
+
+
+/**
+ * Debts
+ */
+
+export async function fetchDebtsByPayeeIds(
+  spreadsheetId: string,
+): Promise<t.DebtsByPayeeId> {
+  const loansTable: void | t.GQueryTable = await sn.querySheet(
+    spreadsheetId,
+    ss.TRANSACTIONS_SHEET_ID,
+    `
+    SELECT D, SUM(G)
+    WHERE F = '${ss.DEBT_ACCOUNT_ID}'
+    GROUP BY D
+    `,
+  )
+  const loanDebts: t.DebtsByPayeeId = loansTable
+    ? fpx.keyBy(
+        fpx.map(loansTable.rows, rowToDebt),
+        (debt: t.Debt) => debt.payeeId
+      )
+    : {}
+
+  const borrowsTable: void | t.GQueryTable = await sn.querySheet(
+    spreadsheetId,
+    ss.TRANSACTIONS_SHEET_ID,
+    `
+    SELECT D, SUM(I)
+    WHERE H = '${ss.DEBT_ACCOUNT_ID}'
+    GROUP BY D
+    `,
+  )
+  const borrowDebts: t.DebtsByPayeeId = borrowsTable
+    ? fpx.keyBy(
+        fpx.map(borrowsTable.rows, rowToDebt),
+        (debt: t.Debt) => debt.payeeId
+      )
+    : {}
+
+  const ids = fpx.uniq(fpx.concat(fpx.keys(loanDebts), fpx.keys(borrowDebts)))
+
+  const result: t.DebtsByPayeeId = fpx.fold(
+    ids,
+    {},
+    (acc: t.DebtsByPayeeId, id: string) => {
+      const borrowDebt: void | t.Debt = borrowDebts[id]
+      const borrowAmount = borrowDebt ? borrowDebt.debt : 0
+
+      const loanDebt: void | t.Debt = loanDebts[id]
+      const loanAmount = loanDebt ? loanDebt.debt : 0
+
+      return {
+        ...acc,
+        [id]: {
+          payeeId: id,
+          debt: u.round(loanAmount - borrowAmount, 2),
+        },
+      }
+    })
+
+  return result
+}
+
+function rowToDebt(row: t.GQueryRow): t.Debt {
+  return {
+    payeeId: row.c[0]  ? String(row.c[0].v)  : '',
+    debt   : row.c[1]  ? Number(row.c[1].v)  : 0,
   }
 }
