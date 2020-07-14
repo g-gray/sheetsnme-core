@@ -115,6 +115,12 @@ export enum TRANSACTION_TYPE {
   BORROW   = 'BORROW',
 }
 
+
+
+/**
+ * Errors
+ */
+
 export enum TRANSACTION_ERROR {
   ID_REQUIRED = 'TRANSACTION_ID_REQUIRED',
   NOT_FOUND   = 'TRANSACTION_NOT_FOUND',

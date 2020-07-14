@@ -176,10 +176,10 @@ export async function fetchTransactionsNumber(
 function transactionsNumberQuery(filter: t.TransactionsFilter): string {
   const where = transactionsWhere(filter)
 
-  const query: string = fpx.compact([
-    `SELECT COUNT(A)`,
-    `WHERE ${where}`,
-  ]).join(' ')
+  const query: string = `
+    SELECT COUNT(A)
+    WHERE ${where}
+  `
 
   return query
 }
