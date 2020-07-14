@@ -51,14 +51,24 @@ export type AccountRowDataResult = {
 
 
 
+/**
+ * Balances
+ */
+
 export type Balance = {
   accountId: string,
   balance  : number,
 }
 
-export type BalancesByCategoryId = {[key: string]: Balance}
+export type BalancesByAccountId = {[key: string]: Balance}
+
+export type AccountsBalancesRes = BalancesByAccountId
 
 
+
+/**
+ * Errors
+ */
 
 export enum ACCOUNT_ERROR {
   ID_REQUIRED                = 'ACCOUNT_ID_REQUIRED',

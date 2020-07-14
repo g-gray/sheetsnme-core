@@ -120,86 +120,6 @@ function accountToRow(rowData: t.AccountRowDataQuery): t.GRowData {
 }
 
 
-
-/**
- * Balance
- */
-
-export async function fetchBalancesByAccountId(
-  spreadsheetId: string,
-): Promise<t.BalancesByCategoryId> {
-  const outcomeBalancesTable: void | t.GQueryTable = await sn.querySheet(
-    spreadsheetId,
-    ss.TRANSACTIONS_SHEET_ID,
-    `
-    SELECT F, SUM(G)
-    GROUP BY F
-    `,
-  )
-
-  let outcomeBalancesByCategoryId: t.BalancesByCategoryId = {}
-  if (outcomeBalancesTable) {
-    outcomeBalancesByCategoryId = fpx.keyBy(
-      outcomeBalancesTable.rows.map(rowToBalance),
-      (balance: t.Balance) => balance.accountId
-    )
-  }
-
-  const incomeBalancesTable: void | t.GQueryTable = await sn.querySheet(
-    spreadsheetId,
-    ss.TRANSACTIONS_SHEET_ID,
-    `
-    SELECT H, SUM(I)
-    GROUP BY H
-    `,
-  )
-
-  let incomeBalancesById: t.BalancesByCategoryId = {}
-  if (incomeBalancesTable) {
-    incomeBalancesById = fpx.keyBy(
-      incomeBalancesTable.rows.map(rowToBalance),
-      (balance: t.Balance) => balance.accountId
-    )
-  }
-
-  const accountIds: string[] = fpx.uniq(fpx.concat(
-    fpx.keys(outcomeBalancesByCategoryId),
-    fpx.keys(incomeBalancesById)
-  ))
-
-  const result: t.BalancesByCategoryId = fpx.fold(
-    accountIds,
-    {},
-    (acc: t.BalancesByCategoryId, accountId: string) => {
-      const income = incomeBalancesById[accountId]
-        ? incomeBalancesById[accountId].balance
-        : 0
-      const outcome = outcomeBalancesByCategoryId[accountId]
-        ? outcomeBalancesByCategoryId[accountId].balance
-        : 0
-
-      return {
-        ...acc,
-        [accountId]: {
-          accountId,
-          balance: u.round(income - outcome, 2),
-        },
-      }
-  })
-
-  return result
-}
-
-
-function rowToBalance(row: t.GQueryRow): t.Balance {
-  return {
-    accountId: row.c[0] ? String(row.c[0].v) : '',
-    balance  : row.c[1] ? Number(row.c[1].v) : 0,
-  }
-}
-
-
-
 export function validateAccountFields(fields: any, lang: t.Lang): t.ValidationErrors {
   const errors: t.ValidationErrors = []
   const {title} = fields
@@ -244,5 +164,84 @@ export function fieldsToAccount(fields: t.AccountReq): t.AccountQuery {
     currencyCode,
     createdAt,
     updatedAt,
+  }
+}
+
+
+
+/**
+ * Balance
+ */
+
+export async function fetchBalancesByAccountId(
+  spreadsheetId: string,
+): Promise<t.BalancesByAccountId> {
+  const outcomeBalancesTable: void | t.GQueryTable = await sn.querySheet(
+    spreadsheetId,
+    ss.TRANSACTIONS_SHEET_ID,
+    `
+    SELECT F, SUM(G)
+    GROUP BY F
+    `
+  )
+
+  let outcomeBalancesByCategoryId: t.BalancesByAccountId = {}
+  if (outcomeBalancesTable) {
+    outcomeBalancesByCategoryId = fpx.keyBy(
+      outcomeBalancesTable.rows.map(rowToBalance),
+      (balance: t.Balance) => balance.accountId
+    )
+  }
+
+  const incomeBalancesTable: void | t.GQueryTable = await sn.querySheet(
+    spreadsheetId,
+    ss.TRANSACTIONS_SHEET_ID,
+    `
+    SELECT H, SUM(I)
+    GROUP BY H
+    `,
+  )
+
+  let incomeBalancesById: t.BalancesByAccountId = {}
+  if (incomeBalancesTable) {
+    incomeBalancesById = fpx.keyBy(
+      incomeBalancesTable.rows.map(rowToBalance),
+      (balance: t.Balance) => balance.accountId
+    )
+  }
+
+  const accountIds: string[] = fpx.uniq(fpx.concat(
+    fpx.keys(outcomeBalancesByCategoryId),
+    fpx.keys(incomeBalancesById)
+  ))
+
+  const result: t.BalancesByAccountId = fpx.fold(
+    accountIds,
+    {},
+    (acc: t.BalancesByAccountId, accountId: string) => {
+      const income = incomeBalancesById[accountId]
+        ? incomeBalancesById[accountId].balance
+        : 0
+      const outcome = outcomeBalancesByCategoryId[accountId]
+        ? outcomeBalancesByCategoryId[accountId].balance
+        : 0
+
+      return {
+        ...acc,
+        [accountId]: {
+          accountId,
+          balance: income - outcome,
+        },
+      }
+  })
+
+  return result
+}
+
+
+function rowToBalance(row: t.GQueryRow): t.Balance {
+  return {
+    accountId: row.c[0] ? String(row.c[0].v) : '',
+    balance  : row.c[1] ? Number(row.c[1].v) : 0,
   }
 }

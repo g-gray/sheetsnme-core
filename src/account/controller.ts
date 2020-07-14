@@ -1,5 +1,9 @@
 import * as t from '../types'
 
+// @ts-ignore
+import * as fpx from 'fpx'
+
+import * as u from '../utils'
 import * as err from '../error'
 
 import * as s from '../sheet/sheets'
@@ -117,5 +121,37 @@ export async function deleteAccount(ctx: t.KContext): Promise<t.AccountRes> {
   )
 
   const response = n.accountToFields(account)
+  return response
+}
+
+
+
+/**
+ * Balances
+ */
+
+
+export async function getAccountsBalances(
+  ctx: t.KContext
+): Promise<t.AccountsBalancesRes> {
+  const {client, gSpreadsheetId} = ctx
+
+  const accounts = await n.fetchAccounts(client, gSpreadsheetId)
+  const balancesByAccountId = await n.fetchBalancesByAccountId(gSpreadsheetId)
+
+  const response: t.AccountsBalancesRes = fpx.keyBy(
+    accounts.map((account) => {
+      const balance = balancesByAccountId[account.id]
+        ? balancesByAccountId[account.id].balance
+        : 0
+
+      return {
+        accountId: account.id,
+        balance: u.round(balance, 2),
+      }
+    }),
+    (balance: t.Balance) => balance.accountId
+  )
+
   return response
 }

@@ -7,11 +7,13 @@ export const accountRouter: Router = new Router({
 })
 
 accountRouter
+  .get('/balances', c.getAccountsBalances)
+
   .get('/',    c.getAccountsWithBalances)
   .get('/:id', c.getAccount)
 
-  .post('/',   c.createAccount)
-  .post('/:id',c.updateAccount)
+  .post('/',    c.createAccount)
+  .post('/:id', c.updateAccount)
 
   .del('/:id', c.deleteAccount)
 
