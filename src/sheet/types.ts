@@ -60,6 +60,10 @@ export type GQueryRes = {
 
 
 
+/**
+ * Errors
+ */
+
 export enum SHEET_ERROR {
   SPREADSHEET_NOT_FOUND = 'SPREADSHEET_NOT_FOUND',
 }
