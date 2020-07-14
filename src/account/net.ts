@@ -3,16 +3,11 @@ import * as t from '../types'
 // @ts-ignore
 import * as fpx from 'fpx'
 
-import * as u from '../utils'
 import * as i18n from '../i18n'
 
 import * as ss from '../sheet/sheets'
 import * as sn from '../sheet/net'
 import * as en from '../entity/net'
-
-/**
- * Account
- */
 
 export async function fetchAccount(
   client       : t.GOAuth2Client,

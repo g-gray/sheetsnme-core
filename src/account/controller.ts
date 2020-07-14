@@ -16,17 +16,19 @@ export async function getAccountsWithBalances(
 ): Promise<t.AccountWithBalanceRes[]> {
   const {client, gSpreadsheetId} = ctx
 
-  const accounts = await n.fetchAccounts(client, gSpreadsheetId)
-  const balancesByAccountId = await n.fetchBalancesByAccountId(gSpreadsheetId)
-
-  const response = accounts.map(
-    (account) => ({
-      ...n.accountToFields(account),
-      balance: balancesByAccountId[account.id]
-        ? balancesByAccountId[account.id].balance
-        : 0,
-    })
+  const accounts: t.AccountResult[] = await n.fetchAccounts(
+    client,
+    gSpreadsheetId
   )
+  const balancesByAccountId: t.BalancesByAccountId = await n.fetchBalancesByAccountId(gSpreadsheetId)
+
+  const response: t.AccountWithBalanceRes[] = accounts.map((account) => ({
+    ...n.accountToFields(account),
+    balance: balancesByAccountId[account.id]
+      ? balancesByAccountId[account.id].balance
+      : 0,
+  }))
+
   return response
 }
 
