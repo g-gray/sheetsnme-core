@@ -6,7 +6,12 @@ import * as fpx from 'fpx'
 import * as i18n from '../i18n'
 
 import * as ss from '../sheet/sheets'
+import * as sn from '../sheet/net'
 import * as en from '../entity/net'
+
+/**
+ * Category
+ */
 
 export async function fetchCategory(
   client       : t.GOAuth2Client,
@@ -150,4 +155,82 @@ export function fieldsToCategory(fields: t.CategoryReq): t.CategoryQuery {
     createdAt,
     updatedAt,
   }
+}
+
+
+
+/**
+ * Spendings
+ */
+
+export async function fetchSpendingsByCategoryId(
+  spreadsheetId: string,
+  filter       : t.SpendingsByCategoryIdFilter,
+): Promise<t.SpendingsByCategoryId> {
+  const query: string = spendingsByCategoryIdQuery(filter)
+  const spendingsTable: void | t.GQueryTable = await sn.querySheet(
+    spreadsheetId,
+    ss.TRANSACTIONS_SHEET_ID,
+    query
+  )
+
+  let spendingsByCategoryId: t.SpendingsByCategoryId = {}
+  if (spendingsTable) {
+    spendingsByCategoryId = fpx.keyBy(
+      spendingsTable.rows.map(rowToSpending),
+      (spending: t.Spending) => spending.categoryId
+    )
+  }
+
+  return spendingsByCategoryId
+}
+
+
+function spendingsByCategoryIdQuery(
+  filter: t.SpendingsByCategoryIdFilter
+): string {
+  const where = spendingsByCategoryIdWhere(filter)
+
+  const query: string = `
+    SELECT C, SUM(G)
+    WHERE ${where}
+    GROUP BY C
+  `
+
+  return query
+}
+
+function spendingsByCategoryIdWhere(
+  filter: t.SpendingsByCategoryIdFilter
+): string {
+  return fpx.compact([
+    `A != 'id'`,
+    filter.dateFrom ? `B >= '${filter.dateFrom}'`: '',
+    filter.dateTo   ? `B <= '${filter.dateTo}'`  : '',
+  ]).join(' AND ')
+}
+
+
+function rowToSpending(row: t.GQueryRow): t.Spending {
+  return {
+    categoryId: row.c[0] ? String(row.c[0].v): '',
+    spending  : row.c[1] ? Number(row.c[1].v): 0,
+  }
+}
+
+
+export function validateSpendingsByCategoryIdFilter(
+  filter: any
+): t.ValidationErrors {
+  const errors: t.ValidationErrors = []
+
+  if (filter.dateFrom && !fpx.isValidDate(new Date(filter.dateFrom))) {
+    errors.push({text: t.CATEGORY_ERROR.DATE_FROM_MUST_BE_A_VALID_DATE})
+  }
+
+  if (filter.dateTo && !fpx.isValidDate(new Date(filter.dateTo))) {
+    errors.push({text: t.CATEGORY_ERROR.DATE_TO_MUST_BE_A_VALID_DATE})
+  }
+
+  return errors
 }
