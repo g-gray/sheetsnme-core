@@ -12,12 +12,14 @@ import * as n from './net'
 
 export async function getCategories(ctx: t.KContext): Promise<t.CategoryRes[]> {
   const {client, gSpreadsheetId} = ctx
+
   const categories: t.CategoryResult[] = await n.fetchCategories(
     client,
     gSpreadsheetId
   )
 
-  const response = categories.map(n.categoryToFields)
+  const response: t.CategoryRes[] = categories.map(n.categoryToFields)
+
   return response
 }
 

@@ -9,10 +9,6 @@ import * as ss from '../sheet/sheets'
 import * as sn from '../sheet/net'
 import * as en from '../entity/net'
 
-/**
- * Category
- */
-
 export async function fetchCategory(
   client       : t.GOAuth2Client,
   spreadsheetId: string,
