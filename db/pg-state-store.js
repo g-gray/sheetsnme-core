@@ -27,7 +27,7 @@ PgStore.prototype.load = async function (fn) {
   await client.release()
 
   if (rows.length !== 1) {
-    console.log('Cannot read migrations from database. If this is the first time you run migrations, then this is normal.')
+    console.log('Can\'t read migrations from database. If this is the first time you run migrations, then this is ok.')
     fn(null, {})
   }
   else {
