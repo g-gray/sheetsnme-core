@@ -33,7 +33,7 @@
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^8.0.8",
     "migrate": "^1.6.2",
-    "pg": "^7.18.2",
+    "pg": "^8.6.0",
     "pg-native": "^3.0.0",
     "query-string": "^6.11.1",
     "uuid": "^7.0.2",
