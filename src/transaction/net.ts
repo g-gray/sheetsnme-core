@@ -408,7 +408,13 @@ export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuer
     }
   }
 
-  return transaction
+  return {
+    ...transaction,
+    outcomeAccountId: outcomeAccountId || '',
+    outcomeAmount   : outcomeAmount || 0,
+    incomeAccountId : '',
+    incomeAmount    : 0,
+  }
 }
 
 export function validateTransactionsFilter(filter: any): t.ValidationErrors {
