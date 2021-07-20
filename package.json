@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "ts-node-dev --respawn --transpileOnly --no-notify ./src/index.ts",
+    "start": "ts-node-dev --respawn --transpile-only --no-notify ./src/index.ts",
     "build": "tsc --build tsconfig.json",
     "lint": "tslint --project .",
     "db:migrate-up": "migrate up --migrations-dir ./db/migrations --store ./db/pg-state-store.js",
@@ -8,7 +8,8 @@
     "db:migrate-create": "migrate create --migrations-dir ./db/migrations"
   },
   "engines": {
-    "node": "12.x"
+    "node": "14.17.x",
+    "yarn": "1.22.x"
   },
   "devDependencies": {
     "@types/dotenv": "^8.2.0",
