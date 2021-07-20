@@ -381,6 +381,7 @@ export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuer
   if (type === t.TRANSACTION_TYPE.LOAN) {
     return {
       ...transaction,
+      categoryId      : '',
       outcomeAccountId: outcomeAccountId || '',
       outcomeAmount   : outcomeAmount    || 0,
       incomeAccountId : ss.DEBT_ACCOUNT_ID,
@@ -391,6 +392,7 @@ export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuer
   if (type === t.TRANSACTION_TYPE.BORROW) {
     return {
       ...transaction,
+      categoryId      : '',
       outcomeAccountId: ss.DEBT_ACCOUNT_ID,
       outcomeAmount   : incomeAmount    || 0,
       incomeAccountId : incomeAccountId || '',
@@ -401,6 +403,8 @@ export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuer
   if (type === t.TRANSACTION_TYPE.TRANSFER) {
     return {
       ...transaction,
+      categoryId      : '',
+      payeeId         : '',
       outcomeAccountId: outcomeAccountId || '',
       outcomeAmount   : outcomeAmount    || 0,
       incomeAccountId : incomeAccountId  || '',
@@ -408,6 +412,7 @@ export function fieldsToTransaction(fields: t.TransactionReq): t.TransactionQuer
     }
   }
 
+  // TRANSACTION_TYPE.OUTCOME by default
   return {
     ...transaction,
     outcomeAccountId: outcomeAccountId || '',
